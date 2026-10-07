@@ -11,7 +11,11 @@ export type RegiaoDoCorpo = 'pernas' | 'tronco' | 'bracos';
 
 export function aplicarDesvioNaPose(pose: Pose, desvio: Desvio | null, tempo: number): Pose {
   if (!desvio) return pose;
-  const balanco = (amplitude: number, hz: number) => amplitude * Math.sin(2 * Math.PI * hz * tempo);
+  /* Oscilação postural real não é um metrônomo: soma de uma onda principal
+     (70%) com outra mais lenta, numa razão não inteira (30%, 0,34× a
+     frequência). O pico nunca passa de `amplitude` (auditoria, B1). */
+  const balanco = (amplitude: number, hz: number) =>
+    amplitude * (0.7 * Math.sin(2 * Math.PI * hz * tempo) + 0.3 * Math.sin(2 * Math.PI * 0.34 * hz * tempo + 1.3));
   switch (desvio) {
     case 'assimetria':
       // Peso jogado na perna direita: quadril e tronco vão para a direita.

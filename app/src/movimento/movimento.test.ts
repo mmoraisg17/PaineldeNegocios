@@ -257,3 +257,22 @@ describe('defasagem entre partes do corpo (A2)', () => {
     }
   });
 });
+
+describe('oscilação do desvio irregular (B1)', () => {
+  const pose = sentarELevantar().quadros[0]?.pose;
+  if (!pose) throw new Error('sem quadros');
+  const lateral = (t: number) => aplicarDesvioNaPose(pose, 'oscilacao', t).deslocamentoLateral - pose.deslocamentoLateral;
+
+  test('não repete a cada período da frequência principal (não é metrônomo)', () => {
+    const periodo = 1 / 1.1;
+    const diferencas = [0.3, 1.7, 2.9].map((t) => Math.abs(lateral(t) - lateral(t + periodo)));
+    expect(Math.max(...diferencas)).toBeGreaterThan(0.002); // > 2 mm
+  });
+
+  test('o pico continua no tamanho de antes (2,5 cm)', () => {
+    let pico = 0;
+    for (let t = 0; t < 60; t += 0.01) pico = Math.max(pico, Math.abs(lateral(t)));
+    expect(pico).toBeLessThanOrEqual(0.025 + 1e-9);
+    expect(pico).toBeGreaterThan(0.02);
+  });
+});
