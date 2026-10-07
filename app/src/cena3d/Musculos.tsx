@@ -25,6 +25,9 @@ type Casca = {
   abertura: number; // graus cobertos
   lateral: (e: Esqueleto) => Vec3;
   achatado?: boolean; // tronco: mesma largura × profundidade do corpo
+  /* Músculo de uma perna: apaga quando essa perna não está apoiada (pé no
+     ar não faz força; fase 6, exercícios num pé só). */
+  lado?: 'esquerdo' | 'direito';
 };
 
 const ESCALA_DA_CASCA = 1.07;
@@ -45,6 +48,7 @@ const pernas = (lado: 'esquerdo' | 'direito'): Casca[] => [
     musculo: 'quadriceps',
     de: (e) => e.lados[lado].quadril,
     ate: (e) => e.lados[lado].joelho,
+    lado,
     perfil: COXA,
     trecho: [0.12, 0.82],
     centro: FRENTE_DA_PERNA,
@@ -55,6 +59,7 @@ const pernas = (lado: 'esquerdo' | 'direito'): Casca[] => [
     musculo: 'panturrilhas',
     de: (e) => e.lados[lado].joelho,
     ate: (e) => e.lados[lado].tornozelo,
+    lado,
     perfil: CANELA,
     trecho: [0.08, 0.55],
     centro: COSTAS_DA_PERNA,
@@ -152,7 +157,8 @@ export function atualizarMusculos(malhas: (Mesh | null)[], esqueleto: Esqueleto,
       c.achatado ? { lateral, largura: TRONCO_LARGURA, profundidade: TRONCO_PROFUNDIDADE } : { lateral, largura: 1, profundidade: 1 },
     );
     const material = malha.material as MeshBasicMaterial;
-    const alvo = OPACIDADE_MAXIMA * brilhoDoMusculo(esforcoDoMusculo(c.musculo, carga, flexao));
+    const pernaNoAr = c.lado !== undefined && !esqueleto.lados[c.lado].apoiado;
+    const alvo = pernaNoAr ? 0 : OPACIDADE_MAXIMA * brilhoDoMusculo(esforcoDoMusculo(c.musculo, carga, flexao));
     material.opacity += (alvo - material.opacity) * fator;
   });
 }

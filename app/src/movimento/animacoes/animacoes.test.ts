@@ -113,3 +113,39 @@ describe('miniagachamento simétrico', () => {
     }
   });
 });
+
+/* ---- 3. Elevação de panturrilha unilateral (pesquisa, seção 3) ---- */
+describe('panturrilha unilateral', () => {
+  const quadros = (nivel: 1 | 2 | 3) => quadrosDe(animacaoDe('panturrilha-unilateral', { nivel })!);
+  const alturaDoCalcanhar = (e: Esqueleto) => e.lados.esquerdo.calcanhar.y - TOPO_BASE;
+
+  test('o calcanhar sobe ~5 cm no alto (altura de referência da pesquisa)', () => {
+    for (const nivel of NIVEIS) {
+      const maximo = Math.max(...quadros(nivel).map((q) => alturaDoCalcanhar(q.esqueleto)));
+      expect(maximo, `nível ${nivel}`).toBeGreaterThan(0.04);
+      expect(maximo, `nível ${nivel}`).toBeLessThan(0.07);
+    }
+  });
+
+  test('a ponta do pé de apoio não sai do lugar (sobe girando na ponta, sem escorregar)', () => {
+    const qs = quadros(2);
+    const inicio = qs[0]!.esqueleto.lados.esquerdo.ponta;
+    for (const { esqueleto, t } of qs) expect(distancia(esqueleto.lados.esquerdo.ponta, inicio), `t=${t.toFixed(2)}`).toBeLessThan(MM);
+  });
+
+  test('nível 1 usa os dois pés; níveis 2 e 3, só o esquerdo (o direito fica no ar)', () => {
+    for (const { esqueleto } of quadros(1)) expect(esqueleto.lados.direito.apoiado).toBe(true);
+    for (const nivel of [2, 3] as const) {
+      for (const { esqueleto } of quadros(nivel)) {
+        expect(esqueleto.lados.esquerdo.apoiado).toBe(true);
+        expect(esqueleto.lados.direito.apoiado).toBe(false);
+      }
+    }
+  });
+
+  test('no alto o centro de pressão vai para a ponta; num pé só, todo o peso na esquerda', () => {
+    const qs = quadros(2);
+    expect(Math.max(...qs.map((q) => q.amostra.carga.copAP))).toBeGreaterThan(0.6);
+    for (const { amostra } of qs) expect(amostra.carga.copML).toBe(1);
+  });
+});
