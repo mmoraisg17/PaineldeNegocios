@@ -1,8 +1,7 @@
 import type { RefObject } from 'react';
 import { Color, type Mesh, type MeshBasicMaterial } from 'three';
 import { cargaDosPes, corDoEstado, raioDoAnel } from '../movimento/aneis';
-import { TOPO_BASE } from '../movimento/cenario';
-import type { Esqueleto } from '../movimento/corpo';
+import { type Esqueleto, alturaDaSuperficie } from '../movimento/corpo';
 import { fatorDeAproximacao } from '../movimento/transicoes';
 import type { CoresDaCena } from './cores';
 import type { RelogioDaAnimacao } from './relogio';
@@ -12,7 +11,7 @@ import type { RelogioDaAnimacao } from './relogio';
    avaliação. Um disco suave por dentro dá o "brilho" da referência. */
 
 const LADOS = ['esquerdo', 'direito'] as const;
-const ALTURA = TOPO_BASE + 0.004; // logo acima da tampa, sem brigar com ela
+const FOLGA = 0.004; // logo acima da tampa, sem brigar com ela
 const TAXA = 10; // 1/s: o anel acompanha a leitura de 10 Hz sem saltar
 const OPACIDADE_DO_DISCO = 0.22;
 
@@ -26,7 +25,7 @@ export function AneisDePressao({ malhas }: { malhas: RefObject<(Mesh | null)[]> 
             if (malhas.current) malhas.current[i * 2] = m;
           }}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, ALTURA, 0]}
+          position={[0, 0, 0]}
           renderOrder={3}
           visible={false}
         >
@@ -39,7 +38,7 @@ export function AneisDePressao({ malhas }: { malhas: RefObject<(Mesh | null)[]> 
             if (malhas.current) malhas.current[i * 2 + 1] = m;
           }}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, ALTURA - 0.001, 0]}
+          position={[0, 0, 0]}
           renderOrder={3}
           visible={false}
         >
@@ -70,12 +69,16 @@ export function atualizarAneis(
     const x = (pe.calcanhar.x + pe.ponta.x) / 2;
     const z = (pe.calcanhar.z + pe.ponta.z) / 2;
     const raio = carga ? raioDoAnel(carga[lado]) : 0;
-    [malhas[i * 2], malhas[i * 2 + 1]].forEach((malha) => {
+    // Só sob pé apoiado na base: no ar ou no chão (degrau), os sensores não medem.
+    const visivel = carga !== null && pe.apoiado;
+    const y = alturaDaSuperficie(x, z, esqueleto.inclinacaoDaBase) + FOLGA;
+    const inclinacao = (esqueleto.inclinacaoDaBase * Math.PI) / 180;
+    [malhas[i * 2], malhas[i * 2 + 1]].forEach((malha, k) => {
       if (!malha) return;
-      malha.visible = carga !== null;
-      if (!carga) return;
-      malha.position.x = x;
-      malha.position.z = z;
+      malha.visible = visivel;
+      if (!visivel || !carga) return;
+      malha.position.set(x, y - k * 0.001, z);
+      malha.rotation.x = -Math.PI / 2 - inclinacao;
       const atual = malha.scale.x;
       const novo = atual + (raio - atual) * fator;
       malha.scale.set(novo, novo, 1);

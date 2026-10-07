@@ -2,8 +2,7 @@ import type { RefObject } from 'react';
 import { Color, type Group, type Mesh, type MeshBasicMaterial } from 'three';
 import { alinhamentoLateral, meioDosPes } from '../movimento/alinhamento';
 import { corDoEstado } from '../movimento/aneis';
-import { TOPO_BASE } from '../movimento/cenario';
-import type { Esqueleto } from '../movimento/corpo';
+import { type Esqueleto, alturaDaSuperficie } from '../movimento/corpo';
 import { fatorDeAproximacao } from '../movimento/transicoes';
 import type { CoresDaCena } from './cores';
 import type { RelogioDaAnimacao } from './relogio';
@@ -52,13 +51,14 @@ export function atualizarPrumo(
   const [linha, ponta, alvo] = grupo.children as Mesh[];
   if (!linha || !ponta || !alvo) return;
   const { pelve } = esqueleto;
-  const chao = TOPO_BASE + 0.005;
+  const meio = meioDosPes(esqueleto);
+  const chao = alturaDaSuperficie(pelve.x, pelve.z, esqueleto.inclinacaoDaBase) + 0.005;
   const altura = Math.max(pelve.y - chao, 0.01);
   linha.position.set(pelve.x, chao + altura / 2, pelve.z);
   linha.scale.set(1, altura, 1);
   ponta.position.set(pelve.x, chao, pelve.z);
-  const meio = meioDosPes(esqueleto);
-  alvo.position.set(meio.x, chao, meio.z);
+  alvo.position.set(meio.x, meio.y + 0.005, meio.z);
+  alvo.rotation.x = -Math.PI / 2 - (esqueleto.inclinacaoDaBase * Math.PI) / 180;
 
   const { alinhado } = alinhamentoLateral(esqueleto);
   // Fora do meio sem o app ter acusado ainda: âmbar (atenção).

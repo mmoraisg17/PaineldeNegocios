@@ -20,6 +20,11 @@ export const PLATAFORMA = {
 
 export const TOPO_BASE = PLATAFORMA.altura;
 
+/* Graus por nível do seletor de inclinação (manual, 3.3). O manual define os
+   níveis, não os graus: 5° por nível é decisão de projeto (faixa das pranchas
+   de reabilitação de tornozelo; pesquisa da fase 6). */
+export const GRAUS_POR_NIVEL_DE_INCLINACAO = 5;
+
 /* Proporções de um adulto de ~1,65 m (referência antropométrica usual:
    coxa ≈ canela ≈ 0,25 da estatura). */
 export const CORPO = {

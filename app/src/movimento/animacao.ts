@@ -1,4 +1,4 @@
-import type { Pose } from './corpo';
+import type { Pose, PoseDoPe } from './corpo';
 import type { Musculo } from './musculos';
 
 /* O que a plataforma deveria medir naquele instante, se a execução estiver
@@ -29,6 +29,9 @@ export type Animacao = {
   readonly musculos?: readonly Musculo[];
   /* Ângulo ideal para ver o exercício (V8). Sem isto, a câmera padrão 3/4. */
   readonly camera?: { readonly posicao: [number, number, number]; readonly alvo: [number, number, number] };
+  /* Inclinação da base em graus (nível do seletor × 5°, fase 6). Constante no
+     ciclo: o praticante ajusta o seletor antes de subir. */
+  readonly inclinacaoDaBase?: number;
 };
 
 export type Amostra = { readonly pose: Pose; readonly carga: Carga; readonly fase: string; readonly indiceFase: number };
@@ -117,12 +120,27 @@ export function amostrar(animacao: Animacao, tempo: number): Amostra {
   const b = quadros[i + 1] ?? a;
   if (!a || !b) throw new Error(`Animação ${animacao.id} sem quadros`);
   const u = b.t > a.t ? suavizar((t - a.t) / (b.t - a.t)) : 0;
-  return { pose: poseNaCurva(quadros, t, a.pose.bracos), carga: misturarCarga(a.carga, b.carga, u), fase: a.fase, indiceFase: i };
+  const pose = poseNaCurva(quadros, t, a.pose.bracos);
+  const comBase = animacao.inclinacaoDaBase ? { ...pose, inclinacaoDaBase: animacao.inclinacaoDaBase } : pose;
+  return { pose: comBase, carga: misturarCarga(a.carga, b.carga, u), fase: a.fase, indiceFase: i };
+}
+
+const LADOS = ['esquerdo', 'direito'] as const;
+const CAMPOS_DO_PE = ['dx', 'dz', 'elevacao', 'calcanhar'] as const;
+
+/* Pés como canais da mesma curva (fase 6). Só entram se algum quadro mexe
+   nos pés: o sentar e levantar continua com a pose de antes, sem `pes`. */
+function pesNaCurva(quadros: readonly Quadro[], curva: (canal: Canal) => number): Pose['pes'] {
+  if (!quadros.some((q) => q.pose.pes)) return undefined;
+  const pe = (lado: (typeof LADOS)[number]): PoseDoPe =>
+    Object.fromEntries(CAMPOS_DO_PE.map((campo) => [campo, curva((p) => p.pes?.[lado]?.[campo] ?? 0)])) as PoseDoPe;
+  return { esquerdo: pe('esquerdo'), direito: pe('direito') };
 }
 
 function poseNaCurva(quadros: readonly Quadro[], t: number, bracos: Pose['bracos']): Pose {
   const total = quadros.at(-1)?.t ?? 0;
   const curva = (canal: Canal, defasagem = 0) => valorNaCurva(quadros, canal, noCiclo(total, t - defasagem));
+  const pes = pesNaCurva(quadros, curva);
   return {
     quadril: { y: curva((p) => p.quadril.y), z: curva((p) => p.quadril.z) },
     tronco: curva((p) => p.tronco, DEFASAGEM_DAS_PARTES.tronco),
@@ -131,6 +149,7 @@ function poseNaCurva(quadros: readonly Quadro[], t: number, bracos: Pose['bracos
     cabeca: curva((p) => p.cabeca, DEFASAGEM_DAS_PARTES.cabeca),
     bracos,
     maoZ: curva((p) => p.maoZ, DEFASAGEM_DAS_PARTES.maoZ),
+    ...(pes ? { pes } : {}),
   };
 }
 

@@ -12,6 +12,17 @@ export type Lado = 'esquerdo' | 'direito';
    quadril é posicionado e a IK resolve joelho e canela a partir dos
    tornozelos fixos. Assim os pés nunca deslizam e o comprimento dos ossos é
    sempre o mesmo, os dois defeitos clássicos de animação feita à mão. */
+/* Ajuste de um pé (fase 6). Sem ajuste, o pé fica plantado no lugar padrão.
+   - dx/dz: deslocamento do pé (m; +dx = para a esquerda, +dz = para a frente)
+   - elevacao: pé no ar, acima da superfície (m)
+   - calcanhar: elevação do calcanhar com a ponta apoiada (graus) */
+export type PoseDoPe = {
+  readonly dx?: number;
+  readonly dz?: number;
+  readonly elevacao?: number;
+  readonly calcanhar?: number;
+};
+
 export type Pose = {
   readonly quadril: { readonly y: number; readonly z: number };
   readonly tronco: number; // flexão à frente, graus a partir da vertical
@@ -20,6 +31,8 @@ export type Pose = {
   readonly cabeca: number; // graus extras de flexão do pescoço
   readonly bracos: ModoBracos;
   readonly maoZ: number; // onde as mãos seguram a barra, ao longo dela
+  readonly pes?: { readonly esquerdo?: PoseDoPe; readonly direito?: PoseDoPe };
+  readonly inclinacaoDaBase?: number; // graus; a frente da tampa sobe (seletor da plataforma)
 };
 
 export type Esqueleto = {
@@ -29,6 +42,7 @@ export type Esqueleto = {
   readonly lados: Record<Lado, LadoDoCorpo>;
   readonly maosNoAlvo: boolean;
   readonly quadrilAlcancavel: boolean;
+  readonly inclinacaoDaBase: number; // graus
 };
 
 export type LadoDoCorpo = {
@@ -40,6 +54,8 @@ export type LadoDoCorpo = {
   readonly ombro: Vec3;
   readonly cotovelo: Vec3;
   readonly mao: Vec3;
+  /* O pé está na base, sobre os sensores (no ar ou no chão fora da base, não). */
+  readonly apoiado: boolean;
 };
 
 const SINAL: Record<Lado, number> = { esquerdo: 1, direito: -1 };
@@ -58,7 +74,8 @@ export function alturaEmPe(z: number): number {
 
 export function montarEsqueleto(pose: Pose): Esqueleto {
   const centroPedido = vec(pose.deslocamentoLateral, pose.quadril.y, pose.quadril.z);
-  const pernas = (['esquerdo', 'direito'] as const).map((lado) => perna(lado, centroPedido));
+  const inclinacao = pose.inclinacaoDaBase ?? 0;
+  const pernas = (['esquerdo', 'direito'] as const).map((lado) => perna(lado, centroPedido, pose.pes?.[lado], inclinacao));
   const [esq, dir] = pernas as [ReturnType<typeof perna>, ReturnType<typeof perna>];
   const pelve = misturar(esq.quadril, dir.quadril, 0.5);
 
@@ -88,20 +105,42 @@ export function montarEsqueleto(pose: Pose): Esqueleto {
     },
     maosNoAlvo: bracoE.alcancou && bracoD.alcancou,
     quadrilAlcancavel: esq.alcancou && dir.alcancou,
+    inclinacaoDaBase: inclinacao,
   };
 }
 
-function perna(lado: Lado, centroQuadril: Vec3) {
-  const tornozelo = tornozeloPadrao(lado);
+/* Altura da superfície onde o pé pisa: a tampa da base (inclinada com a
+   frente para cima, girando na borda de trás) ou o chão, fora da base. */
+export function alturaDaSuperficie(x: number, z: number, inclinacaoGraus: number): number {
+  if (Math.abs(x) > PLATAFORMA.largura / 2) return 0;
+  return TOPO_BASE + (z + PLATAFORMA.profundidade / 2) * Math.tan(radianos(inclinacaoGraus));
+}
+
+/* O pé gira em torno da ponta: ângulo = elevação do calcanhar menos a
+   inclinação da base (na rampa, o calcanhar fica mais baixo que a ponta). Sem
+   ajuste e com a base plana, dá exatamente o pé plantado de antes. */
+function perna(lado: Lado, centroQuadril: Vec3, ajuste: PoseDoPe | undefined, inclinacao: number) {
+  const x = SINAL[lado] * CORPO.meiaLarguraQuadril + (ajuste?.dx ?? 0);
+  const zPonta = (ajuste?.dz ?? 0) + CORPO.peFrente;
+  const elevacao = ajuste?.elevacao ?? 0;
+  const naBase = Math.abs(x) <= PLATAFORMA.largura / 2;
+  const angulo = radianos((ajuste?.calcanhar ?? 0) - (naBase ? inclinacao : 0));
+  const ponta = vec(x, alturaDaSuperficie(x, zPonta, inclinacao) + elevacao, zPonta);
+  const comprimento = CORPO.peFrente + CORPO.peTras;
+  const calcanhar = soma(ponta, vec(0, comprimento * Math.sin(angulo), -comprimento * Math.cos(angulo)));
+  const tornozelo = soma(
+    ponta,
+    vec(0, CORPO.alturaTornozelo * Math.cos(angulo) + CORPO.peFrente * Math.sin(angulo), -CORPO.peFrente * Math.cos(angulo) + CORPO.alturaTornozelo * Math.sin(angulo)),
+  );
   const alvoQuadril = soma(centroQuadril, vec(SINAL[lado] * CORPO.meiaLarguraQuadril, 0, 0));
   const ik = ikDoisOssos(tornozelo, alvoQuadril, CORPO.canela, CORPO.coxa, FRENTE);
-  const chao = TOPO_BASE;
   return {
     tornozelo,
     joelho: ik.meio,
     quadril: ik.fim,
-    ponta: vec(tornozelo.x, chao, tornozelo.z + CORPO.peFrente),
-    calcanhar: vec(tornozelo.x, chao, tornozelo.z - CORPO.peTras),
+    ponta,
+    calcanhar,
+    apoiado: naBase && elevacao <= 0.005,
     alcancou: ik.alcancou,
   };
 }

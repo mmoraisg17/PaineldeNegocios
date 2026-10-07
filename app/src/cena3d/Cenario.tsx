@@ -5,8 +5,13 @@ import type { CoresDaCena } from './cores';
 /* Plataforma modelada a partir do desenho da base de 06/10/2026: caixa com
    tampa (área dos sensores em destaque), abas laterais com dois furos onde
    entram os postes das barras, e quatro pés. Medidas em movimento/cenario.ts. */
-export function Plataforma({ cores }: { cores: CoresDaCena }) {
+export function Plataforma({ cores, inclinacao = 0 }: { cores: CoresDaCena; inclinacao?: number }) {
   const { largura, profundidade, altura, alturaPes, margemTampa, barraX, pegadaAltura, pegadaZ } = PLATAFORMA;
+  /* Tampa inclinável (fase 6): gira na borda de trás, frente para cima, como
+     o seletor da plataforma. As barras ficam na base e continuam verticais.
+     A superfície bate com alturaDaSuperficie (movimento/corpo.ts). */
+  const angulo = (inclinacao * Math.PI) / 180;
+  const subidaNaFrente = profundidade * Math.tan(angulo);
   const corpoAltura = altura - alturaPes;
   const alturaPoste = pegadaAltura + altura - 0.06;
   const xPes = largura / 2 - 0.06;
@@ -19,11 +24,26 @@ export function Plataforma({ cores }: { cores: CoresDaCena }) {
         <boxGeometry args={[largura, corpoAltura, profundidade]} />
         <meshStandardMaterial color={cores.base} roughness={0.6} />
       </mesh>
-      {/* Tampa: área dos sensores */}
-      <mesh position={[0, altura + 0.002, 0]}>
-        <boxGeometry args={[largura - 2 * margemTampa, 0.004, profundidade - 2 * margemTampa]} />
-        <meshStandardMaterial color={cores.sensores} roughness={0.9} />
-      </mesh>
+      {/* Tampa (inclinável) com a área dos sensores */}
+      <group position={[0, altura, -profundidade / 2]} rotation={[-angulo, 0, 0]}>
+        {inclinacao > 0 && (
+          <mesh position={[0, -0.008, profundidade / 2]}>
+            <boxGeometry args={[largura, 0.016, profundidade]} />
+            <meshStandardMaterial color={cores.base} roughness={0.6} />
+          </mesh>
+        )}
+        <mesh position={[0, 0.002, profundidade / 2]}>
+          <boxGeometry args={[largura - 2 * margemTampa, 0.004, profundidade - 2 * margemTampa]} />
+          <meshStandardMaterial color={cores.sensores} roughness={0.9} />
+        </mesh>
+      </group>
+      {/* Calço da frente: fecha o vão entre a base e a tampa levantada. */}
+      {inclinacao > 0 && (
+        <mesh position={[0, altura + subidaNaFrente / 2, profundidade / 2 - 0.01]}>
+          <boxGeometry args={[largura - 0.04, subidaNaFrente, 0.02]} />
+          <meshStandardMaterial color={cores.base} roughness={0.6} />
+        </mesh>
+      )}
       {/* Pés antiderrapantes */}
       {[-1, 1].flatMap((sx) =>
         [-1, 1].map((sz) => (

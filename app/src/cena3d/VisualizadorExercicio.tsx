@@ -103,7 +103,7 @@ export default function VisualizadorExercicio({
           <directionalLight position={[-3, 3, -4]} intensity={2.6} />
           <directionalLight position={[3, 2.5, -4]} intensity={1.8} color="#bfe9ff" />
           <Chao cores={cores} />
-          <Plataforma cores={cores} />
+          <Plataforma cores={cores} inclinacao={animacao.inclinacaoDaBase ?? 0} />
           {animacao.cadeira && <Cadeira cadeira={animacao.cadeira} cores={cores} />}
           <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} versao={versao} />
           <Orbita alvo={alvoDaCamera} relogio={relogio} />
