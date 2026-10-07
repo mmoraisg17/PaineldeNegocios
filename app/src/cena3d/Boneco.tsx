@@ -7,7 +7,7 @@ import { type Esqueleto, montarEsqueleto } from '../movimento/corpo';
 import { type RegiaoDoCorpo, aplicarDesvioNaPose, regiaoDoDesvio } from '../movimento/desvios';
 import type { Vec3 } from '../movimento/vetor';
 import type { CoresDaCena } from './cores';
-import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao } from '../movimento/transicoes';
+import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao, respiracao } from '../movimento/transicoes';
 import type { RelogioDaAnimacao } from './relogio';
 
 /* Boneco low-poly feito de cilindros e esferas. Nada de modelo externo: os
@@ -136,7 +136,9 @@ export function Boneco({
     // Pausada, a cena só desenha sob demanda: segue pedindo quadros até parar.
     if (r.pausado && velocidadeEfetiva.current > 0) estado.invalidate();
     const amostra = amostrar(animacao, r.tempo);
-    const esqueleto = montarEsqueleto(aplicarDesvioNaPose(amostra.pose, r.desvio, r.tempo));
+    // Respiração (M3): só no desenho; amostra.carga segue intacta para os sensores.
+    const pose = r.menosMovimento ? amostra.pose : { ...amostra.pose, tronco: amostra.pose.tronco + respiracao(r.tempo) };
+    const esqueleto = montarEsqueleto(aplicarDesvioNaPose(pose, r.desvio, r.tempo));
     const regiao = regiaoDoDesvio(r.desvio);
     if (regiao !== ultimaRegiao.current) {
       ultimaRegiao.current = regiao;

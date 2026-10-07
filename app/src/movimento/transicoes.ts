@@ -22,3 +22,12 @@ export function aproximar(atual: number, alvo: number, delta: number, taxa: numb
   const passo = taxa * Math.max(0, delta);
   return atual < alvo ? Math.min(alvo, atual + passo) : Math.max(alvo, atual - passo);
 }
+
+/* M3: respiração calma (0,22 Hz ≈ 13 por minuto) que move o tronco ±0,6°.
+   Só aparece quando o corpo está parado (sentado, em pé): durante o
+   movimento some na escala do exercício. Só visual: não entra na carga. */
+export const RESPIRACAO = { hz: 0.22, graus: 0.6 } as const;
+
+export function respiracao(tempo: number): number {
+  return RESPIRACAO.graus * Math.sin(2 * Math.PI * RESPIRACAO.hz * tempo);
+}

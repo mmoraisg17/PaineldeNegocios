@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao } from './transicoes';
+import { RAMPA_DE_PAUSA, RESPIRACAO, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao, respiracao } from './transicoes';
 
 /* Auditoria de animações: A3 (destaque com transição), M1 (rampa de pausa) e
    M3 (respiração). Funções puras; a cena 3D só as aplica a cada quadro. */
@@ -35,5 +35,18 @@ describe('aproximar (M1: rampa de pausa)', () => {
     let v = 0;
     for (let i = 0; i < passos(1); i += 1) v = aproximar(v, 0.5, 1 / 60, 1 / RAMPA_DE_PAUSA);
     expect(v).toBe(0.5);
+  });
+});
+
+describe('respiracao (M3)', () => {
+  test('é sutil: no máximo RESPIRACAO.graus de tronco', () => {
+    for (let t = 0; t < 10; t += 0.05) expect(Math.abs(respiracao(t))).toBeLessThanOrEqual(RESPIRACAO.graus + 1e-9);
+  });
+
+  test('tem o ritmo de uma respiração calma (~13 por minuto)', () => {
+    const periodo = 1 / RESPIRACAO.hz;
+    expect(60 / periodo).toBeGreaterThan(10);
+    expect(60 / periodo).toBeLessThan(16);
+    expect(respiracao(1.3 + periodo)).toBeCloseTo(respiracao(1.3), 6);
   });
 });
