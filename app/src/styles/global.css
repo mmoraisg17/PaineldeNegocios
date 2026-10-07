@@ -59,6 +59,7 @@
   --color-cena-certo: #3ddc84;
   --color-cena-atencao: #ffb020;
   --color-cena-erro: #ff4d4f;
+  --color-cena-elastico: #ff8a3d; /* faixa elástica (abdução) */
   --color-cena-sapato: #1b1f24;
   /* Estúdio escuro (auditoria visual, V1): o corpo claro e as marcações de
      correção se destacam sobre ele, como na referência enviada. */

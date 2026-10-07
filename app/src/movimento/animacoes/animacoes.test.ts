@@ -235,3 +235,46 @@ describe('descida de degrau', () => {
     expect(duracao(animacaoDe('descida-de-degrau', { nivel: 3 })!)).toBeCloseTo(duracao(animacaoDe('descida-de-degrau', { nivel: 2 })!) * 1.5, 1);
   });
 });
+
+/* ---- 6. Abdução de quadril com elástico (pesquisa, seção 6) ---- */
+describe('abdução com elástico', () => {
+  const quadros = quadrosDe(animacaoDe('abducao-com-elastico', { nivel: 1, bracos: 'uma-mao' })!);
+  const anguloDaPernaDireita = (e: Esqueleto) => {
+    const d = e.lados.direito;
+    return (Math.atan2(Math.abs(d.quadril.x - d.tornozelo.x), d.quadril.y - d.tornozelo.y) * 180) / Math.PI;
+  };
+
+  test('a perna direita abre 20–30° para o lado (faixa da pesquisa)', () => {
+    const pico = Math.max(...quadros.map((q) => anguloDaPernaDireita(q.esqueleto)));
+    expect(pico).toBeGreaterThan(20);
+    expect(pico).toBeLessThan(30);
+  });
+
+  // O IK nunca estica 100% (ik.ts: 99,5% → ~11,5° no mínimo); "reta" aqui é
+  // mais reta que a postura em pé (~16°).
+  test('aberta, a perna fica reta (joelho < 16°, menos que em pé); o tronco nunca inclina', () => {
+    for (const { amostra, t } of quadros) expect(Math.abs(amostra.pose.inclinacaoLateral), `tronco t=${t.toFixed(2)}`).toBeLessThanOrEqual(1);
+    for (const { esqueleto: e, t } of quadros.filter((q) => anguloDaPernaDireita(q.esqueleto) > 15)) {
+      const d = e.lados.direito;
+      const coxa = { x: d.quadril.x - d.joelho.x, y: d.quadril.y - d.joelho.y, z: d.quadril.z - d.joelho.z };
+      const canela = { x: d.tornozelo.x - d.joelho.x, y: d.tornozelo.y - d.joelho.y, z: d.tornozelo.z - d.joelho.z };
+      const cos = (coxa.x * canela.x + coxa.y * canela.y + coxa.z * canela.z) / (Math.hypot(coxa.x, coxa.y, coxa.z) * Math.hypot(canela.x, canela.y, canela.z));
+      const flexao = 180 - (Math.acos(Math.min(1, Math.max(-1, cos))) * 180) / Math.PI;
+      expect(flexao, `joelho t=${t.toFixed(2)}`).toBeLessThan(16);
+    }
+  });
+
+  test('o pé esquerdo (apoio) fica plantado e recebe todo o peso', () => {
+    const inicio = quadros[0]!.esqueleto.lados.esquerdo.ponta;
+    for (const { esqueleto, amostra } of quadros) {
+      expect(distancia(esqueleto.lados.esquerdo.ponta, inicio)).toBeLessThan(MM);
+      expect(amostra.carga.copML).toBe(1);
+    }
+  });
+
+  test('tem o elástico preso na base da barra e no tornozelo que abre', () => {
+    const animacao = animacaoDe('abducao-com-elastico')!;
+    expect(animacao.elastico?.lado).toBe('direito');
+    expect(animacao.musculos).toContain('abdutores');
+  });
+});

@@ -68,9 +68,26 @@ const pernas = (lado: 'esquerdo' | 'direito'): Casca[] => [
   },
 ];
 
+/* Abdutores (glúteo médio) na lateral do quadril. O X local da perna aponta
+   para a esquerda do corpo: lado de fora é +X na perna esquerda (π/2) e −X
+   na direita (−π/2). Sem `lado`: trabalham nas duas pernas (a de apoio
+   segura a pelve, a livre abre). */
+const abdutor = (lado: 'esquerdo' | 'direito'): Casca => ({
+  musculo: 'abdutores',
+  de: (e) => e.lados[lado].quadril,
+  ate: (e) => e.lados[lado].joelho,
+  perfil: COXA,
+  trecho: [0.02, 0.38],
+  centro: lado === 'esquerdo' ? Math.PI / 2 : -Math.PI / 2,
+  abertura: 110,
+  lateral: LATERAL_DO_QUADRIL,
+});
+
 export const CASCAS: readonly Casca[] = [
   ...pernas('esquerdo'),
   ...pernas('direito'),
+  abdutor('esquerdo'),
+  abdutor('direito'),
   {
     musculo: 'gluteos',
     de: (e) => e.pelve,

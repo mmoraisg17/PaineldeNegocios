@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { CATALOGO, rotinaDoPraticante } from '../../dominio';
+import { exerciciosAnimados } from '../../movimento/animacoes';
 import { abrirTela, estadoDeTeste, usarRelogioFixo } from './auxiliaresDeTeste';
 
 usarRelogioFixo();
@@ -134,9 +135,16 @@ test('o selo "Animação 3D" aparece só nos exercícios que têm animação', (
   // Arrange / Act
   abrirTela('/praticante/biblioteca');
 
-  // Assert
-  expect(within(cartao('Sentar e levantar')).getByText('Animação 3D')).toBeInTheDocument();
-  expect(within(cartao('Abdução de quadril com elástico')).queryByText('Animação 3D')).not.toBeInTheDocument();
+  // Assert: em cada cartão na tela, o selo segue a lista de animações.
+  const animados = exerciciosAnimados();
+  const cartoes = screen.getAllByRole('article');
+  expect(cartoes.length).toBeGreaterThan(0);
+  for (const elemento of cartoes) {
+    const exercicio = CATALOGO.find((e) => within(elemento).queryByRole('heading', { name: e.nome }));
+    expect(exercicio, 'cartão sem exercício conhecido').toBeDefined();
+    const selo = within(elemento).queryByText('Animação 3D');
+    expect(selo !== null, exercicio?.id).toBe(animados.includes(exercicio?.id ?? ''));
+  }
 });
 
 test('"Experimentar agora" abre o exercício no nível atual da pessoa', () => {

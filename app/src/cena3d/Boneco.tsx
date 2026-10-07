@@ -11,6 +11,7 @@ import { MaterialManequim } from './MaterialManequim';
 import { LADOS_DA_REVOLUCAO, pontosDoPerfil, posicionarSegmento } from './malhas';
 import { AneisDePressao, atualizarAneis } from './AneisDePressao';
 import { CascasDosMusculos, atualizarMusculos } from './Musculos';
+import { Elastico, atualizarElastico } from './Elastico';
 import { LinhaDePrumo, atualizarPrumo } from './LinhaDePrumo';
 import { SetaDeCorrecao, atualizarSeta } from './SetaDeCorrecao';
 import {
@@ -128,6 +129,7 @@ export function Boneco({
   const aneis = useRef<(Mesh | null)[]>([]);
   const seta = useRef<Group | null>(null);
   const prumo = useRef<Group | null>(null);
+  const elastico = useRef<Mesh | null>(null);
   const ultimaFase = useRef(-1);
   const ultimaRegiao = useRef<RegiaoDoCorpo | null>(null);
   const corEmTransicao = useRef(0); // segundos restantes do fade do destaque
@@ -202,6 +204,7 @@ export function Boneco({
     atualizarSeta(seta.current, esqueleto, r.desvio, r.sensores, cores, r.tempo, r.menosMovimento);
     // Fio de prumo (V7): quadril sobre o meio dos pés?
     atualizarPrumo(prumo.current, esqueleto, r.sensores, cores, Math.min(delta, 0.1), animacao.prumo);
+    atualizarElastico(elastico.current, animacao.elastico, esqueleto);
     if (amostra.indiceFase !== ultimaFase.current) {
       ultimaFase.current = amostra.indiceFase;
       aoAmostrar?.(amostra);
@@ -239,6 +242,7 @@ export function Boneco({
       <AneisDePressao malhas={aneis} />
       <SetaDeCorrecao grupo={seta} />
       <LinhaDePrumo grupo={prumo} />
+      {animacao.elastico && <Elastico malha={elastico} cor={cores.elastico} />}
     </group>
   );
 }

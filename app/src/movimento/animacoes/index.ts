@@ -1,6 +1,7 @@
 import type { Animacao } from '../animacao';
 import { GRAUS_POR_NIVEL_DE_INCLINACAO } from '../cenario';
 import type { ModoBracos } from '../corpo';
+import { abducao } from './abducao';
 import { descidaDeDegrau } from './descidaDeDegrau';
 import { miniagachamento } from './miniagachamento';
 import { panturrilha } from './panturrilha';
@@ -23,6 +24,7 @@ const FABRICAS: Record<string, (opcoes: OpcoesDaAnimacao) => Animacao> = {
   'panturrilha-unilateral': (o) => panturrilha(o.bracos, o.nivel),
   'pes-em-linha': (o) => pesEmLinha(o.bracos),
   'descida-de-degrau': (o) => descidaDeDegrau(o.bracos, o.nivel),
+  'abducao-com-elastico': (o) => abducao(o.bracos),
 };
 
 export function animacaoDe(idExercicio: string, opcoes: Partial<OpcoesDaAnimacao> = {}): Animacao | undefined {

@@ -7,7 +7,7 @@ import { anguloEntre, sub } from './vetor';
    esforço do instante, estimado com os mesmos dados que movem o boneco.
    É uma estimativa visual para ensinar, não uma medida de ativação. */
 
-export type Musculo = 'quadriceps' | 'gluteos' | 'panturrilhas' | 'abdomen';
+export type Musculo = 'quadriceps' | 'gluteos' | 'panturrilhas' | 'abdomen' | 'abdutores';
 
 const limitar = (x: number) => Math.min(1, Math.max(0, x));
 
@@ -25,7 +25,8 @@ const FLEXAO_DE_REPOUSO = 15;
    - quadríceps e glúteos: carga nos pés × seno da flexão do joelho (a
      alavanca dos extensores). Forte ao sair da cadeira, fraco em pé;
    - panturrilhas: carga nos pés, mais quando o peso vai para a ponta;
-   - abdômen: segura o tronco; sobe com a carga e com o desvio lateral. */
+   - abdômen: segura o tronco; sobe com a carga e com o desvio lateral;
+   - abdutores (glúteo médio): seguram a pelve; máximo apoiado num pé só. */
 export function esforcoDoMusculo(musculo: Musculo, carga: Carga, flexaoJoelhoGraus: number): number {
   const alem = Math.min(Math.max(flexaoJoelhoGraus - FLEXAO_DE_REPOUSO, 0), 90);
   const alavanca = Math.sin((alem * Math.PI) / 180);
@@ -37,6 +38,8 @@ export function esforcoDoMusculo(musculo: Musculo, carga: Carga, flexaoJoelhoGra
       return limitar(carga.pes * (0.35 + 0.65 * Math.max(0, carga.copAP)));
     case 'abdomen':
       return limitar(0.35 * carga.pes + 0.65 * Math.abs(carga.copML));
+    case 'abdutores': // glúteo médio: segura a pelve; máximo num pé só
+      return limitar(0.45 + 0.55 * Math.abs(carga.copML));
     default:
       return 0;
   }
