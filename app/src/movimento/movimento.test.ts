@@ -223,3 +223,37 @@ describe('interpolação contínua (A1)', () => {
     }
   });
 });
+
+describe('defasagem entre partes do corpo (A2)', () => {
+  /* Animação sintética: tronco, cabeça e mãos sobem e descem juntos nos
+     quadros; o quadril fica parado. Mede quando cada parte atinge o pico. */
+  const base = sentarELevantar().quadros[0];
+  if (!base) throw new Error('sem quadros');
+  const comPico = (t: number, valor: number) => ({
+    ...base,
+    t,
+    pose: { ...base.pose, tronco: valor, cabeca: valor, maoZ: valor / 100 },
+  });
+  const sintetica: Animacao = { id: 'teste', quadros: [comPico(0, 0), comPico(2, 30), comPico(4, 0)] };
+  const instanteDoPico = (canal: (t: number) => number) => {
+    let melhor = 0;
+    for (let t = 0; t <= 4; t += 0.01) if (canal(t) > canal(melhor)) melhor = t;
+    return melhor;
+  };
+
+  test('o tronco antecipa o movimento; cabeça e braços chegam depois', () => {
+    const tronco = instanteDoPico((t) => amostrar(sintetica, t).pose.tronco);
+    const cabeca = instanteDoPico((t) => amostrar(sintetica, t).pose.cabeca);
+    const maos = instanteDoPico((t) => amostrar(sintetica, t).pose.maoZ);
+    expect(tronco).toBeCloseTo(2 - 0.15, 1);
+    expect(cabeca).toBeCloseTo(2 + 0.1, 1);
+    expect(maos).toBeCloseTo(2 + 0.18, 1);
+  });
+
+  test('a carga dos sensores não é defasada: segue o tempo dos quadros', () => {
+    const animacao = sentarELevantar();
+    for (const quadro of animacao.quadros) {
+      expect(amostrar(animacao, quadro.t).carga.pes, `t=${quadro.t}`).toBeCloseTo(quadro.carga.pes, 6);
+    }
+  });
+});

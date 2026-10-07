@@ -45,6 +45,13 @@ const lerp = (a: number, b: number, u: number): number => a + (b - a) * u;
      atravessa o assento entre um quadro e outro. */
 type Canal = (pose: Pose) => number;
 
+/* Defasagem por parte do corpo, em segundos (+ = chega depois, − = adianta).
+   Ao levantar da cadeira o tronco inclina antes de o quadril sair (fase de
+   transferência de momento), e cabeça e braços se acomodam depois. Sem isso,
+   tudo chega junto e o boneco parece marionete (auditoria, A2). Quadril e
+   desvios laterais não são defasados: são eles que os sensores medem. */
+export const DEFASAGEM_DAS_PARTES = { tronco: -0.15, cabeca: 0.1, maoZ: 0.18 } as const;
+
 /* Inclinação da curva no quadro k (Fritsch–Carlson, a mesma do PCHIP). O
    último quadro repete o primeiro, então o anterior do quadro 0 é o penúltimo. */
 function inclinacaoNoQuadro(quadros: readonly Quadro[], canal: Canal, k: number): number {
@@ -109,15 +116,16 @@ export function amostrar(animacao: Animacao, tempo: number): Amostra {
 }
 
 function poseNaCurva(quadros: readonly Quadro[], t: number, bracos: Pose['bracos']): Pose {
-  const curva = (canal: Canal) => valorNaCurva(quadros, canal, t);
+  const total = quadros.at(-1)?.t ?? 0;
+  const curva = (canal: Canal, defasagem = 0) => valorNaCurva(quadros, canal, noCiclo(total, t - defasagem));
   return {
     quadril: { y: curva((p) => p.quadril.y), z: curva((p) => p.quadril.z) },
-    tronco: curva((p) => p.tronco),
+    tronco: curva((p) => p.tronco, DEFASAGEM_DAS_PARTES.tronco),
     deslocamentoLateral: curva((p) => p.deslocamentoLateral),
     inclinacaoLateral: curva((p) => p.inclinacaoLateral),
-    cabeca: curva((p) => p.cabeca),
+    cabeca: curva((p) => p.cabeca, DEFASAGEM_DAS_PARTES.cabeca),
     bracos,
-    maoZ: curva((p) => p.maoZ),
+    maoZ: curva((p) => p.maoZ, DEFASAGEM_DAS_PARTES.maoZ),
   };
 }
 
