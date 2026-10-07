@@ -11,3 +11,14 @@ export const TAXA_DO_DESTAQUE = 12;
 export function fatorDeAproximacao(delta: number, taxa: number): number {
   return 1 - Math.exp(-taxa * Math.max(0, delta));
 }
+
+/* M1: ao pausar, o boneco desacelera até parar em 0,35 s (e acelera igual ao
+   retomar), em vez de congelar e arrancar num quadro só. */
+export const RAMPA_DE_PAUSA = 0.35;
+
+/* Anda de `atual` até `alvo` no máximo `taxa × delta` (rampa linear), sem
+   passar do alvo. */
+export function aproximar(atual: number, alvo: number, delta: number, taxa: number): number {
+  const passo = taxa * Math.max(0, delta);
+  return atual < alvo ? Math.min(alvo, atual + passo) : Math.max(alvo, atual - passo);
+}

@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Amostra, Animacao } from '../movimento/animacao';
+import { RAMPA_DE_PAUSA } from '../movimento/transicoes';
 import { Boneco } from './Boneco';
 import { Cadeira, Chao, Plataforma } from './Cenario';
 import { lerCoresDaCena } from './cores';
@@ -40,9 +41,21 @@ export default function VisualizadorExercicio({
   // visual) pular para qualquer instante do ciclo. Some do build de produção.
   if (import.meta.env.DEV) (window as unknown as { __relogioCena?: RelogioDaAnimacao }).__relogioCena = relogio.current;
 
+  /* Pausado, o canvas só desenha sob demanda. Mas o boneco desacelera por
+     RAMPA_DE_PAUSA antes de parar (M1): se a troca fosse no mesmo instante,
+     a rampa ficaria sem quadros e o boneco congelaria. */
+  const [sobDemanda, setSobDemanda] = useState(relogio.current.pausado);
+  const temporizador = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(temporizador.current), []);
+
   const alternarPausa = () => {
-    relogio.current.pausado = !relogio.current.pausado;
-    setPausado(relogio.current.pausado);
+    const r = relogio.current;
+    r.pausado = !r.pausado;
+    setPausado(r.pausado);
+    window.clearTimeout(temporizador.current);
+    if (!r.pausado) setSobDemanda(false);
+    else if (r.menosMovimento) setSobDemanda(true);
+    else temporizador.current = window.setTimeout(() => setSobDemanda(true), RAMPA_DE_PAUSA * 1000 + 100);
   };
   const alternarVelocidade = () => {
     relogio.current.velocidade = lento ? 1 : 0.5;
@@ -61,7 +74,7 @@ export default function VisualizadorExercicio({
           resize={{ offsetSize: true }}
           /* Pausado, só redesenha quando algo muda (girar, trocar desvio):
              poupa bateria no celular e respeita quem pediu menos movimento. */
-          frameloop={pausado ? 'demand' : 'always'}
+          frameloop={sobDemanda ? 'demand' : 'always'}
           dpr={[1, 2]}
           camera={{ position: CAMERA_POSICAO, fov: 38, near: 0.05, far: 20 }}
           role="img"

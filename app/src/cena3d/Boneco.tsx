@@ -7,7 +7,7 @@ import { type Esqueleto, montarEsqueleto } from '../movimento/corpo';
 import { type RegiaoDoCorpo, aplicarDesvioNaPose, regiaoDoDesvio } from '../movimento/desvios';
 import type { Vec3 } from '../movimento/vetor';
 import type { CoresDaCena } from './cores';
-import { TAXA_DO_DESTAQUE, fatorDeAproximacao } from '../movimento/transicoes';
+import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao } from '../movimento/transicoes';
 import type { RelogioDaAnimacao } from './relogio';
 
 /* Boneco low-poly feito de cilindros e esferas. Nada de modelo externo: os
@@ -57,6 +57,9 @@ const DURACAO_DA_COR = 0.4;
    o primeiro quadro depois de um tempo parado traz um delta enorme, e a cor
    pularia direto para o fim. */
 const DELTA_MAXIMO_DA_COR = 1 / 30;
+/* Mesmo cuidado na rampa de pausa: ao retomar depois de um tempo parado, o
+   primeiro delta é grande e a velocidade saltaria em vez de subir. */
+const DELTA_MAXIMO_DA_RAMPA = 1 / 30;
 
 const CIMA = new Vector3(0, 1, 0);
 const tmpA = new Vector3();
@@ -94,6 +97,9 @@ export function Boneco({
   const ultimaFase = useRef(-1);
   const ultimaRegiao = useRef<RegiaoDoCorpo | null>(null);
   const corEmTransicao = useRef(0); // segundos restantes do fade do destaque
+  // Velocidade com que o tempo anda de fato: segue relogio.velocidade (ou 0
+  // pausado) por uma rampa, para o boneco desacelerar e acelerar (M1).
+  const velocidadeEfetiva = useRef(relogio.current.pausado ? 0 : relogio.current.velocidade);
   const inicial = useMemo(() => montarEsqueleto(amostrar(animacao, 0).pose), [animacao]);
   const corDestaque = useMemo(() => new Color(cores.destaque), [cores]);
   const corOriginal = useMemo(() => Object.fromEntries(Object.entries(cores).map(([k, v]) => [k, new Color(v)])), [cores]);
@@ -121,8 +127,14 @@ export function Boneco({
 
   useFrame((estado, delta) => {
     const r = relogio.current;
+    const alvo = r.pausado ? 0 : r.velocidade;
+    velocidadeEfetiva.current = r.menosMovimento
+      ? alvo
+      : aproximar(velocidadeEfetiva.current, alvo, Math.min(delta, DELTA_MAXIMO_DA_RAMPA), 1 / RAMPA_DE_PAUSA);
     // delta limitado: ao voltar de outra aba o delta é enorme e o boneco "pularia".
-    if (!r.pausado) r.tempo += Math.min(delta, 0.1) * r.velocidade;
+    r.tempo += Math.min(delta, 0.1) * velocidadeEfetiva.current;
+    // Pausada, a cena só desenha sob demanda: segue pedindo quadros até parar.
+    if (r.pausado && velocidadeEfetiva.current > 0) estado.invalidate();
     const amostra = amostrar(animacao, r.tempo);
     const esqueleto = montarEsqueleto(aplicarDesvioNaPose(amostra.pose, r.desvio, r.tempo));
     const regiao = regiaoDoDesvio(r.desvio);
