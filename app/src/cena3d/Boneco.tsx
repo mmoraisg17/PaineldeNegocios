@@ -8,6 +8,7 @@ import { type RegiaoDoCorpo, aplicarDesvioNaPose, regiaoDoDesvio } from '../movi
 import type { Vec3 } from '../movimento/vetor';
 import type { CoresDaCena } from './cores';
 import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao, respiracao } from '../movimento/transicoes';
+import { MaterialManequim } from './MaterialManequim';
 import type { RelogioDaAnimacao } from './relogio';
 
 /* Boneco low-poly feito de cilindros e esferas. Nada de modelo externo: os
@@ -28,27 +29,27 @@ const R = lado('direito');
 
 const SEGMENTOS: Segmento[] = [
   ...[L, R].flatMap((s): Segmento[] => [
-    { de: (e) => s(e).calcanhar, ate: (e) => s(e).ponta, raio: 0.038, cor: 'sapato', regiao: 'pernas' },
-    { de: (e) => s(e).tornozelo, ate: (e) => s(e).joelho, raio: 0.048, cor: 'calca', regiao: 'pernas' },
-    { de: (e) => s(e).joelho, ate: (e) => s(e).quadril, raio: 0.062, cor: 'calca', regiao: 'pernas' },
-    { de: (e) => s(e).ombro, ate: (e) => s(e).cotovelo, raio: 0.042, cor: 'camisa', regiao: 'bracos' },
-    { de: (e) => s(e).cotovelo, ate: (e) => s(e).mao, raio: 0.034, cor: 'pele', regiao: 'bracos' },
+    { de: (e) => s(e).calcanhar, ate: (e) => s(e).ponta, raio: 0.038, cor: 'corpo', regiao: 'pernas' },
+    { de: (e) => s(e).tornozelo, ate: (e) => s(e).joelho, raio: 0.048, cor: 'corpo', regiao: 'pernas' },
+    { de: (e) => s(e).joelho, ate: (e) => s(e).quadril, raio: 0.062, cor: 'corpo', regiao: 'pernas' },
+    { de: (e) => s(e).ombro, ate: (e) => s(e).cotovelo, raio: 0.042, cor: 'corpo', regiao: 'bracos' },
+    { de: (e) => s(e).cotovelo, ate: (e) => s(e).mao, raio: 0.034, cor: 'corpo', regiao: 'bracos' },
   ]),
-  { de: (e) => e.lados.esquerdo.quadril, ate: (e) => e.lados.direito.quadril, raio: 0.075, cor: 'calca', regiao: 'pernas' },
-  { de: (e) => e.pelve, ate: (e) => e.pescoco, raio: 0.115, cor: 'camisa', regiao: 'tronco' },
-  { de: (e) => e.lados.esquerdo.ombro, ate: (e) => e.lados.direito.ombro, raio: 0.06, cor: 'camisa', regiao: 'tronco' },
-  { de: (e) => e.pescoco, ate: (e) => e.cabeca, raio: 0.04, cor: 'pele', regiao: 'tronco' },
+  { de: (e) => e.lados.esquerdo.quadril, ate: (e) => e.lados.direito.quadril, raio: 0.075, cor: 'corpo', regiao: 'pernas' },
+  { de: (e) => e.pelve, ate: (e) => e.pescoco, raio: 0.115, cor: 'corpo', regiao: 'tronco' },
+  { de: (e) => e.lados.esquerdo.ombro, ate: (e) => e.lados.direito.ombro, raio: 0.06, cor: 'corpo', regiao: 'tronco' },
+  { de: (e) => e.pescoco, ate: (e) => e.cabeca, raio: 0.04, cor: 'corpo', regiao: 'tronco' },
 ];
 
 const JUNTAS: Junta[] = [
   ...[L, R].flatMap((s): Junta[] => [
-    { em: (e) => s(e).joelho, raio: 0.052, cor: 'calca', regiao: 'pernas' },
-    { em: (e) => s(e).tornozelo, raio: 0.04, cor: 'sapato', regiao: 'pernas' },
-    { em: (e) => s(e).ombro, raio: 0.06, cor: 'camisa', regiao: 'bracos' },
-    { em: (e) => s(e).cotovelo, raio: 0.04, cor: 'camisa', regiao: 'bracos' },
-    { em: (e) => s(e).mao, raio: 0.042, cor: 'pele', regiao: 'bracos' },
+    { em: (e) => s(e).joelho, raio: 0.052, cor: 'corpo', regiao: 'pernas' },
+    { em: (e) => s(e).tornozelo, raio: 0.04, cor: 'corpo', regiao: 'pernas' },
+    { em: (e) => s(e).ombro, raio: 0.06, cor: 'corpo', regiao: 'bracos' },
+    { em: (e) => s(e).cotovelo, raio: 0.04, cor: 'corpo', regiao: 'bracos' },
+    { em: (e) => s(e).mao, raio: 0.042, cor: 'corpo', regiao: 'bracos' },
   ]),
-  { em: (e) => e.cabeca, raio: CORPO.raioCabeca, cor: 'pele', regiao: 'tronco' },
+  { em: (e) => e.cabeca, raio: CORPO.raioCabeca, cor: 'corpo', regiao: 'tronco' },
 ];
 
 /* Tempo que a cor leva para assentar no destaque (≈ 99% com TAXA_DO_DESTAQUE). */
@@ -177,7 +178,7 @@ export function Boneco({
           }}
         >
           <cylinderGeometry args={[s.raio, s.raio, 1, 14]} />
-          <meshStandardMaterial color={cores[s.cor]} roughness={0.75} />
+          <MaterialManequim cor={cores[s.cor]} borda={cores.borda} />
         </mesh>
       ))}
       {JUNTAS.map((j, i) => {
@@ -185,7 +186,7 @@ export function Boneco({
         return (
           <mesh key={`j${i}`} ref={(m) => void (juntas.current[i] = m)} position={[p.x, p.y, p.z]}>
             <sphereGeometry args={[j.raio, 18, 14]} />
-            <meshStandardMaterial color={cores[j.cor]} roughness={0.75} />
+            <MaterialManequim cor={cores[j.cor]} borda={cores.borda} />
           </mesh>
         );
       })}

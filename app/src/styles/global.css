@@ -50,9 +50,9 @@
    descartaria as variáveis que nenhuma classe usa. Mesma regra das outras
    cores: mudar aqui muda a cena. */
 @theme static {
-  --color-cena-pele: #c68863;
-  --color-cena-camisa: #0f6e5c;
-  --color-cena-calca: #2f3b4a;
+  /* Manequim claro com borda de luz (auditoria visual, V3). */
+  --color-cena-corpo: #d9dde2;
+  --color-cena-borda: #ffffff;
   --color-cena-sapato: #1b1f24;
   /* Estúdio escuro (auditoria visual, V1): o corpo claro e as marcações de
      correção se destacam sobre ele, como na referência enviada. */

@@ -2,9 +2,8 @@
    static), para a paleta continuar num lugar só. O valor reserva só aparece
    se o CSS ainda não tiver carregado, o que não acontece no app real. */
 const RESERVA = {
-  pele: '#c68863',
-  camisa: '#0f6e5c',
-  calca: '#2f3b4a',
+  corpo: '#d9dde2',
+  borda: '#ffffff',
   sapato: '#1b1f24',
   fundo: '#0e1217',
   base: '#4a5462',
