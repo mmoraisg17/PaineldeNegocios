@@ -9,6 +9,7 @@ import type { CoresDaCena } from './cores';
 import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao, respiracao } from '../movimento/transicoes';
 import { MaterialManequim } from './MaterialManequim';
 import { LADOS_DA_REVOLUCAO, pontosDoPerfil, posicionarSegmento } from './malhas';
+import { AneisDePressao, atualizarAneis } from './AneisDePressao';
 import { CascasDosMusculos, atualizarMusculos } from './Musculos';
 import {
   ANTEBRACO,
@@ -122,6 +123,7 @@ export function Boneco({
   const segmentos = useRef<(Mesh | null)[]>([]);
   const juntas = useRef<(Mesh | null)[]>([]);
   const musculos = useRef<(Mesh | null)[]>([]);
+  const aneis = useRef<(Mesh | null)[]>([]);
   const ultimaFase = useRef(-1);
   const ultimaRegiao = useRef<RegiaoDoCorpo | null>(null);
   const corEmTransicao = useRef(0); // segundos restantes do fade do destaque
@@ -190,6 +192,8 @@ export function Boneco({
     });
     // Músculos (V4) no mesmo quadro do esqueleto, para a casca não atrasar.
     if (animacao.musculos) atualizarMusculos(musculos.current, esqueleto, amostra.carga, Math.min(delta, 0.1));
+    // Anéis de pressão (V5): pés do esqueleto + última leitura do simulador.
+    atualizarAneis(aneis.current, esqueleto, r.sensores, cores, Math.min(delta, 0.1));
     if (amostra.indiceFase !== ultimaFase.current) {
       ultimaFase.current = amostra.indiceFase;
       aoAmostrar?.(amostra);
@@ -224,6 +228,7 @@ export function Boneco({
         );
       })}
       {animacao.musculos && <CascasDosMusculos musculos={animacao.musculos} cor={cores.musculo} malhas={musculos} />}
+      <AneisDePressao malhas={aneis} />
     </group>
   );
 }

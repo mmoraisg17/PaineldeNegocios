@@ -1,4 +1,4 @@
-import type { Desvio } from '../sensores/tipos';
+import type { Desvio, EstadoDaExecucao } from '../sensores/tipos';
 
 /* Estado compartilhado entre a cena 3D (que avança o tempo a cada quadro) e a
    simulação dos sensores (que lê esse tempo para saber em que fase do
@@ -13,6 +13,10 @@ export type RelogioDaAnimacao = {
   /* Movimento reduzido: a cena começa pausada e as transições visuais (fade
      do destaque, rampa de pausa, respiração) viram troca direta. */
   menosMovimento: boolean;
+  /* Última leitura da base e o estado mostrado ao praticante, gravados pelo
+     simulador (10 vezes por segundo) para a cena desenhar os anéis de
+     pressão e as marcações de correção (auditoria visual, V5–V7). */
+  sensores: { pes: number; cargaEsquerda: number; estado: EstadoDaExecucao } | null;
 };
 
 export const novoRelogio = (menosMovimento = false): RelogioDaAnimacao => ({
@@ -21,4 +25,5 @@ export const novoRelogio = (menosMovimento = false): RelogioDaAnimacao => ({
   pausado: menosMovimento,
   desvio: null,
   menosMovimento,
+  sensores: null,
 });

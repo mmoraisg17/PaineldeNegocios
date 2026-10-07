@@ -54,6 +54,11 @@
   --color-cena-corpo: #d9dde2;
   --color-cena-borda: #ffffff;
   --color-cena-musculo: #2ec5ff; /* músculo trabalhado (V4) */
+  /* Marcações de correção (V5–V7): sempre com forma ou texto junto, nunca
+     só a cor, para quem tem daltonismo. */
+  --color-cena-certo: #3ddc84;
+  --color-cena-atencao: #ffb020;
+  --color-cena-erro: #ff4d4f;
   --color-cena-sapato: #1b1f24;
   /* Estúdio escuro (auditoria visual, V1): o corpo claro e as marcações de
      correção se destacam sobre ele, como na referência enviada. */

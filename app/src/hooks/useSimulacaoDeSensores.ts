@@ -77,6 +77,7 @@ export function useSimulacaoDeSensores(opcoes: Opcoes): SimulacaoDeSensores {
       anterior = leitura;
       const avaliacao = avaliar(o.exercicio, leitura, esperado);
       feedback = feedback ? atualizarFeedback(feedback, avaliacao, parede) : iniciarFeedback(avaliacao, parede);
+      o.relogio.current.sensores = { pes: leitura.pes, cargaEsquerda: leitura.cargaEsquerda, estado: feedback.exibido.estado };
       soma.simetria += avaliacao.simetria;
       soma.estabilidade += avaliacao.estabilidade;
       soma.apoioNasBarras += leitura.maos;
