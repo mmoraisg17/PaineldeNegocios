@@ -1,6 +1,6 @@
 # Auditoria de animações: demonstrações dos exercícios
 
-> Data: 07/10/2026 · Somente leitura (etapas 1 a 3). **Nenhum código foi alterado.** A implementação aguarda aprovação.
+> Data: 07/10/2026 · Etapas 1 a 3 (auditoria) e etapa 4 (implementação, aprovada pelo Murilo em 07/10). **Status: todas as correções implementadas**. Ver a seção 6.
 >
 > **Escopo definido pelo grupo:** só as **demonstrações dos exercícios**, isto é, a cena 3D da tela do exercício (`app/src/cena3d/` + `app/src/movimento/`). Ficam **fora**: microinterações da interface (botões, rotas, listas, gráficos), mapa de pressão, aviso de correção e qualquer entrega do Painel (break-even, organograma etc.).
 
@@ -132,3 +132,31 @@ Esforço: **P** ≤ 30 min · **M** 1–2 h. Valores **atual → novo**.
 | **Câmera lenta na fase crítica** | Botão "ver devagar": velocidade 0,5× com rampa de 0,35 s (reaproveita M1) | Útil para o público 60+ |
 
 **Higgsfield:** **não** recomendo nas demonstrações. Vídeo gerado não garante a biomecânica correta (joelho alinhado, tronco na inclinação certa), não sincroniza com a carga dos sensores e não muda com o nível nem com o erro simulado. O 3D procedural cumpre tudo isso. Gerar com Higgsfield só faria sentido para material de divulgação fora do app, que está fora deste escopo.
+
+---
+
+## 6. Implementação (etapa 4)
+
+Um commit por correção, no branch `feat/animacoes-exercicios`. Depois de cada um rodei tipos (`tsc`), lint (`oxlint`, sem erros), a suíte completa e o build.
+
+| # | Commit | O que foi verificado |
+|---|---|---|
+| A1 | `3803d74` | 8 testes novos: passa por cada pose; velocidade contínua em 2,8 · 3,9 · 7,0 · 8,0 s (diferença < 10% entre antes e depois); parado nos repousos; nenhum valor passa dos vizinhos. Todos os testes de fatos do 3D seguem verdes. Custo: 1,47 µs por quadro, contra 0,26 µs antes (o quadro de 60 fps tem 16.667 µs) |
+| A2 | `c106cdb` | Pico do tronco 0,15 s antes, cabeça 0,1 s depois e mãos 0,18 s depois (animação sintética); carga no tempo dos quadros; tronco ainda entre 40° e 60° na saída da cadeira |
+| A3 | `29e0506` | Função: cerca de 90% da cor em 200 ms a 30, 60 e 120 fps. Chrome: pernas em coral com "Peso numa perna só" e de volta à cor normal com "Execução certa" |
+| M1 | `5b84c6c` | Chrome, medido quadro a quadro: depois de pausar, a animação anda 0,172 s em cerca de 340 ms e para (esperado: 0,175 s); ao retomar, volta a 0,98 s/s em cerca de 0,35 s |
+| M2 | `cea9487` | Chrome: legenda com `aparecer 0.18s`, opacidade 0 no instante da troca e 1 depois |
+| M3 | `6157bbe` | Testes da função: amplitude ≤ 0,6° e cerca de 13 respirações por minuto. A amplitude de 0,6° não dá para conferir por screenshot |
+| B1 | `ff15e89` | Testes: não repete a cada período da onda principal; pico de 2,5 cm mantido. O sentar e levantar não tem esse desvio; ele aparece nos exercícios da fase 6 |
+
+**Desvios do plano:**
+- **A1:** usei curva cúbica monotônica (PCHIP) em vez de Catmull-Rom.
+  - Ela zera a velocidade sozinha nos trechos parados e nos picos, então o campo `repouso` ficou desnecessário.
+  - Ela nunca ultrapassa os quadros vizinhos. Uma Catmull-Rom comum poderia fazer o quadril atravessar o assento.
+- **A2:** a defasagem ficou em **segundos** (`DEFASAGEM_DAS_PARTES`), não em fração do trecho. Assim o efeito é o mesmo em trechos curtos e longos.
+- **M1:** o canvas só entra em `frameloop="demand"` depois da rampa. Trocar no mesmo render deixava a rampa sem quadros; achei isso na verificação no Chrome.
+- **M2:** a legenda só entra esmaecendo, sem esmaecer a anterior. Fiz em CSS (`--animate-aparecer`) para não levar a Motion para a cena 3D.
+
+**Ambiente de verificação:**
+- Chrome DevTools em 390×844 (celular, toque) e 1280×800 (desktop), sem limite de CPU: cerca de 233 fps e nenhum erro no console, só o aviso `THREE.Clock` de dentro do R3F.
+- Com limite de CPU 4× a cena cai para 1 fps, porque o Chrome desse modo desenha o WebGL por software, na CPU. Isso não representa um celular real, e não medi em aparelho físico.
