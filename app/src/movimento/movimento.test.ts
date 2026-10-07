@@ -176,3 +176,50 @@ describe('variações por nível e desvios', () => {
     expect(Number.isFinite(amostrar(sentarELevantar(), Number.NaN).pose.quadril.y)).toBe(true);
   });
 });
+
+/* Auditoria de animações (docs/auditoria-animacoes.md), correções A1 e A2:
+   o boneco não pode frear em cada quadro intermediário, não pode passar do
+   ponto entre quadros (o quadril atravessaria a cadeira) e as partes do corpo
+   não chegam todas ao mesmo tempo. */
+describe('interpolação contínua (A1)', () => {
+  const animacao = sentarELevantar();
+  const DT = 0.005;
+  const velocidadeDoQuadril = (t: number, lado: -1 | 1 = 1) => {
+    const a = amostrar(animacao, t).pose.quadril;
+    const b = amostrar(animacao, t + lado * DT).pose.quadril;
+    return (lado * Math.hypot(b.y - a.y, b.z - a.z)) / DT;
+  };
+
+  test('passa exatamente pela posição do quadril de cada quadro', () => {
+    for (const quadro of animacao.quadros) {
+      const { quadril } = amostrar(animacao, quadro.t).pose;
+      expect(quadril.y, `t=${quadro.t}`).toBeCloseTo(quadro.pose.quadril.y, 6);
+      expect(quadril.z, `t=${quadro.t}`).toBeCloseTo(quadro.pose.quadril.z, 6);
+    }
+  });
+
+  test.each([2.8, 3.9, 7.0, 8.0])('não freia no quadro intermediário de t=%s s', (t) => {
+    const antes = Math.abs(velocidadeDoQuadril(t, -1));
+    const depois = Math.abs(velocidadeDoQuadril(t, 1));
+    expect(depois).toBeGreaterThan(0.03); // m/s: segue andando
+    expect(Math.abs(antes - depois) / depois).toBeLessThan(0.1); // sem tranco
+  });
+
+  test.each([1.0, 5.8])('fica parado de verdade no repouso de t=%s s', (t) => {
+    expect(Math.abs(velocidadeDoQuadril(t - 0.2))).toBeLessThan(1e-6);
+  });
+
+  test('entre dois quadros, nenhum valor passa dos vizinhos (sem ultrapassar)', () => {
+    const quadros = animacao.quadros;
+    for (let k = 0; k < quadros.length - 1; k += 1) {
+      const a = quadros[k];
+      const b = quadros[k + 1];
+      if (!a || !b) continue;
+      for (let s = 0; s <= 1; s += 0.05) {
+        const { quadril } = amostrar(animacao, a.t + s * (b.t - a.t)).pose;
+        expect(quadril.y).toBeGreaterThanOrEqual(Math.min(a.pose.quadril.y, b.pose.quadril.y) - 1e-9);
+        expect(quadril.y).toBeLessThanOrEqual(Math.max(a.pose.quadril.y, b.pose.quadril.y) + 1e-9);
+      }
+    }
+  });
+});
