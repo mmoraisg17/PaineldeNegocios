@@ -59,7 +59,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
     aoMudarDesvio: () => setVersaoDesvio((v) => v + 1),
   });
   const mensagem = sim.avaliacao.correcao?.mensagem ?? MENSAGEM_OK;
-  useVoz(voz, sim.avaliacao.correcao?.id ?? sim.avaliacao.estado, mensagem);
+  const { vozBrasileiraDisponivel } = useVoz(voz, sim.avaliacao.correcao?.id ?? sim.avaliacao.estado, mensagem);
 
   const trilha = exercicio.trilha === 'fisio' ? 'Fisioterapia' : 'Equilíbrio 60+';
 
@@ -93,6 +93,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
         desvioForcado={automatico ? null : desvioForcado}
         automatico={automatico}
         voz={voz}
+        vozIndisponivel={voz && !vozBrasileiraDisponivel}
         aoForcar={(d) => {
           setAutomatico(false);
           setDesvioForcado(d);

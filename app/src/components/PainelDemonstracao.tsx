@@ -11,6 +11,7 @@ export function PainelDemonstracao({
   desvioForcado,
   automatico,
   voz,
+  vozIndisponivel = false,
   aoForcar,
   aoAutomatico,
   aoVoz,
@@ -19,6 +20,7 @@ export function PainelDemonstracao({
   desvioForcado: Desvio | null;
   automatico: boolean;
   voz: boolean;
+  vozIndisponivel?: boolean;
   aoForcar: (d: Desvio | null) => void;
   aoAutomatico: (ligado: boolean) => void;
   aoVoz: (ligada: boolean) => void;
@@ -50,6 +52,12 @@ export function PainelDemonstracao({
           {voz ? '🔊 Voz ligada' : '🔈 Voz'}
         </button>
       </div>
+      {vozIndisponivel && (
+        <p role="status" className="mt-2 text-sm text-alerta-texto">
+          Este aparelho não tem voz em português do Brasil, por isso os avisos não serão falados. No celular ou no Chrome com
+          internet, ela costuma estar disponível.
+        </p>
+      )}
     </details>
   );
 }
