@@ -54,11 +54,15 @@
   --color-cena-camisa: #0f6e5c;
   --color-cena-calca: #2f3b4a;
   --color-cena-sapato: #1b1f24;
-  --color-cena-base: #3a4552;
+  /* Estúdio escuro (auditoria visual, V1): o corpo claro e as marcações de
+     correção se destacam sobre ele, como na referência enviada. */
+  --color-cena-fundo: #0e1217;
+  --color-cena-base: #4a5462;
   --color-cena-sensores: #ddefea;
   --color-cena-metal: #9aa4b1;
   --color-cena-madeira: #b7835a;
-  --color-cena-chao: #ece9e2;
+  --color-cena-chao: #1a2027;
+  --color-cena-luz-chao: #252e38; /* disco mais claro sob a plataforma */
   --color-cena-destaque: #e8735a;
 }
 

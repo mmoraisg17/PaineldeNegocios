@@ -65,7 +65,7 @@ export default function VisualizadorExercicio({
 
   return (
     <figure className="flex flex-col gap-2">
-      <div className="relative h-56 overflow-hidden rounded-cartao bg-superficie" data-cena-3d>
+      <div className="relative h-56 overflow-hidden rounded-cartao bg-cena-fundo" data-cena-3d>
         <Canvas
           /* offsetSize: mede o tamanho de layout do contêiner, e não o
              tamanho visual. No desktop o app inteiro está dentro de uma
@@ -80,8 +80,15 @@ export default function VisualizadorExercicio({
           role="img"
           aria-label={`Animação 3D do exercício ${nomeExercicio}. Arraste para os lados para girar.`}
         >
-          <hemisphereLight args={['#ffffff', '#b9b4a8', 1.4]} />
-          <directionalLight position={[2.5, 4, 3]} intensity={1.6} />
+          {/* Estúdio (V1): fundo escuro, névoa que funde o chão no fundo, luz
+              principal suave pela frente e duas luzes de recorte por trás, que
+              desenham a borda clara do corpo, como na referência. */}
+          <color attach="background" args={[cores.fundo]} />
+          <fog attach="fog" args={[cores.fundo, 4.2, 7.5]} />
+          <hemisphereLight args={['#cfd8e3', cores.fundo, 0.55]} />
+          <directionalLight position={[2.5, 4, 3]} intensity={1.3} />
+          <directionalLight position={[-3, 3, -4]} intensity={2.6} />
+          <directionalLight position={[3, 2.5, -4]} intensity={1.8} color="#bfe9ff" />
           <Chao cores={cores} />
           <Plataforma cores={cores} />
           {animacao.cadeira && <Cadeira cadeira={animacao.cadeira} cores={cores} />}

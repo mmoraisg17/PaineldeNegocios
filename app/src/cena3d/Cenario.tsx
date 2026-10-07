@@ -89,11 +89,19 @@ export function Cadeira({ cadeira, cores }: { cadeira: CadeiraDaAnimacao; cores:
   );
 }
 
+/* Chão do estúdio: disco escuro que some no fundo pela névoa da cena, com um
+   disco um pouco mais claro sob a plataforma, como um foco de luz (V1). */
 export function Chao({ cores }: { cores: CoresDaCena }) {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, -0.1]}>
-      <circleGeometry args={[1.6, 48]} />
-      <meshStandardMaterial color={cores.chao} roughness={1} />
-    </mesh>
+    <group rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0.1, -0.001]}>
+        <circleGeometry args={[6, 48]} />
+        <meshStandardMaterial color={cores.chao} roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.1, 0]}>
+        <circleGeometry args={[0.95, 48]} />
+        <meshStandardMaterial color={cores.luzChao} roughness={1} />
+      </mesh>
+    </group>
   );
 }
