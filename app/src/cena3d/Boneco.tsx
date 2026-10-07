@@ -7,6 +7,7 @@ import { type Esqueleto, montarEsqueleto } from '../movimento/corpo';
 import { type RegiaoDoCorpo, aplicarDesvioNaPose, regiaoDoDesvio } from '../movimento/desvios';
 import type { Vec3 } from '../movimento/vetor';
 import type { CoresDaCena } from './cores';
+import { TAXA_DO_DESTAQUE, fatorDeAproximacao } from '../movimento/transicoes';
 import type { RelogioDaAnimacao } from './relogio';
 
 /* Boneco low-poly feito de cilindros e esferas. Nada de modelo externo: os
@@ -50,6 +51,13 @@ const JUNTAS: Junta[] = [
   { em: (e) => e.cabeca, raio: CORPO.raioCabeca, cor: 'pele', regiao: 'tronco' },
 ];
 
+/* Tempo que a cor leva para assentar no destaque (≈ 99% com TAXA_DO_DESTAQUE). */
+const DURACAO_DA_COR = 0.4;
+/* Delta máximo da transição de cor: com a cena pausada (frameloop "demand"),
+   o primeiro quadro depois de um tempo parado traz um delta enorme, e a cor
+   pularia direto para o fim. */
+const DELTA_MAXIMO_DA_COR = 1 / 30;
+
 const CIMA = new Vector3(0, 1, 0);
 const tmpA = new Vector3();
 const tmpB = new Vector3();
@@ -85,6 +93,7 @@ export function Boneco({
   const juntas = useRef<(Mesh | null)[]>([]);
   const ultimaFase = useRef(-1);
   const ultimaRegiao = useRef<RegiaoDoCorpo | null>(null);
+  const corEmTransicao = useRef(0); // segundos restantes do fade do destaque
   const inicial = useMemo(() => montarEsqueleto(amostrar(animacao, 0).pose), [animacao]);
   const corDestaque = useMemo(() => new Color(cores.destaque), [cores]);
   const corOriginal = useMemo(() => Object.fromEntries(Object.entries(cores).map(([k, v]) => [k, new Color(v)])), [cores]);
@@ -96,17 +105,21 @@ export function Boneco({
   }, [animacao, relogio]);
 
   /* Pinta de destaque a região que o app pede para corrigir (pernas na
-     assimetria, braços no apoio demais…), só quando ela muda. */
-  const pintar = (regiao: RegiaoDoCorpo | null) => {
+     assimetria, braços no apoio demais…). `fator` 1 troca direto; menor que 1
+     aproxima a cor um pouco a cada quadro, para o destaque "acender" em
+     ~200 ms em vez de piscar (auditoria, A3). */
+  const pintar = (regiao: RegiaoDoCorpo | null, fator: number) => {
     const aplicar = (mesh: Mesh | null, item: { regiao: RegiaoDoCorpo; cor: keyof CoresDaCena }) => {
       const material = mesh?.material as MeshStandardMaterial | undefined;
-      material?.color.copy(item.regiao === regiao ? corDestaque : (corOriginal[item.cor] ?? corDestaque));
+      const alvo = item.regiao === regiao ? corDestaque : (corOriginal[item.cor] ?? corDestaque);
+      if (fator >= 1) material?.color.copy(alvo);
+      else material?.color.lerp(alvo, fator);
     };
     SEGMENTOS.forEach((s, i) => aplicar(segmentos.current[i] ?? null, s));
     JUNTAS.forEach((j, i) => aplicar(juntas.current[i] ?? null, j));
   };
 
-  useFrame((_, delta) => {
+  useFrame((estado, delta) => {
     const r = relogio.current;
     // delta limitado: ao voltar de outra aba o delta é enorme e o boneco "pularia".
     if (!r.pausado) r.tempo += Math.min(delta, 0.1) * r.velocidade;
@@ -115,7 +128,15 @@ export function Boneco({
     const regiao = regiaoDoDesvio(r.desvio);
     if (regiao !== ultimaRegiao.current) {
       ultimaRegiao.current = regiao;
-      pintar(regiao);
+      corEmTransicao.current = r.menosMovimento ? 0 : DURACAO_DA_COR;
+      if (r.menosMovimento) pintar(regiao, 1);
+    }
+    if (corEmTransicao.current > 0) {
+      const passo = Math.min(delta, DELTA_MAXIMO_DA_COR);
+      corEmTransicao.current -= passo;
+      pintar(regiao, corEmTransicao.current > 0 ? fatorDeAproximacao(passo, TAXA_DO_DESTAQUE) : 1);
+      // Pausada, a cena só desenha sob demanda: pede o próximo quadro até a cor assentar.
+      if (corEmTransicao.current > 0) estado.invalidate();
     }
     SEGMENTOS.forEach((s, i) => {
       const mesh = segmentos.current[i];

@@ -10,6 +10,15 @@ export type RelogioDaAnimacao = {
   velocidade: number;
   pausado: boolean;
   desvio: Desvio | null;
+  /* Movimento reduzido: a cena começa pausada e as transições visuais (fade
+     do destaque, rampa de pausa, respiração) viram troca direta. */
+  menosMovimento: boolean;
 };
 
-export const novoRelogio = (pausado = false): RelogioDaAnimacao => ({ tempo: 0, velocidade: 1, pausado, desvio: null });
+export const novoRelogio = (menosMovimento = false): RelogioDaAnimacao => ({
+  tempo: 0,
+  velocidade: 1,
+  pausado: menosMovimento,
+  desvio: null,
+  menosMovimento,
+});
