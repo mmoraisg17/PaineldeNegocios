@@ -1,6 +1,6 @@
 # Auditoria visual: demonstrações 3D × referência enviada
 
-> Data: 07/10/2026 · Somente leitura. **Nenhum código foi alterado.** A implementação aguarda aprovação.
+> Data: 07/10/2026 · Auditoria e implementação de V1–V8 (aprovadas pelo Murilo em 07/10: estilo híbrido, blocos Alta + Média). Ver a seção 7.
 > Escopo: só as demonstrações dos exercícios (`app/src/cena3d/`, `app/src/movimento/`).
 > Referência: pin do Pinterest enviado pelo Murilo (https://pin.it/70wu8Hjwp). Vídeo principal do LYFTA ("9 Shoulder exercises to try with cable", 17,6 s) + dois vídeos relacionados que a página exibe junto (40 s e 32 s).
 > Os quadros foram capturados só para análise e **não** entram no repositório, que é público: são material de terceiros.
@@ -118,3 +118,34 @@ Esforço: **P** ≤ 1 h · **M** 2–4 h · **G** ~1 dia.
 - **Desempenho:** a malha mais detalhada (V2) e a transparência (V4) custam mais GPU. Mitigação: geometria com poucos segmentos (≤ 16), sem sombras em tempo real e `dpr` limitado a 2 (já é assim). Mediremos FPS antes e depois.
 - **Contraste para 60+:** num fundo escuro, os textos e botões sobre a cena precisam de contraste AA. O ✓ / ✕ tem forma, não só cor.
 - **Tempo:** V1–V8 somam cerca de 2 dias. Fazer antes da fase 6 encurta o tempo dela.
+
+---
+
+## 7. Implementação (V1–V8)
+
+Um commit por item no branch `feat/visual-estudio`. Depois de cada um rodei tipos, lint (oxlint), a suíte completa (722 testes no fim) e o build, e conferi no Chrome (DevTools) em 390 px.
+
+| # | Commit | O que foi verificado |
+|---|---|---|
+| V1 | `9eec5b7` | Estúdio escuro; o chão some na névoa sem horizonte marcado |
+| V3 | `9a1002b` | Manequim claro; shader *fresnel* compila sem erros no console |
+| V2 | `101088d` | Close na saída da cadeira: coxa e panturrilha com volume, cintura, articulações discretas. 19 testes dos perfis |
+| V4 | `a06e350` | Quadríceps em ciano na extensão do joelho e quase apagado em pé. 7 testes do esforço com a animação real |
+| V5 | `1a48994` | "Peso numa perna só": anéis âmbar, maior no pé carregado (25% / 75%). 8 testes |
+| V6 | `5be0c71` | "Peso numa perna só": selo ! Atenção e seta para a esquerda. "Execução certa": ✓ verde, anéis verdes iguais e sem seta. 10 testes |
+| V7 | `fbc45c0` | Fio de prumo âmbar fora do meio com peso numa perna. 3 testes (alinhado o ciclo inteiro na execução certa) |
+| V8 | `5c50d3f` | Com erro nas pernas, a câmera desce e aproxima; no tamanho real do cartão (252 px) o corpo continua inteiro. 5 testes |
+
+**Desvios do plano e ajustes:**
+- **V4:**
+  - Mistura **normal** em vez de aditiva: sobre o corpo claro, a aditiva virava quase branco.
+  - Desconto de 15° de "flexão de repouso": o boneco fica em pé com cerca de 16° de joelho, e sem isso o quadríceps acenderia parado.
+- **V2:** a cabeça visível ficou com 9 cm de raio, contra os 10,5 cm do esqueleto, e não ficou oval. A esfera não gira com o pescoço, e uma cabeça oval ficaria "em pé" com o tronco inclinado.
+- **V6:** o selo é `aria-hidden`, porque o `AvisoDeCorrecao` já anuncia o estado ao leitor de tela.
+- **Ambiente:** o servidor de desenvolvimento serviu CSS antigo uma vez, e as cores novas não apareceram. O build de produção estava certo; reiniciar o servidor resolveu.
+
+**Desempenho:** no Chrome sem limite de CPU, com tudo ligado, foram cerca de 222 fps no desktop, contra cerca de 233 antes. Não medi em celular físico; a limitação de CPU do Chrome não representa um aparelho real, porque nesse modo o WebGL é desenhado por software.
+
+**Ficou de fora (Baixa):**
+- V9: mini mapa muscular.
+- V10: equipamento no estilo do estúdio. A cadeira de madeira e a plataforma continuam com as cores antigas.
