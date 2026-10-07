@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { APP_NAME, APP_TAGLINE, AVISO_EDUCACIONAL } from '../config/app';
+import { APP_NAME, APP_TAGLINE, AVISO_DE_DADOS, AVISO_EDUCACIONAL } from '../config/app';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
 
 /* A ilustração repete a da tela A1 do Figma (pessoa na plataforma, segurando as
@@ -43,6 +43,7 @@ export function Inicio() {
         <p className="mt-2 text-center text-base text-texto-suave">Personal, fisioterapeuta ou familiar</p>
 
         <p className="mt-8 text-base font-medium text-texto-suave">{AVISO_EDUCACIONAL}</p>
+        <p className="mt-2 text-base text-texto-suave">{AVISO_DE_DADOS}</p>
       </div>
     </main>
   );

@@ -1,0 +1,18 @@
+# O repositório é PÚBLICO. Material do grupo e da PJ que não deve ser
+# publicado fica fora do git (revisão de segurança, fase 8): um `git add .`
+# na raiz não pode levar estes arquivos para o GitHub.
+docs/requisitos/
+docs/pesquisa/
+docs/modelagem/
+
+# Segredos e configurações locais
+.env
+.env.*
+*.pem
+*.key
+.claude/settings.local.json
+.claude/*.local.*
+
+# Sistema
+.DS_Store
+Thumbs.db

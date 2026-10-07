@@ -85,3 +85,8 @@ test('um endereço inexistente mostra erro amigável com volta ao início', () =
   expect(screen.getByRole('heading', { name: 'Tela não encontrada' })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Voltar ao início' })).toHaveAttribute('href', '/');
 });
+
+test('o início avisa que é para usar dados fictícios e que tudo fica no aparelho', () => {
+  abrirEm('/');
+  expect(screen.getByText(/use dados fictícios/i)).toBeInTheDocument();
+});

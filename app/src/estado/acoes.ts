@@ -16,6 +16,8 @@ import {
   TAMANHO_MAXIMO_DA_FUNCAO,
   decidirNivel,
   limparNome,
+  novoId,
+  TAMANHO_MAXIMO_DO_RECADO,
   exerciciosDaTrilha,
   gerarConvite,
   nivelMaximoCompativel,
@@ -37,8 +39,8 @@ import {
    chama e salva o resultado; toda regra fica aqui, testável sem React. */
 
 type GerarId = () => string;
-const idPadrao: GerarId = () =>
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `id-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+// Mesmo gerador do domínio (crypto.randomUUID, ou getRandomValues como reserva).
+const idPadrao: GerarId = novoId;
 
 export const entrar = (estado: EstadoApp, conta: ContaAtual): EstadoApp => ({ ...estado, contaAtual: conta });
 export const sair = (estado: EstadoApp): EstadoApp => ({ ...estado, contaAtual: null });
@@ -210,7 +212,6 @@ export function salvarAjuste(
   return { estado: { ...estado, praticantes: { ...estado.praticantes, [praticanteId]: { ...praticante, ajuste: completo } } }, ok: true };
 }
 
-export const TAMANHO_MAXIMO_DO_RECADO = 280;
 
 export function enviarRecado(
   estado: EstadoApp,
@@ -238,3 +239,5 @@ export function recadosPara(estado: EstadoApp, praticanteId: string): (Recado & 
     .filter((r) => r.paraId === praticanteId && vinculoEntre(estado, r.deId, praticanteId))
     .map((r) => ({ ...r, autor: estado.acompanhantes.find((a) => a.id === r.deId)?.nome ?? 'Acompanhante' }));
 }
+
+export { TAMANHO_MAXIMO_DO_RECADO };

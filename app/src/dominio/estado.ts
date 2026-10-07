@@ -29,6 +29,10 @@ export type Acompanhante = {
   funcao: string;
 };
 
+/* Recado curto: a tela impõe no campo e o domínio corta ao gravar e ao ler
+   do aparelho (localStorage adulterado não quebra a tela; fase 8). */
+export const TAMANHO_MAXIMO_DO_RECADO = 280;
+
 /* Mensagem de mão única do profissional para o praticante (sem chat). */
 export type Recado = {
   id: string;

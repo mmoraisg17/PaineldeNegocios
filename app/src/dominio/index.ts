@@ -78,7 +78,9 @@ export {
   type EstadoApp,
   type PapelDaConta,
   type Recado,
+  TAMANHO_MAXIMO_DO_RECADO,
 } from './estado';
+export { novoId } from './aleatorio';
 export {
   CHAVE_DO_ESTADO,
   apagarDados,

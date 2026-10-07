@@ -407,3 +407,9 @@ describe('sanearEstado: nomes longos', () => {
     expect(estado.acompanhantes[0]?.funcao.length).toBeLessThanOrEqual(30);
   });
 });
+
+test('recado lido do localStorage é cortado no tamanho máximo (280)', () => {
+  const longo = 'x'.repeat(5000);
+  const estado = sanearEstado(bruto({ recados: [{ id: 'r1', deId: 'carlos', paraId: 'lucia', texto: longo, enviadoEm: '2026-10-02T00:00:00.000Z', lido: false }] }));
+  expect(estado.recados[0]?.texto.length).toBe(280);
+});

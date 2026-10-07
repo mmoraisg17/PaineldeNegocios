@@ -1,4 +1,5 @@
 import type { Convite, StatusDoVinculo, TipoAcompanhante, Vinculo } from './acompanhamento';
+import { TAMANHO_MAXIMO_DO_RECADO } from './estado';
 import {
   estadoInicial,
   VERSAO_DO_ESTADO,
@@ -194,7 +195,7 @@ function sanearConvite(valor: unknown): Convite | undefined {
 function sanearRecado(valor: unknown): Recado | undefined {
   if (!ehObjeto(valor) || typeof valor['lido'] !== 'boolean') return undefined;
   const campos = textos(valor, ['id', 'deId', 'paraId', 'texto', 'enviadoEm']);
-  return campos ? { ...campos, lido: valor['lido'] } : undefined;
+  return campos ? { ...campos, texto: campos.texto.slice(0, TAMANHO_MAXIMO_DO_RECADO), lido: valor['lido'] } : undefined;
 }
 
 /* Uma conta atual que aponta para alguém que não existe mais (cadastro

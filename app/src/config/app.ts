@@ -15,3 +15,8 @@ export const APP_TAGLINE = 'Treinos de equilíbrio e força em casa, com a sua p
    acompanhamento. Prometer diagnóstico ou reabilitação o enquadraria como
    dispositivo médico (ANVISA). O mesmo texto abre o manual de uso. */
 export const AVISO_EDUCACIONAL = 'Protótipo educacional. Não substitui a orientação de um profissional de saúde.';
+
+/* Os dados ficam em texto no próprio aparelho (localStorage), sem servidor:
+   ninguém deve digitar dado de saúde real no protótipo (revisão de segurança,
+   fase 8). */
+export const AVISO_DE_DADOS = 'Use dados fictícios: tudo fica só neste aparelho, nada vai para a internet.';
