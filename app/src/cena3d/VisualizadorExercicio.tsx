@@ -39,6 +39,8 @@ export default function VisualizadorExercicio({
   estado?: EstadoDaExecucao;
 }) {
   const cores = useMemo(() => lerCoresDaCena(), []);
+  // Ângulo por exercício (V8): cada animação pode declarar o seu.
+  const alvoDaCamera = animacao.camera?.alvo ?? ALVO_CAMERA;
   const [pausado, setPausado] = useState(relogio.current.pausado);
   const [lento, setLento] = useState(relogio.current.velocidade < 1);
   const [fase, setFase] = useState('');
@@ -82,7 +84,7 @@ export default function VisualizadorExercicio({
              poupa bateria no celular e respeita quem pediu menos movimento. */
           frameloop={sobDemanda ? 'demand' : 'always'}
           dpr={[1, 2]}
-          camera={{ position: CAMERA_POSICAO, fov: 38, near: 0.05, far: 20 }}
+          camera={{ position: animacao.camera?.posicao ?? CAMERA_POSICAO, fov: 38, near: 0.05, far: 20 }}
           role="img"
           aria-label={`Animação 3D do exercício ${nomeExercicio}. Arraste para os lados para girar.`}
         >
@@ -99,7 +101,7 @@ export default function VisualizadorExercicio({
           <Plataforma cores={cores} />
           {animacao.cadeira && <Cadeira cadeira={animacao.cadeira} cores={cores} />}
           <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} versao={versao} />
-          <Orbita alvo={ALVO_CAMERA} />
+          <Orbita alvo={alvoDaCamera} relogio={relogio} />
         </Canvas>
         {estado && <SeloDoEstado estado={estado} />}
         <div className="absolute bottom-2 right-2 flex gap-2">

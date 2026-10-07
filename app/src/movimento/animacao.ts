@@ -27,6 +27,8 @@ export type Animacao = {
   readonly cadeira?: Cadeira;
   /* Músculos que o exercício trabalha: acendem em ciano na demonstração (V4). */
   readonly musculos?: readonly Musculo[];
+  /* Ângulo ideal para ver o exercício (V8). Sem isto, a câmera padrão 3/4. */
+  readonly camera?: { readonly posicao: [number, number, number]; readonly alvo: [number, number, number] };
 };
 
 export type Amostra = { readonly pose: Pose; readonly carga: Carga; readonly fase: string; readonly indiceFase: number };
