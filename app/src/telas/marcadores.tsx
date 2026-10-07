@@ -20,11 +20,6 @@ export const Perfil = () => (
   <TelaEmConstrucao titulo="Perfil" descricao="Seus dados, acompanhantes autorizados, ajustes e privacidade." />
 );
 
-export function Exercicio() {
-  const { id } = useParams();
-  return <TelaEmConstrucao titulo="Exercício" descricao={`Animação 3D, mapa de pressão e correções (${id ?? 'sem exercício'}).`} />;
-}
-
 export const Alunos = () => (
   <TelaEmConstrucao titulo="Meus alunos" descricao="As pessoas que autorizaram você a acompanhar os treinos delas." />
 );

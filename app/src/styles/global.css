@@ -35,6 +35,23 @@
   --radius-botao: 1rem;
 }
 
+/* Cores da cena 3D (boneco, plataforma, cadeira). `static` porque são lidas
+   pelo JavaScript (cena3d/cores.ts) e não por classes: sem isso o Tailwind
+   descartaria as variáveis que nenhuma classe usa. Mesma regra das outras
+   cores: mudar aqui muda a cena. */
+@theme static {
+  --color-cena-pele: #c68863;
+  --color-cena-camisa: #0f6e5c;
+  --color-cena-calca: #2f3b4a;
+  --color-cena-sapato: #1b1f24;
+  --color-cena-base: #3a4552;
+  --color-cena-sensores: #ddefea;
+  --color-cena-metal: #9aa4b1;
+  --color-cena-madeira: #b7835a;
+  --color-cena-chao: #ece9e2;
+  --color-cena-destaque: #e8735a;
+}
+
 @layer base {
   /* 18 px de base em vez de 16: o público principal tem 60 anos ou mais, e o
      Figma já desenhava o corpo de texto nesse tamanho. Tudo em rem acompanha. */

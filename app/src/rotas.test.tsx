@@ -1,9 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { APP_NAME } from './config/app';
 import { rotas } from './rotas';
+
+// O jsdom não tem WebGL nem ResizeObserver: a cena 3D é testada pelo motor
+// (src/movimento) e verificada no navegador; aqui ela vira um marcador.
+vi.mock('./cena3d/VisualizadorExercicio', () => ({ default: () => <p>animação 3D</p> }));
 
 function abrirEm(caminho: string) {
   const roteador = createMemoryRouter(rotas, { initialEntries: [caminho] });
@@ -45,12 +49,13 @@ test('quem entra como acompanhante vê a lista de alunos, sem a barra do pratica
   expect(screen.queryByRole('navigation', { name: 'Navegação principal' })).not.toBeInTheDocument();
 });
 
-test('a tela de exercício abre sem a barra de abas', () => {
+test('a tela de exercício abre sem a barra de abas e carrega a animação', async () => {
   // Arrange / Act
   abrirEm('/praticante/exercicio/sentar-e-levantar');
 
   // Assert
-  expect(screen.getByRole('heading', { level: 1, name: 'Exercício' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 1, name: 'Sentar e levantar' })).toBeInTheDocument();
+  expect(await screen.findByText('animação 3D')).toBeInTheDocument();
   expect(screen.queryByRole('navigation', { name: 'Navegação principal' })).not.toBeInTheDocument();
 });
 

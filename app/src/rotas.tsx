@@ -4,7 +4,8 @@ import { MolduraCelular } from './components/MolduraCelular';
 import { ABAS_PRATICANTE, BarraDeAbas } from './components/BarraDeAbas';
 import { Inicio } from './telas/Inicio';
 import { NaoEncontrada } from './telas/NaoEncontrada';
-import { Aluno, Alunos, Biblioteca, Exercicio, Hoje, Perfil, Progresso } from './telas/marcadores';
+import { Exercicio } from './telas/Exercicio';
+import { Aluno, Alunos, Biblioteca, Hoje, Perfil, Progresso } from './telas/marcadores';
 
 function LayoutRaiz() {
   return (
