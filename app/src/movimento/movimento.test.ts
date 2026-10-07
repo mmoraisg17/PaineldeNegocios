@@ -85,9 +85,9 @@ describe.each(['barras', 'cruzados'] as const)('sentar e levantar (braços: %s)'
     for (const { esqueleto } of sentado) {
       expect(esqueleto.pelve.y - cadeira.assentoY).toBeCloseTo(QUADRIL_ACIMA_DO_ASSENTO, 2);
     }
-    for (const { esqueleto, t } of quadros) {
-      const sobreOAssento = esqueleto.pelve.z <= cadeira.frenteZ;
-      if (sobreOAssento) expect(esqueleto.pelve.y, `t=${t}`).toBeGreaterThanOrEqual(cadeira.assentoY + QUADRIL_ACIMA_DO_ASSENTO - 0.01);
+    const sobreOAssento = quadros.filter(({ esqueleto }) => esqueleto.pelve.z <= cadeira.frenteZ);
+    for (const { esqueleto, t } of sobreOAssento) {
+      expect(esqueleto.pelve.y, `t=${t}`).toBeGreaterThanOrEqual(cadeira.assentoY + QUADRIL_ACIMA_DO_ASSENTO - 0.01);
     }
   });
 

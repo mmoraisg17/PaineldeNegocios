@@ -60,7 +60,7 @@ describe('acompanhantes', () => {
 
     // Act
     await usuario.click(screen.getByRole('button', { name: 'Remover acesso de Carlos' }));
-    const confirmacao = screen.getByRole('alertdialog', { name: /Remover o acesso de Carlos\?/ });
+    const confirmacao = screen.getByRole('group', { name: /Remover o acesso de Carlos\?/ });
     await usuario.click(within(confirmacao).getByRole('button', { name: 'Sim, remover acesso' }));
 
     // Assert
@@ -80,7 +80,7 @@ describe('acompanhantes', () => {
     await usuario.click(screen.getByRole('button', { name: 'Cancelar' }));
 
     // Assert
-    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: /Remover o acesso/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remover acesso de Marta' })).toBeInTheDocument();
     expect(app.estado().vinculos.find((v) => v.acompanhanteId === 'marta')?.status).toBe('autorizado');
   });
@@ -95,7 +95,7 @@ describe('acompanhantes', () => {
     await usuario.keyboard('{Escape}');
 
     // Assert
-    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: /Remover o acesso/ })).not.toBeInTheDocument();
     expect(app.estado().vinculos.every((v) => v.status === 'autorizado')).toBe(true);
   });
 

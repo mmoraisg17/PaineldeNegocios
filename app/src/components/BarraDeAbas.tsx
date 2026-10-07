@@ -34,6 +34,8 @@ export const ABAS_PRATICANTE: Aba[] = [
 export function BarraDeAbas({ abas }: { abas: Aba[] }) {
   return (
     <nav aria-label="Navegação principal" className="shrink-0 border-t border-borda bg-superficie pb-[env(safe-area-inset-bottom)]">
+      {/* role="list" de propósito: o Safari tira a semântica de lista de <ul> sem marcadores. */}
+      {/* oxlint-disable-next-line jsx-a11y/no-redundant-roles */}
       <ul role="list" className="grid grid-cols-4">
         {abas.map((aba) => (
           <li key={aba.para}>

@@ -31,7 +31,7 @@ export default function VisualizadorExercicio({
   relogio: React.MutableRefObject<RelogioDaAnimacao>;
   versao: number;
 }) {
-  const cores = useMemo(lerCoresDaCena, []);
+  const cores = useMemo(() => lerCoresDaCena(), []);
   const [pausado, setPausado] = useState(relogio.current.pausado);
   const [lento, setLento] = useState(relogio.current.velocidade < 1);
   const [fase, setFase] = useState('');
