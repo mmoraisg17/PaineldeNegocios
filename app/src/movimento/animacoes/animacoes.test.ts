@@ -278,3 +278,42 @@ describe('abdução com elástico', () => {
     expect(animacao.musculos).toContain('abdutores');
   });
 });
+
+/* ---- 7. Equilíbrio num pé só com inclinação (pesquisa, seção 7) ---- */
+describe('equilíbrio num pé só com inclinação', () => {
+  const opcoesDoNivel = { 1: { nivel: 1, inclinacao: 0 }, 2: { nivel: 2, inclinacao: 1 }, 3: { nivel: 3, inclinacao: 2 } } as const;
+  const quadros = (nivel: 1 | 2 | 3) => quadrosDe(animacaoDe('equilibrio-com-inclinacao', opcoesDoNivel[nivel])!);
+  const parado = (nivel: 1 | 2 | 3) => quadros(nivel).filter((q) => q.t >= 2.8 && q.t <= 8.8);
+
+  test('parado, só o pé esquerdo apoia; o direito fica no ar', () => {
+    for (const { esqueleto: e, t } of parado(2)) {
+      expect(e.lados.esquerdo.apoiado, `t=${t.toFixed(2)}`).toBe(true);
+      expect(e.lados.direito.apoiado, `t=${t.toFixed(2)}`).toBe(false);
+    }
+  });
+
+  test('joelho de apoio levemente dobrado (18–30°) em todos os níveis, mesmo na rampa', () => {
+    for (const nivel of NIVEIS) {
+      for (const { esqueleto: e, t } of parado(nivel)) {
+        const flexao = flexaoDoJoelho(e);
+        expect(flexao, `nível ${nivel} t=${t.toFixed(2)}`).toBeGreaterThan(18);
+        expect(flexao, `nível ${nivel} t=${t.toFixed(2)}`).toBeLessThan(30);
+      }
+    }
+  });
+
+  test('micro-oscilações sutis: o quadril se move de 3 a 12 mm para os lados', () => {
+    const xs = parado(1).map((q) => q.esqueleto.pelve.x);
+    const amplitude = Math.max(...xs) - Math.min(...xs);
+    expect(amplitude).toBeGreaterThan(0.003);
+    expect(amplitude).toBeLessThan(0.012);
+  });
+
+  test('a base inclina conforme o nível: 0°, 5° e 10°; o pé acompanha a rampa', () => {
+    expect(animacaoDe('equilibrio-com-inclinacao', opcoesDoNivel[1])!.inclinacaoDaBase ?? 0).toBe(0);
+    expect(animacaoDe('equilibrio-com-inclinacao', opcoesDoNivel[2])!.inclinacaoDaBase).toBe(5);
+    const e = parado(3)[0]!.esqueleto;
+    expect(e.inclinacaoDaBase).toBe(10);
+    expect(e.lados.esquerdo.ponta.y).toBeGreaterThan(e.lados.esquerdo.calcanhar.y + 0.03);
+  });
+});

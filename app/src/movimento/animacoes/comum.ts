@@ -1,5 +1,5 @@
 import type { Carga } from '../animacao';
-import { CORPO, TOPO_BASE } from '../cenario';
+import { CORPO, GRAUS_POR_NIVEL_DE_INCLINACAO, PLATAFORMA, TOPO_BASE } from '../cenario';
 import { type ModoBracos, type Pose, alturaEmPe } from '../corpo';
 
 /* Peças comuns das animações da fase 6. */
@@ -38,6 +38,18 @@ export function pose(campos: Partial<Pose> & Pick<Pose, 'quadril'>, bracos: Modo
 }
 
 export const carga = (pes: number, copAP: number, maos: number, copML = 0): Carga => ({ pes, copAP, copML, maos });
+
+/* Quanto o tornozelo (no lugar padrão) sobe com a base inclinada no nível
+   do seletor: a tampa sobe na frente, e o pé apoiado na rampa leva o
+   tornozelo junto. As animações sobem o quadril o mesmo tanto, para o
+   joelho não dobrar além do pedido (motor: movimento/corpo.ts). */
+export function subidaDoTornozeloNaRampa(nivelDoSeletor: number): number {
+  const a = radianos(nivelDoSeletor * GRAUS_POR_NIVEL_DE_INCLINACAO);
+  const zPonta = CORPO.peFrente;
+  const superficie = TOPO_BASE + (zPonta + PLATAFORMA.profundidade / 2) * Math.tan(a);
+  const tornozeloY = superficie + CORPO.alturaTornozelo * Math.cos(a) - CORPO.peFrente * Math.sin(a);
+  return tornozeloY - (TOPO_BASE + CORPO.alturaTornozelo);
+}
 
 /* Com as barras, parte do peso vai para as mãos. */
 export const pesoNasMaos = (bracos: ModoBracos, valor: number) => (bracos === 'barras' || bracos === 'uma-mao' ? valor : 0);

@@ -3,6 +3,7 @@ import { GRAUS_POR_NIVEL_DE_INCLINACAO } from '../cenario';
 import type { ModoBracos } from '../corpo';
 import { abducao } from './abducao';
 import { descidaDeDegrau } from './descidaDeDegrau';
+import { equilibrioComInclinacao } from './equilibrioComInclinacao';
 import { miniagachamento } from './miniagachamento';
 import { panturrilha } from './panturrilha';
 import { pesEmLinha } from './pesEmLinha';
@@ -25,6 +26,7 @@ const FABRICAS: Record<string, (opcoes: OpcoesDaAnimacao) => Animacao> = {
   'pes-em-linha': (o) => pesEmLinha(o.bracos),
   'descida-de-degrau': (o) => descidaDeDegrau(o.bracos, o.nivel),
   'abducao-com-elastico': (o) => abducao(o.bracos),
+  'equilibrio-com-inclinacao': (o) => equilibrioComInclinacao(o.bracos, o.inclinacao),
 };
 
 export function animacaoDe(idExercicio: string, opcoes: Partial<OpcoesDaAnimacao> = {}): Animacao | undefined {
