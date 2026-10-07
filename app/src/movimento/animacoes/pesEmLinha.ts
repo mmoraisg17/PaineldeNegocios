@@ -1,7 +1,7 @@
 import type { Animacao, Quadro } from '../animacao';
 import { CORPO } from '../cenario';
 import type { ModoBracos, Pose, PoseDoPe } from '../corpo';
-import { EM_PE, carga, pesoNasMaos, pose } from './comum';
+import { EM_PE, NUM_PE_SO, carga, pesoNasMaos, pose } from './comum';
 
 /* Pés em linha / tandem (trilha Equilíbrio 60+).
 
@@ -39,19 +39,23 @@ export function pesEmLinha(bracos: ModoBracos): Animacao {
 
   const quadros: Quadro[] = [
     { t: 0, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Em pé, pés na largura do quadril' },
-    { t: 1.0, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Leve o pé direito à frente do esquerdo' },
-    { t: 1.8, pose: emPe(NO_CAMINHO, 0.06), carga: carga(1, 0.02, maos(0.06), 0.7), fase: 'Leve o pé direito à frente do esquerdo' },
-    { t: 2.6, pose: tandem(OSCILACAO[0]), carga: cargaParado(OSCILACAO[0]), fase: 'Fique parado, olhando para a frente' },
-    { t: 3.8, pose: tandem(OSCILACAO[1]), carga: cargaParado(OSCILACAO[1]), fase: 'Fique parado, olhando para a frente' },
-    { t: 5.0, pose: tandem(OSCILACAO[2]), carga: cargaParado(OSCILACAO[2]), fase: 'Fique parado, olhando para a frente' },
-    { t: 6.3, pose: tandem(OSCILACAO[3]), carga: cargaParado(OSCILACAO[3]), fase: 'Fique parado, olhando para a frente' },
-    { t: 7.5, pose: tandem(OSCILACAO[4]), carga: cargaParado(OSCILACAO[4]), fase: 'Fique parado, olhando para a frente' },
-    { t: 8.6, pose: tandem(OSCILACAO[5]), carga: cargaParado(OSCILACAO[5]), fase: 'Volte o pé para o lado' },
-    { t: 9.4, pose: emPe(NO_CAMINHO, 0.06), carga: carga(1, 0.02, maos(0.06), 0.7), fase: 'Volte o pé para o lado' },
-    { t: 10.2, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Em pé, pés na largura do quadril' },
-    { t: 11.0, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Em pé, pés na largura do quadril' },
+    { t: 1.0, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Passe o peso para o pé esquerdo' },
+    // Primeiro o peso vai para o pé esquerdo; só então o direito sai do chão.
+    { t: 1.6, pose: emPe(PARADO, LINHA_X, NUM_PE_SO), carga: carga(1, 0.02, maos(0.05), 1), fase: 'Leve o pé direito à frente do esquerdo' },
+    { t: 2.2, pose: emPe(NO_CAMINHO, LINHA_X, NUM_PE_SO), carga: carga(1, 0.02, maos(0.06), 1), fase: 'Leve o pé direito à frente do esquerdo' },
+    { t: 2.8, pose: tandem(OSCILACAO[0]), carga: cargaParado(OSCILACAO[0]), fase: 'Fique parado, olhando para a frente' },
+    { t: 4.0, pose: tandem(OSCILACAO[1]), carga: cargaParado(OSCILACAO[1]), fase: 'Fique parado, olhando para a frente' },
+    { t: 5.2, pose: tandem(OSCILACAO[2]), carga: cargaParado(OSCILACAO[2]), fase: 'Fique parado, olhando para a frente' },
+    { t: 6.5, pose: tandem(OSCILACAO[3]), carga: cargaParado(OSCILACAO[3]), fase: 'Fique parado, olhando para a frente' },
+    { t: 7.7, pose: tandem(OSCILACAO[4]), carga: cargaParado(OSCILACAO[4]), fase: 'Fique parado, olhando para a frente' },
+    { t: 8.8, pose: tandem(OSCILACAO[5]), carga: cargaParado(OSCILACAO[5]), fase: 'Volte o pé para o lado' },
+    { t: 9.4, pose: emPe(NO_CAMINHO, LINHA_X, NUM_PE_SO), carga: carga(1, 0.02, maos(0.06), 1), fase: 'Volte o pé para o lado' },
+    { t: 10.0, pose: emPe(PARADO, LINHA_X, NUM_PE_SO), carga: carga(1, 0.02, maos(0.05), 1), fase: 'Volte o peso para o meio' },
+    { t: 10.6, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Em pé, pés na largura do quadril' },
+    { t: 11.4, pose: emPe(PARADO, 0), carga: carga(1, 0.02, maos(0.04)), fase: 'Em pé, pés na largura do quadril' },
   ];
 
   // O tronco e os tornozelos seguram o corpo na base estreita.
-  return { id: 'pes-em-linha', quadros, musculos: ['abdomen', 'panturrilhas'] };
+  // Troca de apoio no passo: basta o centro do corpo estar dentro da base.
+  return { id: 'pes-em-linha', quadros, musculos: ['abdomen', 'panturrilhas'], prumo: 'apoio' };
 }

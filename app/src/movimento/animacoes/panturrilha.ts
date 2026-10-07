@@ -1,7 +1,7 @@
 import type { Animacao, Quadro } from '../animacao';
 import { CORPO } from '../cenario';
 import type { ModoBracos, Pose } from '../corpo';
-import { EM_PE, carga, pesoNasMaos, pose } from './comum';
+import { EM_PE, NUM_PE_SO, carga, pesoNasMaos, pose } from './comum';
 
 /* Elevação de panturrilha unilateral (trilha Fisioterapia, tornozelo).
 
@@ -22,9 +22,9 @@ const radianos = (graus: number) => (graus * Math.PI) / 180;
 const SUBIDA =
   CORPO.peFrente * Math.sin(radianos(CALCANHAR)) + CORPO.alturaTornozelo * (Math.cos(radianos(CALCANHAR)) - 1);
 
-/* Num pé só, o quadril vai para cima do pé de apoio (7 cm para a esquerda);
-   o pé livre fica atrás e no ar, com o joelho dobrado. */
-const SOBRE_O_PE_ESQUERDO = 0.07;
+/* Num pé só, o centro do corpo vai para cima do pé de apoio (8,5 cm para a
+   esquerda; o pé está a 9,5 cm); o pé livre fica atrás e no ar. */
+const SOBRE_O_PE_ESQUERDO = 0.085;
 const PE_LIVRE = { dx: 0.05, dz: -0.17, elevacao: 0.22 } as const;
 
 export function panturrilha(bracos: ModoBracos, nivel: 1 | 2 | 3): Animacao {
@@ -34,7 +34,7 @@ export function panturrilha(bracos: ModoBracos, nivel: 1 | 2 | 3): Animacao {
   const p = (calcanhar: number): Pose =>
     pose(
       {
-        quadril: { y: EM_PE.y + (calcanhar ? SUBIDA : 0), z: EM_PE.z },
+        quadril: { y: (umPe ? NUM_PE_SO : EM_PE).y + (calcanhar ? SUBIDA : 0), z: EM_PE.z },
         deslocamentoLateral: umPe ? SOBRE_O_PE_ESQUERDO : 0,
         pes: umPe ? { esquerdo: { calcanhar }, direito: PE_LIVRE } : { esquerdo: { calcanhar }, direito: { calcanhar } },
       },

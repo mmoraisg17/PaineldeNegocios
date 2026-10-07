@@ -201,7 +201,7 @@ export function Boneco({
     // Seta de correção (V6): só quando o app pede atenção ou para.
     atualizarSeta(seta.current, esqueleto, r.desvio, r.sensores, cores, r.tempo, r.menosMovimento);
     // Fio de prumo (V7): quadril sobre o meio dos pés?
-    atualizarPrumo(prumo.current, esqueleto, r.sensores, cores, Math.min(delta, 0.1));
+    atualizarPrumo(prumo.current, esqueleto, r.sensores, cores, Math.min(delta, 0.1), animacao.prumo);
     if (amostra.indiceFase !== ultimaFase.current) {
       ultimaFase.current = amostra.indiceFase;
       aoAmostrar?.(amostra);

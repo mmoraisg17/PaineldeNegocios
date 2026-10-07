@@ -12,6 +12,9 @@ export const MAO_Z = -0.05;
    dobrado (~16°). */
 export const QUADRIL_EM_PE_Z = -0.02;
 export const EM_PE = { y: alturaEmPe(QUADRIL_EM_PE_Z), z: QUADRIL_EM_PE_Z } as const;
+/* Num pé só, o centro do corpo vai para cima do pé de apoio e a perna fica
+   levemente inclinada: o quadril desce 1 cm (joelho um pouco mais dobrado). */
+export const NUM_PE_SO = { y: EM_PE.y - 0.01, z: EM_PE.z } as const;
 
 const radianos = (graus: number) => (graus * Math.PI) / 180;
 

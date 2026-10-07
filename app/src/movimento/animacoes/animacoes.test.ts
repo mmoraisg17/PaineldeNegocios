@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { type Animacao, amostrar, duracao } from '../animacao';
 import { CORPO, TOPO_BASE } from '../cenario';
 import { type Esqueleto, montarEsqueleto } from '../corpo';
+import { alinhamentoLateral } from '../alinhamento';
 import { flexaoDoJoelho } from '../musculos';
 import { distancia } from '../vetor';
 import { quadrilParaFlexao } from './comum';
@@ -61,6 +62,10 @@ describe.each(variacoes)('$id, nível $nivel: fatos gerais', ({ animacao }) => {
     const fim = amostrar(animacao, duracao(animacao) - 1e-6).pose;
     expect(fim.quadril.y).toBeCloseTo(ini.quadril.y, 3);
     expect(fim.quadril.z).toBeCloseTo(ini.quadril.z, 3);
+  });
+
+  test('na execução certa, o fio de prumo fica alinhado: centro do corpo sobre o(s) pé(s) de apoio', () => {
+    for (const { esqueleto: e, t } of quadros) expect(alinhamentoLateral(e, animacao.prumo).alinhado, `t=${t.toFixed(2)}`).toBe(true);
   });
 
   test('declara os músculos que trabalha', () => {
@@ -153,7 +158,7 @@ describe('panturrilha unilateral', () => {
 /* ---- 4. Pés em linha / tandem (pesquisa, seção 4) ---- */
 describe('pés em linha', () => {
   const quadros = quadrosDe(animacaoDe('pes-em-linha', { nivel: 2 })!);
-  const parado = quadros.filter((q) => q.t >= 2.8 && q.t <= 8.4);
+  const parado = quadros.filter((q) => q.t >= 3.0 && q.t <= 8.6);
 
   test('parado, os pés ficam na mesma linha e o calcanhar da frente encosta na ponta do de trás', () => {
     for (const { esqueleto: e, t } of parado) {
@@ -175,7 +180,7 @@ describe('pés em linha', () => {
   });
 
   test('o pé que se move sai do chão no caminho (não arrasta)', () => {
-    const passo = quadros.filter((q) => q.t > 1.4 && q.t < 2.2);
+    const passo = quadros.filter((q) => q.t > 1.8 && q.t < 2.6);
     expect(passo.some((q) => !q.esqueleto.lados.direito.apoiado)).toBe(true);
   });
 });
@@ -184,4 +189,49 @@ test('pés em linha: o tronco fica quase reto (≤ 3° de inclinação lateral) 
   for (const { amostra, t } of quadrosDe(animacaoDe('pes-em-linha')!)) {
     expect(Math.abs(amostra.pose.inclinacaoLateral), `t=${t.toFixed(2)}`).toBeLessThanOrEqual(3);
   }
+});
+
+/* ---- 5. Descida de degrau lateral (pesquisa, seção 5) ---- */
+describe('descida de degrau', () => {
+  const quadros = (nivel: 1 | 2 | 3) => quadrosDe(animacaoDe('descida-de-degrau', { nivel })!);
+  const flexaoDireita = (e: Esqueleto) => {
+    const d = e.lados.direito;
+    const a = { x: d.tornozelo.x - d.joelho.x, y: d.tornozelo.y - d.joelho.y, z: d.tornozelo.z - d.joelho.z };
+    const b = { x: d.quadril.x - d.joelho.x, y: d.quadril.y - d.joelho.y, z: d.quadril.z - d.joelho.z };
+    const cos = (a.x * b.x + a.y * b.y + a.z * b.z) / (Math.hypot(a.x, a.y, a.z) * Math.hypot(b.x, b.y, b.z));
+    return 180 - (Math.acos(Math.min(1, Math.max(-1, cos))) * 180) / Math.PI;
+  };
+
+  test('apoio no pé direito, na base; o pé esquerdo fica fora da base o ciclo inteiro', () => {
+    for (const { esqueleto: e, t } of quadros(2)) {
+      expect(e.lados.direito.apoiado, `t=${t.toFixed(2)}`).toBe(true);
+      expect(e.lados.esquerdo.apoiado, `t=${t.toFixed(2)}`).toBe(false);
+    }
+  });
+
+  test('embaixo, o calcanhar livre toca o chão de leve (degrau de 12 cm)', () => {
+    const minimo = Math.min(...quadros(2).map((q) => q.esqueleto.lados.esquerdo.calcanhar.y));
+    expect(minimo).toBeLessThan(0.01);
+  });
+
+  test('o joelho de apoio dobra até 55–75° e não vai para dentro (sem valgo)', () => {
+    const qs = quadros(2);
+    const pico = Math.max(...qs.map((q) => flexaoDireita(q.esqueleto)));
+    expect(pico).toBeGreaterThan(55);
+    expect(pico).toBeLessThan(75);
+    // Perna direita: "para dentro" é +X (para o meio do corpo). Até 1 cm de tolerância.
+    for (const { esqueleto: e } of qs) expect(e.lados.direito.joelho.x - e.lados.direito.tornozelo.x).toBeLessThan(0.01);
+  });
+
+  test('o pé livre passa entre os postes da barra, sem atravessá-los', () => {
+    for (const { esqueleto: e } of quadros(2)) {
+      const pe = e.lados.esquerdo;
+      expect(pe.ponta.z).toBeLessThan(0.2 - 0.03);
+      expect(pe.calcanhar.z).toBeGreaterThan(-0.3 + 0.03);
+    }
+  });
+
+  test('nível 3, "descendo mais devagar": ciclo 50% mais longo', () => {
+    expect(duracao(animacaoDe('descida-de-degrau', { nivel: 3 })!)).toBeCloseTo(duracao(animacaoDe('descida-de-degrau', { nivel: 2 })!) * 1.5, 1);
+  });
 });

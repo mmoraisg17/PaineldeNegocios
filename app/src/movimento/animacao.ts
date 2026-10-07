@@ -1,4 +1,5 @@
 import type { Pose, PoseDoPe } from './corpo';
+import type { ModoDoPrumo } from './alinhamento';
 import type { Musculo } from './musculos';
 
 /* O que a plataforma deveria medir naquele instante, se a execução estiver
@@ -32,6 +33,8 @@ export type Animacao = {
   /* Inclinação da base em graus (nível do seletor × 5°, fase 6). Constante no
      ciclo: o praticante ajusta o seletor antes de subir. */
   readonly inclinacaoDaBase?: number;
+  /* Regra do fio de prumo (V7): 'centro' (padrão, simétricos) ou 'apoio'. */
+  readonly prumo?: ModoDoPrumo;
 };
 
 export type Amostra = { readonly pose: Pose; readonly carga: Carga; readonly fase: string; readonly indiceFase: number };

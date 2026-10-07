@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import { Color, type Group, type Mesh, type MeshBasicMaterial } from 'three';
-import { alinhamentoLateral, meioDosPes } from '../movimento/alinhamento';
+import { type ModoDoPrumo, alinhamentoLateral, meioDosPes } from '../movimento/alinhamento';
 import { corDoEstado } from '../movimento/aneis';
 import { type Esqueleto, alturaDaSuperficie } from '../movimento/corpo';
 import { fatorDeAproximacao } from '../movimento/transicoes';
@@ -46,6 +46,7 @@ export function atualizarPrumo(
   sensores: RelogioDaAnimacao['sensores'],
   cores: CoresDaCena,
   delta: number,
+  modo: ModoDoPrumo = 'centro',
 ) {
   if (!grupo) return;
   const [linha, ponta, alvo] = grupo.children as Mesh[];
@@ -60,7 +61,7 @@ export function atualizarPrumo(
   alvo.position.set(meio.x, meio.y + 0.005, meio.z);
   alvo.rotation.x = -Math.PI / 2 - (esqueleto.inclinacaoDaBase * Math.PI) / 180;
 
-  const { alinhado } = alinhamentoLateral(esqueleto);
+  const { alinhado } = alinhamentoLateral(esqueleto, modo);
   // Fora do meio sem o app ter acusado ainda: âmbar (atenção).
   const estado = sensores?.estado ?? 'ok';
   corAlvo.set(alinhado ? cores.certo : cores[corDoEstado(estado === 'ok' || estado === 'dica' ? 'atencao' : estado)]);
