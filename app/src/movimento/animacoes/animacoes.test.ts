@@ -5,6 +5,7 @@ import { type Esqueleto, montarEsqueleto } from '../corpo';
 import { alinhamentoLateral } from '../alinhamento';
 import { flexaoDoJoelho } from '../musculos';
 import { distancia } from '../vetor';
+import { alvoDaTransferencia } from '../../sensores/esperado';
 import { quadrilParaFlexao } from './comum';
 import { animacaoDe, exerciciosAnimados } from './index';
 
@@ -315,5 +316,56 @@ describe('equilíbrio num pé só com inclinação', () => {
     const e = parado(3)[0]!.esqueleto;
     expect(e.inclinacaoDaBase).toBe(10);
     expect(e.lados.esquerdo.ponta.y).toBeGreaterThan(e.lados.esquerdo.calcanhar.y + 0.03);
+  });
+});
+
+/* ---- 8. Transferência de peso com alvos (pesquisa, seção 8) ---- */
+describe('transferência de peso', () => {
+  const animacao = (nivel: 1 | 2 | 3) => animacaoDe('transferencia-de-peso', { nivel })!;
+  const quadros = (nivel: 1 | 2 | 3) => quadrosDe(animacao(nivel));
+  const centro = (nivel: 1 | 2 | 3) => montarEsqueleto(amostrar(animacao(nivel), 0).pose).pelve;
+  const noMeioDoAlvo = (nivel: 1 | 2 | 3, k: number) => montarEsqueleto(amostrar(animacao(nivel), 4 * k + 2).pose).pelve;
+
+  test('os pés não saem do lugar o ciclo inteiro (catálogo: não tire os pés da base)', () => {
+    const qs = quadros(2);
+    const inicio = qs[0]!.esqueleto.lados;
+    for (const { esqueleto: e, t } of qs) {
+      for (const lado of ['esquerdo', 'direito'] as const) {
+        expect(e.lados[lado].apoiado, `t=${t.toFixed(2)}`).toBe(true);
+        expect(distancia(e.lados[lado].ponta, inicio[lado].ponta), `t=${t.toFixed(2)}`).toBeLessThan(MM);
+      }
+    }
+  });
+
+  test('vai aos alvos na mesma ordem e no mesmo ritmo dos sensores: frente, direita, trás, esquerda', () => {
+    const c = centro(2);
+    expect(noMeioDoAlvo(2, 0).z).toBeGreaterThan(c.z + 0.03); // frente
+    expect(noMeioDoAlvo(2, 1).x).toBeLessThan(c.x - 0.03); // direita (−X)
+    expect(noMeioDoAlvo(2, 2).z).toBeLessThan(c.z - 0.03); // trás
+    expect(noMeioDoAlvo(2, 3).x).toBeGreaterThan(c.x + 0.03); // esquerda (+X)
+  });
+
+  test('no meio de cada alvo, a carga da animação é o alvo dos sensores', () => {
+    for (const nivel of NIVEIS) {
+      for (let k = 0; k < 4; k += 1) {
+        const t = 4 * k + 2;
+        const alvo = alvoDaTransferencia(nivel, t);
+        const { carga } = amostrar(animacao(nivel), t);
+        expect(carga.copAP, `nível ${nivel} alvo ${k}`).toBeCloseTo(alvo.ap, 6);
+        expect(carga.copML, `nível ${nivel} alvo ${k}`).toBeCloseTo(alvo.ml, 6);
+      }
+    }
+  });
+
+  test('alvos mais longe nos níveis mais altos', () => {
+    expect(centro(3).x - noMeioDoAlvo(3, 1).x).toBeGreaterThan(centro(1).x - noMeioDoAlvo(1, 1).x);
+  });
+
+  // 2° de postura + até 5° do corpo todo inclinado como pêndulo (alvo mais longe: ~4,1°).
+  test('estratégia do tornozelo: o corpo inclina inteiro, sem dobrar o quadril (tronco ≤ 7°)', () => {
+    for (const { amostra, t } of quadros(3)) {
+      expect(amostra.pose.tronco, `t=${t.toFixed(2)}`).toBeLessThanOrEqual(7);
+      expect(Math.abs(amostra.pose.inclinacaoLateral), `t=${t.toFixed(2)}`).toBeLessThanOrEqual(5);
+    }
   });
 });

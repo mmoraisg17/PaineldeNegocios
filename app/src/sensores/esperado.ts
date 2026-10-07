@@ -11,9 +11,9 @@ import type { Esperado } from './tipos';
 const EM_UM_PE = new Set(['panturrilha-unilateral', 'equilibrio-com-inclinacao', 'abducao-com-elastico']);
 const PE_DE_APOIO_ML = 0.5;
 
-const TEMPO_POR_ALVO = 4; // segundos em cada alvo
-const ALCANCE_POR_NIVEL: Record<Nivel, number> = { 1: 0.35, 2: 0.5, 3: 0.6 };
-const DIRECOES = [
+export const TEMPO_POR_ALVO = 4; // segundos em cada alvo (a animação segue o mesmo ritmo)
+export const ALCANCE_POR_NIVEL: Record<Nivel, number> = { 1: 0.35, 2: 0.5, 3: 0.6 };
+export const DIRECOES_DOS_ALVOS = [
   { ap: 1, ml: 0 },
   { ap: 0, ml: -1 },
   { ap: -1, ml: 0 },
@@ -21,8 +21,8 @@ const DIRECOES = [
 ] as const;
 
 export function alvoDaTransferencia(nivel: Nivel, tempo: number): { ap: number; ml: number } {
-  const i = Math.floor(Math.max(0, tempo) / TEMPO_POR_ALVO) % DIRECOES.length;
-  const d = DIRECOES[i] ?? DIRECOES[0];
+  const i = Math.floor(Math.max(0, tempo) / TEMPO_POR_ALVO) % DIRECOES_DOS_ALVOS.length;
+  const d = DIRECOES_DOS_ALVOS[i] ?? DIRECOES_DOS_ALVOS[0];
   const alcance = ALCANCE_POR_NIVEL[nivel];
   return { ap: d.ap * alcance, ml: d.ml * alcance };
 }
