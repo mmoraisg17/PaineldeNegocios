@@ -8,12 +8,13 @@ import type { RegiaoDoCorpo } from './desvios';
 
 export type Enquadramento = { alturaDoAlvo: number; distancia: number };
 
-export const ENQUADRAMENTO_PADRAO: Enquadramento = { alturaDoAlvo: 0.9, distancia: 1 };
+export const ENQUADRAMENTO_PADRAO: Enquadramento = { alturaDoAlvo: 0.98, distancia: 1 };
 
 const CLOSE_UP: Record<RegiaoDoCorpo, Enquadramento> = {
-  pernas: { alturaDoAlvo: 0.55, distancia: 0.78 },
-  tronco: { alturaDoAlvo: 1.05, distancia: 0.8 },
-  bracos: { alturaDoAlvo: 1.1, distancia: 0.8 },
+  // Suave: a câmera base já fica perto (cartão de 360 px); mais que isso corta a cabeça.
+  pernas: { alturaDoAlvo: 0.68, distancia: 0.88 },
+  tronco: { alturaDoAlvo: 1.05, distancia: 0.9 },
+  bracos: { alturaDoAlvo: 1.1, distancia: 0.9 },
 };
 
 export function enquadramento(regiao: RegiaoDoCorpo | null, estado: EstadoDaExecucao): Enquadramento {

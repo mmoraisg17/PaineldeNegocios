@@ -14,8 +14,11 @@ import type { RelogioDaAnimacao } from './relogio';
    movimento do plano sagital (frente/trás), e uma vista só de frente
    esconderia justamente a inclinação do tronco e o avanço do quadril.
    Enquadra da cadeira até a cabeça em pé (~1,8 m acima do chão). */
-const CAMERA_POSICAO: [number, number, number] = [2.45, 1.6, 2.95];
-const ALVO_CAMERA: [number, number, number] = [0, 0.9, -0.12];
+// 15% mais perto que antes: com o cartão de 360 px o boneco ocupa a cena
+// (mesma direção de antes, [2.45, 1.6, 2.95] → alvo).
+const CAMERA_POSICAO: [number, number, number] = [2.08, 1.58, 2.49];
+// Mira um pouco acima do quadril: a cabeça fica abaixo do selo ✓/✕ do canto.
+const ALVO_CAMERA: [number, number, number] = [0, 0.98, -0.12];
 
 /* Carregado sob demanda (React.lazy) pela tela do exercício: o three.js é a
    maior dependência do app, e quem só abre o início não deveria baixá-lo.
@@ -73,7 +76,9 @@ export default function VisualizadorExercicio({
 
   return (
     <figure className="flex flex-col gap-2">
-      <div className="relative h-56 overflow-hidden rounded-cartao bg-cena-fundo" data-cena-3d>
+      {/* 20rem (360 px no celular): o boneco precisa ser grande o bastante para o
+          público 60+ ver o movimento e as marcações (auditoria visual). */}
+      <div className="relative h-80 overflow-hidden rounded-cartao bg-cena-fundo" data-cena-3d>
         <Canvas
           /* offsetSize: mede o tamanho de layout do contêiner, e não o
              tamanho visual. No desktop o app inteiro está dentro de uma
@@ -137,7 +142,8 @@ export default function VisualizadorExercicio({
   );
 }
 
-/* Selo do canto da cena: forma + texto, nunca só a cor (daltonismo). Oculto
+/* Selo do canto superior direito (o esquerdo fica atrás da cabeça com a
+   câmera 3/4): forma + texto, nunca só a cor (daltonismo). Oculto
    do leitor de tela: o AvisoDeCorrecao, logo abaixo, já anuncia o estado. */
 function SeloDoEstado({ estado }: { estado: EstadoDaExecucao }) {
   const { simbolo, texto, cor } = iconeDoEstado(estado);
@@ -145,7 +151,7 @@ function SeloDoEstado({ estado }: { estado: EstadoDaExecucao }) {
     <div
       key={estado}
       aria-hidden="true"
-      className="pointer-events-none absolute left-2 top-2 flex animate-aparecer items-center gap-2 rounded-full bg-black/60 py-1 pl-1 pr-3 text-sm font-bold text-white"
+      className="pointer-events-none absolute right-2 top-2 flex animate-aparecer items-center gap-2 rounded-full bg-black/60 py-1 pl-1 pr-3 text-sm font-bold text-white"
     >
       <span className="flex size-8 items-center justify-center rounded-full text-lg text-cena-fundo" style={{ backgroundColor: `var(--color-cena-${cor})` }}>
         {simbolo}

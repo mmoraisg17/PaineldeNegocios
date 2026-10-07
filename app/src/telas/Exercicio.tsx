@@ -126,7 +126,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
       </header>
 
       {animacao ? (
-        <Suspense fallback={<p className="flex h-56 items-center justify-center rounded-cartao bg-superficie text-texto-suave">Carregando animação…</p>}>
+        <Suspense fallback={<p className="flex h-80 items-center justify-center rounded-cartao bg-cena-fundo text-white/70">Carregando animação…</p>}>
           <VisualizadorExercicio animacao={animacao} nomeExercicio={exercicio.nome} relogio={relogio} versao={versaoDesvio} estado={sim.avaliacao.estado} />
         </Suspense>
       ) : (
