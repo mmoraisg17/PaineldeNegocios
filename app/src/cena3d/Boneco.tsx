@@ -1,13 +1,15 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
-import { Color, type Mesh, type MeshStandardMaterial, Matrix4, Quaternion, Vector2, Vector3 } from 'three';
+import { Color, type Mesh, type MeshStandardMaterial } from 'three';
 import { type Amostra, type Animacao, amostrar } from '../movimento/animacao';
 import { type Esqueleto, montarEsqueleto } from '../movimento/corpo';
 import { type RegiaoDoCorpo, aplicarDesvioNaPose, regiaoDoDesvio } from '../movimento/desvios';
-import type { Vec3 } from '../movimento/vetor';
+import { type Vec3, sub } from '../movimento/vetor';
 import type { CoresDaCena } from './cores';
 import { RAMPA_DE_PAUSA, TAXA_DO_DESTAQUE, aproximar, fatorDeAproximacao, respiracao } from '../movimento/transicoes';
 import { MaterialManequim } from './MaterialManequim';
+import { LADOS_DA_REVOLUCAO, pontosDoPerfil, posicionarSegmento } from './malhas';
+import { CascasDosMusculos, atualizarMusculos } from './Musculos';
 import {
   ANTEBRACO,
   BRACO,
@@ -38,8 +40,8 @@ type Segmento = {
   regiao: RegiaoDoCorpo;
   /* Silhueta (V2): sem perfil, a parte é um cilindro de `raio`. */
   perfil?: Perfil;
-  /* Achatar a malha (tronco: mais largo que fundo). `lateral` é um ponto do
-     lado esquerdo do corpo (o ombro), que orienta a largura. */
+  /* Achatar a malha (tronco: mais largo que fundo). `lateral` é a direção
+     da direita para a esquerda do corpo (ombro direito → esquerdo). */
   achatar?: { lateral: (e: Esqueleto) => Vec3; largura: number; profundidade: number };
 };
 type Junta = { em: (e: Esqueleto) => Vec3; raio: number; cor: keyof CoresDaCena; regiao: RegiaoDoCorpo };
@@ -48,6 +50,8 @@ type Junta = { em: (e: Esqueleto) => Vec3; raio: number; cor: keyof CoresDaCena;
    (auditoria visual, V2). A cabeça visível é menor que CORPO.raioCabeca (movimento/cenario.ts), que
    só posiciona o centro dela: o pescoço cobre a diferença. */
 const RAIO_DA_CABECA_VISIVEL = 0.09;
+
+const LATERAL_DOS_OMBROS = (e: Esqueleto) => sub(e.lados.esquerdo.ombro, e.lados.direito.ombro);
 
 const lado = (l: 'esquerdo' | 'direito') => (e: Esqueleto) => e.lados[l];
 const L = lado('esquerdo');
@@ -69,7 +73,7 @@ const SEGMENTOS: Segmento[] = [
     cor: 'corpo',
     regiao: 'tronco',
     perfil: TRONCO,
-    achatar: { lateral: (e) => e.lados.esquerdo.ombro, largura: TRONCO_LARGURA, profundidade: TRONCO_PROFUNDIDADE },
+    achatar: { lateral: LATERAL_DOS_OMBROS, largura: TRONCO_LARGURA, profundidade: TRONCO_PROFUNDIDADE },
   },
   { de: (e) => e.lados.esquerdo.ombro, ate: (e) => e.lados.direito.ombro, raio: 0.045, cor: 'corpo', regiao: 'tronco' },
   { de: (e) => e.pescoco, ate: (e) => e.cabeca, raio: 0.04, cor: 'corpo', regiao: 'tronco' },
@@ -96,41 +100,6 @@ const DELTA_MAXIMO_DA_COR = 1 / 30;
    primeiro delta é grande e a velocidade saltaria em vez de subir. */
 const DELTA_MAXIMO_DA_RAMPA = 1 / 30;
 
-const CIMA = new Vector3(0, 1, 0);
-const tmpA = new Vector3();
-const tmpB = new Vector3();
-const tmpX = new Vector3();
-const tmpZ = new Vector3();
-const tmpQ = new Quaternion();
-const tmpM = new Matrix4();
-
-/* Perfil [raio, 0..1] → pontos do LatheGeometry, centrados na altura (−0,5 a
-   0,5) como o cilindro de altura 1 que a malha substitui. */
-const pontosDoPerfil = (perfil: Perfil) => perfil.map(([raio, altura]) => new Vector2(raio, altura - 0.5));
-const LADOS_DA_REVOLUCAO = 18;
-
-/* Malha de altura 1 esticada entre dois pontos. Com `achatar`, a malha é
-   orientada pela direção lateral (ex.: a linha dos ombros) e escalada em
-   largura × profundidade, para o tronco não ser um cilindro redondo. */
-function posicionarSegmento(mesh: Mesh, de: Vec3, ate: Vec3, achatar?: { lateral: Vec3; largura: number; profundidade: number }) {
-  tmpA.set(de.x, de.y, de.z);
-  tmpB.set(ate.x, ate.y, ate.z);
-  const comprimento = Math.max(tmpA.distanceTo(tmpB), 1e-4);
-  mesh.position.copy(tmpA).add(tmpB).multiplyScalar(0.5);
-  tmpB.sub(tmpA).normalize();
-  if (!achatar) {
-    mesh.quaternion.copy(tmpQ.setFromUnitVectors(CIMA, tmpB));
-    mesh.scale.set(1, comprimento, 1);
-    return;
-  }
-  // Eixo X = lateral sem a componente ao longo do osso; Z completa a base.
-  tmpX.set(achatar.lateral.x, achatar.lateral.y, achatar.lateral.z).sub(mesh.position);
-  tmpX.addScaledVector(tmpB, -tmpX.dot(tmpB)).normalize();
-  tmpZ.crossVectors(tmpX, tmpB).normalize();
-  mesh.quaternion.setFromRotationMatrix(tmpM.makeBasis(tmpX, tmpB, tmpZ));
-  mesh.scale.set(achatar.largura, comprimento, achatar.profundidade);
-}
-
 function achatamento(s: Segmento, e: Esqueleto) {
   return s.achatar ? { lateral: s.achatar.lateral(e), largura: s.achatar.largura, profundidade: s.achatar.profundidade } : undefined;
 }
@@ -152,6 +121,7 @@ export function Boneco({
 }) {
   const segmentos = useRef<(Mesh | null)[]>([]);
   const juntas = useRef<(Mesh | null)[]>([]);
+  const musculos = useRef<(Mesh | null)[]>([]);
   const ultimaFase = useRef(-1);
   const ultimaRegiao = useRef<RegiaoDoCorpo | null>(null);
   const corEmTransicao = useRef(0); // segundos restantes do fade do destaque
@@ -218,6 +188,8 @@ export function Boneco({
       const p = j.em(esqueleto);
       juntas.current[i]?.position.set(p.x, p.y, p.z);
     });
+    // Músculos (V4) no mesmo quadro do esqueleto, para a casca não atrasar.
+    if (animacao.musculos) atualizarMusculos(musculos.current, esqueleto, amostra.carga, Math.min(delta, 0.1));
     if (amostra.indiceFase !== ultimaFase.current) {
       ultimaFase.current = amostra.indiceFase;
       aoAmostrar?.(amostra);
@@ -251,6 +223,7 @@ export function Boneco({
           </mesh>
         );
       })}
+      {animacao.musculos && <CascasDosMusculos musculos={animacao.musculos} cor={cores.musculo} malhas={musculos} />}
     </group>
   );
 }

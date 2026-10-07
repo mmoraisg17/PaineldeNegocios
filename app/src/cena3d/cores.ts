@@ -4,6 +4,7 @@
 const RESERVA = {
   corpo: '#d9dde2',
   borda: '#ffffff',
+  musculo: '#2ec5ff',
   sapato: '#1b1f24',
   fundo: '#0e1217',
   base: '#4a5462',

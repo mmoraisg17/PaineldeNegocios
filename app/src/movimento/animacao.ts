@@ -1,4 +1,5 @@
 import type { Pose } from './corpo';
+import type { Musculo } from './musculos';
 
 /* O que a plataforma deveria medir naquele instante, se a execução estiver
    certa. É a "verdade" que o simulador de sensores (fase 4) vai usar e
@@ -24,6 +25,8 @@ export type Animacao = {
   readonly id: string;
   readonly quadros: readonly Quadro[]; // ordenados; o último repete o primeiro (ciclo)
   readonly cadeira?: Cadeira;
+  /* Músculos que o exercício trabalha: acendem em ciano na demonstração (V4). */
+  readonly musculos?: readonly Musculo[];
 };
 
 export type Amostra = { readonly pose: Pose; readonly carga: Carga; readonly fase: string; readonly indiceFase: number };

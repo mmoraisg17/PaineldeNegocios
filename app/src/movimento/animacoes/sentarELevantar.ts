@@ -72,5 +72,6 @@ export function sentarELevantar(bracos: ModoBracos = 'barras'): Animacao {
     { t: 8.8, pose: pose(QUADRIL_SENTADO, 8, bracos), carga: carga(0.3, -0.35, maos(0.05)), fase: 'Sentado, pés firmes na base' },
   ];
 
-  return { id: 'sentar-e-levantar', quadros, cadeira: CADEIRA_SENTAR };
+  // Extensores do joelho e do quadril: os que levantam o corpo da cadeira.
+  return { id: 'sentar-e-levantar', quadros, cadeira: CADEIRA_SENTAR, musculos: ['quadriceps', 'gluteos'] };
 }
