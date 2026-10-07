@@ -111,7 +111,12 @@ export default function VisualizadorExercicio({
           sem parar atrapalharia quem usa leitor de tela (revisão da fase 3).
           Os avisos de correção, que importam, são anunciados pelo
           AvisoDeCorrecao. */}
-      <figcaption className="min-h-7 text-lg font-semibold text-primaria">{fase}</figcaption>
+      <figcaption className="min-h-7 text-lg font-semibold text-primaria">
+        {/* key: cada fase nova remonta o texto e refaz o esmaecimento. */}
+        <span key={fase} className="block animate-aparecer">
+          {fase}
+        </span>
+      </figcaption>
     </figure>
   );
 }

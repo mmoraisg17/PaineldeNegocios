@@ -33,6 +33,16 @@
 
   --radius-cartao: 1.25rem;
   --radius-botao: 1rem;
+
+  /* Legenda da fase da demonstração 3D: o texto novo entra esmaecendo em
+     180 ms em vez de pular (auditoria de animações, M2). Só opacidade: muda
+     cerca de uma vez por segundo, e deslocar o texto cansaria a leitura. */
+  --animate-aparecer: aparecer 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  @keyframes aparecer {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 /* Cores da cena 3D (boneco, plataforma, cadeira). `static` porque são lidas
