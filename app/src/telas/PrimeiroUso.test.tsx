@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test } from 'vitest';
 import { rotas } from '../rotas';
@@ -23,7 +23,8 @@ test('ao conectar, o foco vai para o aviso de conectada; só a linha de status �
   const usuario = await irParaConectar();
   await usuario.click(screen.getByRole('button', { name: 'Conectar plataforma' }));
   const status = await screen.findByText(/Conectada/, {}, { timeout: 3000 });
-  expect(status).toHaveFocus();
+  // O foco vem num efeito depois do texto: sob carga, chega um instante depois.
+  await waitFor(() => expect(status).toHaveFocus());
   expect(status).toHaveAttribute('aria-live', 'polite');
   expect(screen.getByRole('heading', { level: 2, name: 'Conectar a plataforma' }).closest('[aria-live]')).toBeNull();
 });
@@ -36,6 +37,6 @@ test('a contagem não é anunciada a cada segundo; o fim é anunciado e recebe o
 
   expect(screen.getByRole('timer')).not.toHaveAttribute('aria-live');
   await usuario.click(screen.getByRole('button', { name: 'Pular (demonstração)' }));
-  expect(screen.getByRole('timer')).toHaveFocus();
+  await waitFor(() => expect(screen.getByRole('timer')).toHaveFocus());
   expect(screen.getByRole('status')).toHaveTextContent('Pronto! Seu peso foi registrado.');
 });
