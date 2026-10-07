@@ -42,6 +42,11 @@ Uma **plataforma de exercícios para uso em casa** com sensores de pressão, bar
 
 **[▶ Abrir o arquivo no Figma](https://www.figma.com/design/4BqR9zc3WYptKa3MldYpeh/App-Equil%C3%ADbrio-%E2%80%94-Prot%C3%B3tipo--Grupo-7-?node-id=0-1)**
 
+## Documentação
+
+- **[Manual de uso: plataforma + app](docs/manual/manual-de-uso.md)** ([PDF](docs/manual/manual-de-uso.pdf))
+- [PRD do protótipo do app](.claude/PRPs/prds/app-plataforma-equilibrio.prd.md)
+
 ## Status
 
 Em desenvolvimento para apresentação em **16/10/2026**: modelagem da base, protótipo do app, seleção de materiais, processo produtivo e análise financeira.
