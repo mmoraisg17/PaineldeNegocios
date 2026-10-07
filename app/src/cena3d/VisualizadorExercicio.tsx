@@ -132,7 +132,9 @@ export default function VisualizadorExercicio({
           sem parar atrapalharia quem usa leitor de tela (revisão da fase 3).
           Os avisos de correção, que importam, são anunciados pelo
           AvisoDeCorrecao. */}
-      <figcaption className="min-h-7 text-lg font-semibold text-primaria">
+      {/* Duas linhas reservadas: várias fases quebram linha no celular, e a
+          tela abaixo não pode pular a cada troca de fase (CLS, fase 8). */}
+      <figcaption className="min-h-14 text-lg font-semibold text-primaria">
         {/* key: cada fase nova remonta o texto e refaz o esmaecimento. */}
         <span key={fase} className="block animate-aparecer">
           {fase}

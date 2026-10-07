@@ -129,7 +129,15 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
       </header>
 
       {animacao ? (
-        <Suspense fallback={<p className="flex h-80 items-center justify-center rounded-cartao bg-cena-fundo text-white/70">Carregando animação…</p>}>
+        <Suspense
+          fallback={
+            // Mesmo tamanho da cena + legenda: a tela não pula quando o 3D chega (CLS).
+            <div className="flex flex-col gap-2">
+              <p className="flex h-80 items-center justify-center rounded-cartao bg-cena-fundo text-white/70">Carregando animação…</p>
+              <div className="min-h-14" aria-hidden="true" />
+            </div>
+          }
+        >
           <VisualizadorExercicio animacao={animacao} nomeExercicio={exercicio.nome} relogio={relogio} versao={versaoDesvio} estado={sim.avaliacao.estado} />
         </Suspense>
       ) : (
