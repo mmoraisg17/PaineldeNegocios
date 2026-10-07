@@ -3,6 +3,7 @@ import { GRAUS_POR_NIVEL_DE_INCLINACAO } from '../cenario';
 import type { ModoBracos } from '../corpo';
 import { miniagachamento } from './miniagachamento';
 import { panturrilha } from './panturrilha';
+import { pesEmLinha } from './pesEmLinha';
 import { sentarELevantar } from './sentarELevantar';
 
 /* O que muda a demonstração de um mesmo exercício: o apoio das mãos, o nível
@@ -19,6 +20,7 @@ const FABRICAS: Record<string, (opcoes: OpcoesDaAnimacao) => Animacao> = {
   'sentar-e-levantar': (o) => sentarELevantar(o.bracos),
   'miniagachamento-simetrico': (o) => miniagachamento(o.bracos, o.nivel),
   'panturrilha-unilateral': (o) => panturrilha(o.bracos, o.nivel),
+  'pes-em-linha': (o) => pesEmLinha(o.bracos),
 };
 
 export function animacaoDe(idExercicio: string, opcoes: Partial<OpcoesDaAnimacao> = {}): Animacao | undefined {

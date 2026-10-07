@@ -149,3 +149,39 @@ describe('panturrilha unilateral', () => {
     for (const { amostra } of qs) expect(amostra.carga.copML).toBe(1);
   });
 });
+
+/* ---- 4. Pés em linha / tandem (pesquisa, seção 4) ---- */
+describe('pés em linha', () => {
+  const quadros = quadrosDe(animacaoDe('pes-em-linha', { nivel: 2 })!);
+  const parado = quadros.filter((q) => q.t >= 2.8 && q.t <= 8.4);
+
+  test('parado, os pés ficam na mesma linha e o calcanhar da frente encosta na ponta do de trás', () => {
+    for (const { esqueleto: e, t } of parado) {
+      const tras = e.lados.esquerdo;
+      const frente = e.lados.direito;
+      expect(Math.abs(frente.tornozelo.x - tras.tornozelo.x), `linha t=${t.toFixed(2)}`).toBeLessThan(0.01);
+      expect(Math.abs(frente.calcanhar.z - tras.ponta.z), `encostado t=${t.toFixed(2)}`).toBeLessThan(0.02);
+      expect(frente.apoiado && tras.apoiado, `apoiados t=${t.toFixed(2)}`).toBe(true);
+    }
+  });
+
+  test('o quadril fica sobre a linha dos pés, com oscilação lateral sutil (0,5 a 2,5 cm)', () => {
+    const linha = parado[0]!.esqueleto.lados.esquerdo.tornozelo.x;
+    const desvios = parado.map((q) => q.esqueleto.pelve.x - linha);
+    const amplitude = Math.max(...desvios) - Math.min(...desvios);
+    for (const d of desvios) expect(Math.abs(d)).toBeLessThan(0.03);
+    expect(amplitude).toBeGreaterThan(0.005);
+    expect(amplitude).toBeLessThan(0.025);
+  });
+
+  test('o pé que se move sai do chão no caminho (não arrasta)', () => {
+    const passo = quadros.filter((q) => q.t > 1.4 && q.t < 2.2);
+    expect(passo.some((q) => !q.esqueleto.lados.direito.apoiado)).toBe(true);
+  });
+});
+
+test('pés em linha: o tronco fica quase reto (≤ 3° de inclinação lateral) o ciclo inteiro', () => {
+  for (const { amostra, t } of quadrosDe(animacaoDe('pes-em-linha')!)) {
+    expect(Math.abs(amostra.pose.inclinacaoLateral), `t=${t.toFixed(2)}`).toBeLessThanOrEqual(3);
+  }
+});
