@@ -2,6 +2,8 @@
 
 Telas exportadas do Figma (*App Equilíbrio — Protótipo (Grupo 7)*) em 06/10/2026: 32 telas. Clique numa imagem para ver em tamanho real.
 
+**[▶ Abrir o arquivo no Figma](https://www.figma.com/design/4BqR9zc3WYptKa3MldYpeh/App-Equil%C3%ADbrio-%E2%80%94-Prot%C3%B3tipo--Grupo-7-?node-id=0-1)**
+
 ## Telas
 
 **Fluxos do protótipo:** [App Equilíbrio v2 — demonstração](01-telas/01-a1-entrar-ou-criar-conta.png)

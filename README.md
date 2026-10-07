@@ -40,6 +40,8 @@ Uma **plataforma de exercícios para uso em casa** com sensores de pressão, bar
 
 **[Ver todas as 32 telas →](docs/prototipo/README.md)**: acesso, treino do dia, biblioteca, 16 exercícios com animação e acompanhamento.
 
+**[▶ Abrir o arquivo no Figma](https://www.figma.com/design/4BqR9zc3WYptKa3MldYpeh/App-Equil%C3%ADbrio-%E2%80%94-Prot%C3%B3tipo--Grupo-7-?node-id=0-1)**
+
 ## Status
 
 Em desenvolvimento para apresentação em **16/10/2026**: modelagem da base, protótipo do app, seleção de materiais, processo produtivo e análise financeira.
