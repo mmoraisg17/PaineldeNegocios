@@ -168,7 +168,7 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 
 | # | Phase | Description | Status | Parallel | Depends | PRP Plan |
 |---|---|---|---|---|---|---|
-| 1 | Fundação | Projeto Vite/React/TS em `app/`, tema e nome centralizados, moldura de celular, rotas, deploy no Pages | pending | - | - | - |
+| 1 | Fundação | Projeto Vite/React/TS em `app/`, tema e nome centralizados, moldura de celular, rotas, deploy no Pages | complete | - | - | [plano](../plans/completed/fase-1-fundacao.plan.md) · [relatório](../reports/fase-1-fundacao-report.md) |
 | 2 | Domínio | Catálogo dos 8 exercícios, perfil, motor de rotina adaptativa, persistência (TDD) | pending | with 3 | 1 | - |
 | 3 | Motor 3D + 1º exercício | Boneco procedural, plataforma, sistema de keyframes; pesquisa e animação de "sentar e levantar" | pending | with 2 | 1 | - |
 | 4 | Sensores e correção | Simulador de centro de pressão sincronizado com a pose, regras de correção, painel do avaliador, voz | pending | with 5 | 2, 3 | - |

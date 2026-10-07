@@ -1,0 +1,81 @@
+# Publicação do protótipo do app no GitHub Pages.
+#
+# Roda a cada push na main que mexa no app (ou neste arquivo) e pode ser
+# disparado à mão em Actions → "Publicar app" → Run workflow. O deploy só
+# acontece se typecheck, testes e build passarem: é o link que os avaliadores
+# abrem no celular, e um app quebrado no dia da apresentação custa mais que
+# um deploy atrasado.
+#
+# O Pages foi configurado em 07/10/2026 com build_type=workflow, ou seja, ele
+# publica o artefato enviado por este workflow, e não uma pasta da branch.
+
+name: Publicar app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Um deploy por vez. Sem cancelar o que está em andamento: a documentação do
+# Pages recomenda não interromper uma publicação no meio.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      # Actions fixadas no SHA do commit, não na tag: tag pode ser reapontada
+      # por quem comprometa o repositório da action; o SHA é imutável. O
+      # comentário guarda a versão legível. Mesmo padrão do LunchBox e do murici.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # O build só lê; não deixar o token gravado no .git/config.
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: app/.node-version
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Testes
+        run: npm test
+
+      - name: Build
+        run: npx vite build
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: app/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

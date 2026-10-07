@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Tokens do app.
+
+   Os valores vêm do protótipo no Figma (variáveis cor/*), para o app e as 32
+   telas exportadas falarem a mesma língua visual. O grupo avisou que paleta e
+   formatação ainda podem mudar: por isso toda cor do app sai daqui, e nenhum
+   componente escreve hexadecimal. Trocar a identidade é trocar este bloco.
+
+   Contraste conferido para texto sobre fundo (#1B1F24 em #F7F5F0 ≈ 15:1) e
+   sobre a primária (branco em #0F6E5C ≈ 6:1): os dois passam em AA com folga,
+   o que importa para quem tem 60 anos ou mais.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-fundo: #f7f5f0;
+  --color-superficie: #ffffff;
+  --color-texto: #1b1f24;
+  --color-texto-suave: #4a5360;
+  --color-primaria: #0f6e5c;
+  --color-primaria-escura: #0a4a3e;
+  --color-primaria-suave: #ddefea;
+  --color-sobre-primaria: #ffffff;
+  --color-alerta-fundo: #fff1dc;
+  --color-alerta-texto: #7a4100;
+  --color-perigo: #b3261e;
+  --color-perigo-fundo: #fde8e6;
+  --color-borda: #c9ced6;
+  --color-moldura: #0b0f14;
+  --color-mesa: #e5e5e5;
+
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-cartao: 1.25rem;
+  --radius-botao: 1rem;
+}
+
+@layer base {
+  /* 18 px de base em vez de 16: o público principal tem 60 anos ou mais, e o
+     Figma já desenhava o corpo de texto nesse tamanho. Tudo em rem acompanha. */
+  html {
+    font-size: 112.5%;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--color-mesa);
+    color: var(--color-texto);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Foco sempre visível e grosso: navegação por teclado no desktop e leitores
+     de tela no celular dependem disso. */
+  :focus-visible {
+    outline: 3px solid var(--color-primaria);
+    outline-offset: 3px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Moldura de celular.
+
+   Requisito do grupo: o app é pensado para o celular; se os avaliadores só
+   tiverem computador, ele aparece dentro de uma moldura de smartphone. É CSS
+   puro (media query) de propósito: sem JS, não há o "pulo" de layout que
+   apareceria se a moldura dependesse de medir a janela depois de carregar.
+
+   No celular a tela ocupa a janela inteira (100dvh, que desconta a barra do
+   navegador). Nos dois casos o conteúdo rola dentro da .tela, e a barra de
+   abas fica no pé da tela, não da janela: position: fixed escaparia da
+   moldura no desktop.
+   --------------------------------------------------------------------------- */
+@layer components {
+  .moldura-mesa {
+    min-height: 100dvh;
+  }
+  .moldura-aparelho {
+    height: 100dvh;
+  }
+  .moldura-aviso {
+    display: none;
+  }
+  .tela {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--color-fundo);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Só em telas largas E altas: celular deitado (844 × 390) e tablet pequeno
+     continuam vendo o app em tela cheia, sem moldura. */
+  @media (min-width: 768px) and (min-height: 600px) {
+    .moldura-mesa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      /* Em px, não rem: a escala do aparelho (MolduraCelular.tsx) desconta
+         exatamente 24 px de cada lado, e 1,5rem aqui valeria 27 px por causa
+         da fonte base de 18 px. */
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .moldura-aparelho {
+      position: relative;
+      /* 390 × 844 é o iPhone de referência do Figma, e o app é sempre
+         desenhado nesse tamanho. Em janelas baixas (notebook de 768 px de
+         altura) o aparelho inteiro é reduzido com zoom, em vez de espremido:
+         espremer deixaria a tela mais estreita que um celular de verdade e o
+         texto quebraria em lugares que ninguém veria no aparelho. A escala é
+         calculada em MolduraCelular.tsx, antes da primeira pintura. */
+      width: 390px;
+      height: 844px;
+      box-sizing: content-box;
+      zoom: var(--escala-moldura, 1);
+      border: 12px solid var(--color-moldura);
+      border-radius: 3.25rem;
+      box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.45);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .moldura-aparelho::before {
+      content: '';
+      position: absolute;
+      top: 0.55rem;
+      left: 50%;
+      translate: -50% 0;
+      width: 32%;
+      height: 1.7rem;
+      border-radius: 999px;
+      background: var(--color-moldura);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .tela {
+      padding-top: 2.6rem;
+    }
+    .moldura-aviso {
+      display: block;
+      max-width: 16rem;
+      color: var(--color-texto-suave);
+    }
+  }
+}
