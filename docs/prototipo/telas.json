@@ -1,0 +1,243 @@
+{
+  "arquivo": "App Equilíbrio — Protótipo (Grupo 7)",
+  "gerado": "2026-10-07T02:10:17.723Z",
+  "escala": 2,
+  "paginas": [
+    {
+      "nome": "Telas",
+      "slug": "01-telas",
+      "fluxos": [
+        {
+          "nome": "App Equilíbrio v2 — demonstração",
+          "tela": "01-telas/01-a1-entrar-ou-criar-conta.png"
+        }
+      ],
+      "telas": [
+        {
+          "nome": "A1 · Entrar ou criar conta",
+          "secao": "1 · Acesso (login e cadastro)",
+          "arquivo": "01-telas/01-a1-entrar-ou-criar-conta.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "A2 · Entrar",
+          "secao": "1 · Acesso (login e cadastro)",
+          "arquivo": "01-telas/02-a2-entrar.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "A3 · Criar conta",
+          "secao": "1 · Acesso (login e cadastro)",
+          "arquivo": "01-telas/03-a3-criar-conta.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "A4 · Conectar plataforma",
+          "secao": "1 · Acesso (login e cadastro)",
+          "arquivo": "01-telas/04-a4-conectar-plataforma.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "A5 · Recuperar senha",
+          "secao": "1 · Acesso (login e cadastro)",
+          "arquivo": "01-telas/05-a5-recuperar-senha.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "T1 · Nível de hoje",
+          "secao": "2 · Treino do dia",
+          "arquivo": "01-telas/06-t1-nivel-de-hoje.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "T2 · Plano da semana",
+          "secao": "2 · Treino do dia",
+          "arquivo": "01-telas/07-t2-plano-da-semana.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "P1 · Treino pausado",
+          "secao": "2 · Treino do dia",
+          "arquivo": "01-telas/08-p1-treino-pausado.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "S1 · Equilíbrio agora (sensores)",
+          "secao": "2 · Treino do dia",
+          "arquivo": "01-telas/09-s1-equilibrio-agora-sensores.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "C1 · Treino concluído",
+          "secao": "2 · Treino do dia",
+          "arquivo": "01-telas/10-c1-treino-concluido.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "B1 · Biblioteca · Todos",
+          "secao": "3 · Biblioteca de exercícios",
+          "arquivo": "01-telas/11-b1-biblioteca-todos.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "B2 · Biblioteca · Equilíbrio",
+          "secao": "3 · Biblioteca de exercícios",
+          "arquivo": "01-telas/12-b2-biblioteca-equilibrio.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "B3 · Biblioteca · Força",
+          "secao": "3 · Biblioteca de exercícios",
+          "arquivo": "01-telas/13-b3-biblioteca-forca.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "B4 · Biblioteca · Mobilidade",
+          "secao": "3 · Biblioteca de exercícios",
+          "arquivo": "01-telas/14-b4-biblioteca-mobilidade.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E01 · Transferir o peso",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/15-e01-transferir-o-peso.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E02 · Pés juntos",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/16-e02-pes-juntos.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E03 · Marcha no lugar",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/17-e03-marcha-no-lugar.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E04 · Alcance à frente",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/18-e04-alcance-a-frente.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E05 · Pés em linha",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/19-e05-pes-em-linha.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E06 · Apoio em um pé",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/20-e06-apoio-em-um-pe.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E07 · Sentar e levantar",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/21-e07-sentar-e-levantar.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E08 · Ponta dos pés",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/22-e08-ponta-dos-pes.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E09 · Apoio nos calcanhares",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/23-e09-apoio-nos-calcanhares.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E10 · Subida de degrau",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/24-e10-subida-de-degrau.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E11 · Miniagachamento",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/25-e11-miniagachamento.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E12 · Perna para o lado",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/26-e12-perna-para-o-lado.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E13 · Remada com elástico",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/27-e13-remada-com-elastico.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E14 · Alongamento lateral",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/28-e14-alongamento-lateral.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E15 · Círculos com o tornozelo",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/29-e15-circulos-com-o-tornozelo.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "E16 · Alongar a panturrilha",
+          "secao": "4 · Exercícios com animação (16)",
+          "arquivo": "01-telas/30-e16-alongar-a-panturrilha.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "R1 · Progresso",
+          "secao": "5 · Acompanhamento",
+          "arquivo": "01-telas/31-r1-progresso.png",
+          "largura": 390,
+          "altura": 844
+        },
+        {
+          "nome": "F1 · Painel da família",
+          "secao": "5 · Acompanhamento",
+          "arquivo": "01-telas/32-f1-painel-da-familia.png",
+          "largura": 390,
+          "altura": 844
+        }
+      ]
+    }
+  ]
+}

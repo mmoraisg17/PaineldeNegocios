@@ -28,6 +28,18 @@ Uma **plataforma de exercícios para uso em casa** com sensores de pressão, bar
 
 **Exercícios em que a plataforma corrige a execução:** agachamento, sentar e levantar, elevação de panturrilha, equilíbrio em um pé só, transferência de peso e apoio parcial do peso.
 
+## Protótipo do app
+
+<table>
+<tr>
+<td align="center"><img src="docs/prototipo/01-telas/01-a1-entrar-ou-criar-conta.png" width="200" alt="Tela inicial"><br><sub>Início</sub></td>
+<td align="center"><img src="docs/prototipo/01-telas/09-s1-equilibrio-agora-sensores.png" width="200" alt="Distribuição de peso em tempo real"><br><sub>Distribuição de peso ao vivo</sub></td>
+<td align="center"><img src="docs/prototipo/01-telas/25-e11-miniagachamento.png" width="200" alt="Exercício guiado com animação"><br><sub>Exercício guiado</sub></td>
+</tr>
+</table>
+
+**[Ver todas as 32 telas →](docs/prototipo/README.md)**: acesso, treino do dia, biblioteca, 16 exercícios com animação e acompanhamento.
+
 ## Status
 
 Em desenvolvimento para apresentação em **16/10/2026**: modelagem da base, protótipo do app, seleção de materiais, processo produtivo e análise financeira.
