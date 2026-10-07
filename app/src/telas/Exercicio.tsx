@@ -127,7 +127,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
 
       {animacao ? (
         <Suspense fallback={<p className="flex h-56 items-center justify-center rounded-cartao bg-superficie text-texto-suave">Carregando animação…</p>}>
-          <VisualizadorExercicio animacao={animacao} nomeExercicio={exercicio.nome} relogio={relogio} versao={versaoDesvio} />
+          <VisualizadorExercicio animacao={animacao} nomeExercicio={exercicio.nome} relogio={relogio} versao={versaoDesvio} estado={sim.avaliacao.estado} />
         </Suspense>
       ) : (
         <p className="rounded-cartao bg-superficie p-4 text-texto-suave">A animação 3D deste exercício chega numa próxima etapa. Siga os passos abaixo.</p>

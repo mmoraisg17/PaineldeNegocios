@@ -1,7 +1,9 @@
 import { Canvas } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Amostra, Animacao } from '../movimento/animacao';
+import { iconeDoEstado } from '../movimento/setas';
 import { RAMPA_DE_PAUSA } from '../movimento/transicoes';
+import type { EstadoDaExecucao } from '../sensores/tipos';
 import { Boneco } from './Boneco';
 import { Cadeira, Chao, Plataforma } from './Cenario';
 import { lerCoresDaCena } from './cores';
@@ -26,11 +28,15 @@ export default function VisualizadorExercicio({
   nomeExercicio,
   relogio,
   versao,
+  estado,
 }: {
   animacao: Animacao;
   nomeExercicio: string;
   relogio: React.MutableRefObject<RelogioDaAnimacao>;
   versao: number;
+  /* Estado mostrado ao praticante (o mesmo do AvisoDeCorrecao): vira o selo
+     ✓ / ! / ✕ no canto da cena (auditoria visual, V6). */
+  estado?: EstadoDaExecucao;
 }) {
   const cores = useMemo(() => lerCoresDaCena(), []);
   const [pausado, setPausado] = useState(relogio.current.pausado);
@@ -95,6 +101,7 @@ export default function VisualizadorExercicio({
           <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} versao={versao} />
           <Orbita alvo={ALVO_CAMERA} />
         </Canvas>
+        {estado && <SeloDoEstado estado={estado} />}
         <div className="absolute bottom-2 right-2 flex gap-2">
           <button
             type="button"
@@ -125,5 +132,23 @@ export default function VisualizadorExercicio({
         </span>
       </figcaption>
     </figure>
+  );
+}
+
+/* Selo do canto da cena: forma + texto, nunca só a cor (daltonismo). Oculto
+   do leitor de tela: o AvisoDeCorrecao, logo abaixo, já anuncia o estado. */
+function SeloDoEstado({ estado }: { estado: EstadoDaExecucao }) {
+  const { simbolo, texto, cor } = iconeDoEstado(estado);
+  return (
+    <div
+      key={estado}
+      aria-hidden="true"
+      className="pointer-events-none absolute left-2 top-2 flex animate-aparecer items-center gap-2 rounded-full bg-black/60 py-1 pl-1 pr-3 text-sm font-bold text-white"
+    >
+      <span className="flex size-8 items-center justify-center rounded-full text-lg text-cena-fundo" style={{ backgroundColor: `var(--color-cena-${cor})` }}>
+        {simbolo}
+      </span>
+      {texto}
+    </div>
   );
 }

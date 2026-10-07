@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
-import { Color, type Mesh, type MeshStandardMaterial } from 'three';
+import { Color, type Group, type Mesh, type MeshStandardMaterial } from 'three';
 import { type Amostra, type Animacao, amostrar } from '../movimento/animacao';
 import { type Esqueleto, montarEsqueleto } from '../movimento/corpo';
 import { type RegiaoDoCorpo, aplicarDesvioNaPose, regiaoDoDesvio } from '../movimento/desvios';
@@ -11,6 +11,7 @@ import { MaterialManequim } from './MaterialManequim';
 import { LADOS_DA_REVOLUCAO, pontosDoPerfil, posicionarSegmento } from './malhas';
 import { AneisDePressao, atualizarAneis } from './AneisDePressao';
 import { CascasDosMusculos, atualizarMusculos } from './Musculos';
+import { SetaDeCorrecao, atualizarSeta } from './SetaDeCorrecao';
 import {
   ANTEBRACO,
   BRACO,
@@ -124,6 +125,7 @@ export function Boneco({
   const juntas = useRef<(Mesh | null)[]>([]);
   const musculos = useRef<(Mesh | null)[]>([]);
   const aneis = useRef<(Mesh | null)[]>([]);
+  const seta = useRef<Group | null>(null);
   const ultimaFase = useRef(-1);
   const ultimaRegiao = useRef<RegiaoDoCorpo | null>(null);
   const corEmTransicao = useRef(0); // segundos restantes do fade do destaque
@@ -194,6 +196,8 @@ export function Boneco({
     if (animacao.musculos) atualizarMusculos(musculos.current, esqueleto, amostra.carga, Math.min(delta, 0.1));
     // Anéis de pressão (V5): pés do esqueleto + última leitura do simulador.
     atualizarAneis(aneis.current, esqueleto, r.sensores, cores, Math.min(delta, 0.1));
+    // Seta de correção (V6): só quando o app pede atenção ou para.
+    atualizarSeta(seta.current, esqueleto, r.desvio, r.sensores, cores, r.tempo, r.menosMovimento);
     if (amostra.indiceFase !== ultimaFase.current) {
       ultimaFase.current = amostra.indiceFase;
       aoAmostrar?.(amostra);
@@ -229,6 +233,7 @@ export function Boneco({
       })}
       {animacao.musculos && <CascasDosMusculos musculos={animacao.musculos} cor={cores.musculo} malhas={musculos} />}
       <AneisDePressao malhas={aneis} />
+      <SetaDeCorrecao grupo={seta} />
     </group>
   );
 }
