@@ -61,3 +61,12 @@ export function nivelInicial(medidas: MedidasDaAvaliacao, firmeza: Firmeza): Niv
   const medeMuitoBem = oscilacao < OSCILACAO_MAXIMA_PARA_NIVEL_3 && apoio < APOIO_MAXIMO_PARA_NIVEL_3;
   return firmeza === 'firme' && medeMuitoBem ? 3 : 2;
 }
+
+/* Nomes vêm de campo livre (e do localStorage, que pode ser editado): sem
+   limite, um texto longo sem espaços quebra cartões e listas (revisão da fase 5). */
+export const TAMANHO_MAXIMO_DO_NOME = 40;
+export const TAMANHO_MAXIMO_DA_FUNCAO = 30;
+
+export function limparNome(texto: string, maximo: number = TAMANHO_MAXIMO_DO_NOME): string {
+  return texto.replace(/\s+/g, ' ').trim().slice(0, maximo);
+}

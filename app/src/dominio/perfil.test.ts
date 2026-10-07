@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { nivelInicial, trilhaDoObjetivo } from './perfil';
+import { TAMANHO_MAXIMO_DO_NOME, limparNome, nivelInicial, trilhaDoObjetivo } from './perfil';
 
 describe('trilhaDoObjetivo', () => {
   test.each([
@@ -62,5 +62,16 @@ describe('nivelInicial', () => {
   test('medidas fora de 0 a 1 são limitadas ao intervalo', () => {
     expect(nivelInicial({ oscilacao: -2, apoioNasBarras: -1 }, 'firme')).toBe(3);
     expect(nivelInicial({ oscilacao: 5, apoioNasBarras: 0 }, 'firme')).toBe(1);
+  });
+});
+
+describe('limparNome', () => {
+  test('junta espaços repetidos e tira as pontas', () => {
+    expect(limparNome('  Dona   Lúcia 	')).toBe('Dona Lúcia');
+  });
+
+  test('corta no tamanho máximo, para não quebrar cartões e listas', () => {
+    expect(limparNome('A'.repeat(200))).toHaveLength(TAMANHO_MAXIMO_DO_NOME);
+    expect(limparNome('Fisioterapeuta esportiva sênior', 10)).toBe('Fisioterap');
   });
 });

@@ -22,7 +22,9 @@ import {
    do mapa andar suave, devagar o bastante para não pesar no celular. */
 const INTERVALO_MS = 100;
 
-export type MediasDaExecucao = { simetria: number; estabilidade: number; apoioNasBarras: number; amostras: number };
+/* cargaEsquerda: % média do peso dos pés na perna esquerda, comparada com a
+   meta de simetria do profissional no relatório. */
+export type MediasDaExecucao = { simetria: number; estabilidade: number; apoioNasBarras: number; cargaEsquerda: number; amostras: number };
 
 export type SimulacaoDeSensores = {
   leitura: Leitura;
@@ -58,7 +60,7 @@ export function useSimulacaoDeSensores(opcoes: Opcoes): SimulacaoDeSensores {
     let anterior: Leitura | undefined;
     let feedback: EstadoDoFeedback | undefined;
     let desvioAnterior: Desvio | null = null;
-    const soma = { simetria: 0, estabilidade: 0, apoioNasBarras: 0, amostras: 0 };
+    const soma = { simetria: 0, estabilidade: 0, apoioNasBarras: 0, cargaEsquerda: 0, amostras: 0 };
 
     const passo = () => {
       const o = ref.current;
@@ -78,6 +80,7 @@ export function useSimulacaoDeSensores(opcoes: Opcoes): SimulacaoDeSensores {
       soma.simetria += avaliacao.simetria;
       soma.estabilidade += avaliacao.estabilidade;
       soma.apoioNasBarras += leitura.maos;
+      soma.cargaEsquerda += leitura.cargaEsquerda * 100;
       soma.amostras += 1;
       setEstado({ leitura, esperado, avaliacao: feedback.exibido, desvioAtivo: desvio, medias: medias(soma) });
     };
@@ -101,13 +104,19 @@ function cargaSemAnimacao(exercicio: Exercicio, nivel: Nivel) {
   return semMaos ? { ...CARGA_EM_PE, pes: 1, maos: 0 } : CARGA_EM_PE;
 }
 
-function medias(s: { simetria: number; estabilidade: number; apoioNasBarras: number; amostras: number }): MediasDaExecucao {
+function medias(s: Omit<MediasDaExecucao, never>): MediasDaExecucao {
   const n = Math.max(1, s.amostras);
-  return { simetria: Math.round(s.simetria / n), estabilidade: Math.round(s.estabilidade / n), apoioNasBarras: s.apoioNasBarras / n, amostras: s.amostras };
+  return {
+    simetria: Math.round(s.simetria / n),
+    estabilidade: Math.round(s.estabilidade / n),
+    apoioNasBarras: s.apoioNasBarras / n,
+    cargaEsquerda: Math.round(s.cargaEsquerda / n),
+    amostras: s.amostras,
+  };
 }
 
 function calcularInicial(o: Opcoes): SimulacaoDeSensores {
   const esperado = esperadoAgora(o, 0);
   const leitura = simularLeitura(esperado, null, 0);
-  return { leitura, esperado, avaliacao: avaliar(o.exercicio, leitura, esperado), desvioAtivo: null, medias: { simetria: 0, estabilidade: 0, apoioNasBarras: 0, amostras: 0 } };
+  return { leitura, esperado, avaliacao: avaliar(o.exercicio, leitura, esperado), desvioAtivo: null, medias: { simetria: 0, estabilidade: 0, apoioNasBarras: 0, cargaEsquerda: 50, amostras: 0 } };
 }

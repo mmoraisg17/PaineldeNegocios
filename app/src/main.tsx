@@ -5,6 +5,7 @@ import { MotionConfig } from 'motion/react';
 import '@fontsource-variable/inter';
 import './styles/global.css';
 import { APP_NAME } from './config/app';
+import { ProvedorDoApp } from './estado/ContextoApp';
 import { criarRoteador } from './rotas';
 
 const raiz = document.getElementById('raiz');
@@ -18,7 +19,9 @@ createRoot(raiz).render(
     {/* reducedMotion="user": as animações em JS do Motion obedecem ao
         "reduzir movimento" do sistema, como o CSS já obedece. */}
     <MotionConfig reducedMotion="user">
-      <RouterProvider router={criarRoteador()} />
+      <ProvedorDoApp>
+        <RouterProvider router={criarRoteador()} />
+      </ProvedorDoApp>
     </MotionConfig>
   </StrictMode>,
 );

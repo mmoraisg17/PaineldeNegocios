@@ -1,10 +1,11 @@
 import { Suspense, lazy, useMemo, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { AvisoDeCorrecao, MENSAGEM_OK } from '../components/AvisoDeCorrecao';
 import { MapaDePressao } from '../components/MapaDePressao';
 import { PainelDemonstracao } from '../components/PainelDemonstracao';
 import { novoRelogio } from '../cena3d/relogio';
-import { type Apoio, type Exercicio as TipoExercicio, type Nivel, buscarExercicio } from '../dominio';
+import { type Apoio, type Exercicio as TipoExercicio, type Nivel, type ResultadoExercicio, buscarExercicio, notaDeExecucao } from '../dominio';
+import { useApp } from '../estado/ContextoApp';
 import { useSimulacaoDeSensores } from '../hooks/useSimulacaoDeSensores';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
 import { useVoz } from '../hooks/useVoz';
@@ -36,9 +37,23 @@ export function Exercicio() {
   return <TelaDoExercicio key={id} exercicio={exercicio} />;
 }
 
+/* Mínimo de amostras (1 s a 10 Hz) para o resultado valer: quem toca
+   "Concluir" no primeiro segundo não gera uma nota de execução sem sentido. */
+const AMOSTRAS_MINIMAS = 10;
+
 function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
   const [busca] = useSearchParams();
+  const navegar = useNavigate();
+  const { treino, registrarResultado, preferencias } = useApp();
   const nivel = nivelDaBusca(busca.get('nivel'));
+  // Em treino (?treino=N), a tela sabe a posição na rotina e a meta do profissional.
+  // Só vale se a posição for um inteiro válido e o item for o exercício da rota
+  // (URL editada à mão não pode gravar o resultado em outro exercício).
+  const indiceLido = Number(busca.get('treino') ?? Number.NaN);
+  const itemLido = Number.isInteger(indiceLido) && indiceLido >= 0 ? treino?.itens[indiceLido] : undefined;
+  const itemDoTreino = itemLido?.exercicioId === exercicio.id ? itemLido : undefined;
+  const indiceTreino = itemDoTreino ? indiceLido : null;
+  const meta = itemDoTreino?.meta?.simetriaEsquerda;
   const config = exercicio.niveis[nivel];
   const animacao = useMemo(() => animacaoDe(exercicio.id, BRACOS_DO_APOIO[config.apoio]), [exercicio.id, config.apoio]);
   const relogio = useRef(novoRelogio(prefereMenosMovimento()));
@@ -46,7 +61,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
 
   const [automatico, setAutomatico] = useState(true);
   const [desvioForcado, setDesvioForcado] = useState<Desvio | null>(null);
-  const [voz, setVoz] = useState(false);
+  const [voz, setVoz] = useState(preferencias.voz);
   const [versaoDesvio, setVersaoDesvio] = useState(0);
 
   const sim = useSimulacaoDeSensores({
@@ -56,8 +71,33 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
     relogio,
     desvioForcado: automatico ? null : desvioForcado,
     automatico,
+    ...(meta === undefined ? {} : { cargaEsquerdaMeta: meta / 100 }),
     aoMudarDesvio: () => setVersaoDesvio((v) => v + 1),
   });
+
+  const concluir = () => {
+    if (indiceTreino === null || !treino || !itemDoTreino) {
+      navegar('/praticante/hoje');
+      return;
+    }
+    const m = sim.medias;
+    // Sem amostras suficientes não há o que avaliar: o exercício não entra no
+    // resultado (uma nota 0 inventada faria o nível descer sozinho, manual 8.2).
+    if (m.amostras >= AMOSTRAS_MINIMAS) {
+      const resultado: ResultadoExercicio = {
+        id: itemDoTreino.exercicioId,
+        nivel: itemDoTreino.nivel,
+        nota: notaDeExecucao({ simetria: m.simetria, estabilidade: m.estabilidade, apoioNasBarras: m.apoioNasBarras }),
+        simetria: m.simetria,
+        estabilidade: m.estabilidade,
+        apoioNasBarras: m.apoioNasBarras,
+        cargaEsquerda: m.cargaEsquerda,
+      };
+      registrarResultado(resultado);
+    }
+    const proximo = treino.itens[indiceTreino + 1];
+    navegar(proximo ? `/praticante/exercicio/${proximo.exercicioId}?nivel=${proximo.nivel}&treino=${indiceTreino + 1}` : '/praticante/concluido');
+  };
   const mensagem = sim.avaliacao.correcao?.mensagem ?? MENSAGEM_OK;
   const { vozBrasileiraDisponivel } = useVoz(voz, sim.avaliacao.correcao?.id ?? sim.avaliacao.estado, mensagem);
 
@@ -74,6 +114,11 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
         </h1>
         <p className="flex flex-wrap items-center gap-2 text-base">
           <span className="rounded-full bg-primaria-suave px-3 py-1 font-semibold text-primaria">Nível {nivel}</span>
+          {indiceTreino !== null && treino && (
+            <span className="rounded-full bg-superficie px-3 py-1 font-semibold">
+              Exercício {indiceTreino + 1} de {treino.itens.length}
+            </span>
+          )}
           <span className="text-texto-suave">
             {trilha} · {config.descricao}
           </span>
@@ -120,12 +165,9 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
       </section>
 
 
-      <Link
-        to="/praticante/hoje"
-        className="flex min-h-16 items-center justify-center rounded-botao bg-primaria text-xl font-semibold text-sobre-primaria"
-      >
-        Concluir
-      </Link>
+      <button type="button" onClick={concluir} className="flex min-h-16 items-center justify-center rounded-botao bg-primaria text-xl font-semibold text-sobre-primaria">
+        {itemDoTreino && treino && indiceTreino !== null && indiceTreino + 1 < treino.itens.length ? 'Próximo exercício' : 'Concluir'}
+      </button>
     </div>
   );
 }

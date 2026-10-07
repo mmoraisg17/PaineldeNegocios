@@ -5,6 +5,9 @@
 export * from './tipos';
 export { ACESSORIOS_DA_PLATAFORMA, CATALOGO, buscarExercicio, exerciciosDaTrilha } from './catalogo';
 export {
+  TAMANHO_MAXIMO_DA_FUNCAO,
+  TAMANHO_MAXIMO_DO_NOME,
+  limparNome,
   nivelInicial,
   trilhaDoObjetivo,
   type Firmeza,

@@ -19,6 +19,10 @@ export type Convite = {
   tipo: TipoAcompanhante;
   criadoEm: string;
   expiraEm: string;
+  /* Quem gerou o convite: é com essa pessoa que o vínculo será criado quando
+     o acompanhante digitar o código. Opcional só por compatibilidade com
+     convites criados antes do campo existir. */
+  alunoId?: string;
 };
 
 /* `convitesRestantes` é a lista para guardar de volta no estado: sem o convite

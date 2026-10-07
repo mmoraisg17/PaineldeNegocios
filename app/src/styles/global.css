@@ -52,6 +52,20 @@
   --color-cena-destaque: #e8735a;
 }
 
+/* Alto contraste (Perfil → Ajustes, manual 13.1): mesmas variáveis, valores
+   mais fortes. O seletor com classe vence o :root do @theme, então nenhuma
+   tela precisa saber que o modo existe. */
+html.alto-contraste {
+  --color-fundo: #ffffff;
+  --color-texto: #000000;
+  --color-texto-suave: #1b1f24;
+  --color-borda: #4a5360;
+  --color-primaria: #08503f;
+  --color-primaria-escura: #053a2e;
+  --color-alerta-texto: #5a2f00;
+  --color-perigo: #8c1d17;
+}
+
 @layer base {
   /* 18 px de base em vez de 16: o público principal tem 60 anos ou mais, e o
      Figma já desenhava o corpo de texto nesse tamanho. Tudo em rem acompanha. */

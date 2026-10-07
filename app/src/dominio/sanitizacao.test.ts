@@ -385,3 +385,25 @@ describe('sanearEstado: ajuste do profissional', () => {
     expect(lucia(sanearEstado(comPraticante({ ajuste })))?.ajuste).not.toHaveProperty('autorId');
   });
 });
+
+test('o convite mantém quem o gerou (alunoId) e descarta alunoId inválido', () => {
+  const base = { codigo: 'ABC234', tipo: 'profissional', criadoEm: '2026-10-07T10:00:00.000Z', expiraEm: '2026-10-09T10:00:00.000Z' };
+  const estado = sanearEstado({ versao: 1, convites: [{ ...base, alunoId: 'lucia' }, { ...base, codigo: 'XYZ234', alunoId: 42 }] });
+  expect(estado.convites[0]?.alunoId).toBe('lucia');
+  expect(estado.convites[1]).not.toHaveProperty('alunoId');
+});
+
+describe('sanearEstado: nomes longos', () => {
+  test('corta nome do praticante e nome/função do acompanhante no tamanho máximo', () => {
+    const longo = 'X'.repeat(500);
+    const estado = sanearEstado(
+      bruto({
+        praticantes: { lucia: { ...PRATICANTE, perfil: { ...PERFIL, nome: longo } } },
+        acompanhantes: [{ id: 'carlos', nome: longo, funcao: longo, tipo: 'profissional' }],
+      }),
+    );
+    expect(lucia(estado)?.perfil.nome.length).toBeLessThanOrEqual(40);
+    expect(estado.acompanhantes[0]?.nome.length).toBeLessThanOrEqual(40);
+    expect(estado.acompanhantes[0]?.funcao.length).toBeLessThanOrEqual(30);
+  });
+});

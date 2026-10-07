@@ -9,7 +9,7 @@ import {
   type PapelDaConta,
   type Recado,
 } from './estado';
-import type { Firmeza, Objetivo, Perfil } from './perfil';
+import { TAMANHO_MAXIMO_DA_FUNCAO, limparNome, type Firmeza, type Objetivo, type Perfil } from './perfil';
 import type { AjusteProfissional, MetaDeSimetria, NiveisAtuais } from './rotina';
 import type { ResultadoExercicio, Sessao } from './sessao';
 import { IDS_DOS_EXERCICIOS, type Acessorio, type IdExercicio, type Inclinacao, type Nivel, type Percepcao } from './tipos';
@@ -105,7 +105,7 @@ function sanearPerfil(valor: unknown): Perfil | undefined {
   const inclinacaoMaxima = dentroDe(INCLINACOES, valor['inclinacaoMaxima']);
   if (!ehTexto(valor['nome']) || !objetivo || !firmeza || inclinacaoMaxima === undefined) return undefined;
   const acessoriosEmCasa = sanearLista(valor['acessoriosEmCasa'], (item) => dentroDe(ACESSORIOS, item));
-  return { nome: valor['nome'], objetivo, firmeza, acessoriosEmCasa, inclinacaoMaxima };
+  return { nome: limparNome(valor['nome']), objetivo, firmeza, acessoriosEmCasa, inclinacaoMaxima };
 }
 
 function sanearResultado(valor: unknown): ResultadoExercicio | undefined {
@@ -164,7 +164,8 @@ function sanearAcompanhante(valor: unknown): Acompanhante | undefined {
   if (!ehObjeto(valor)) return undefined;
   const campos = textos(valor, ['id', 'nome', 'funcao']);
   const tipo = dentroDe(TIPOS, valor['tipo']);
-  return campos && tipo ? { ...campos, tipo } : undefined;
+  if (!campos || !tipo) return undefined;
+  return { ...campos, nome: limparNome(campos.nome), funcao: limparNome(campos.funcao, TAMANHO_MAXIMO_DA_FUNCAO), tipo };
 }
 
 function sanearVinculo(valor: unknown): Vinculo | undefined {
@@ -186,7 +187,8 @@ function sanearConvite(valor: unknown): Convite | undefined {
   if (!ehObjeto(valor)) return undefined;
   const campos = textos(valor, ['codigo', 'criadoEm', 'expiraEm']);
   const tipo = dentroDe(TIPOS, valor['tipo']);
-  return campos && tipo ? { ...campos, tipo } : undefined;
+  if (!campos || !tipo) return undefined;
+  return { ...campos, tipo, ...(ehTexto(valor['alunoId']) ? { alunoId: valor['alunoId'] } : {}) };
 }
 
 function sanearRecado(valor: unknown): Recado | undefined {

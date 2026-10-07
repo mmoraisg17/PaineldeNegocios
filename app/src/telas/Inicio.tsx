@@ -28,13 +28,13 @@ export function Inicio() {
 
         <div className="mt-8 flex flex-col gap-3">
           <Link
-            to="/praticante/hoje"
+            to="/entrar/praticante"
             className="flex min-h-16 items-center justify-center rounded-botao bg-primaria px-4 text-center text-lg font-semibold text-sobre-primaria active:bg-primaria-escura"
           >
             Sou praticante
           </Link>
           <Link
-            to="/acompanhante/alunos"
+            to="/entrar/acompanhante"
             className="flex min-h-16 items-center justify-center rounded-botao border-2 border-primaria bg-superficie px-4 text-center text-lg font-semibold text-primaria active:bg-primaria-suave"
           >
             Sou acompanhante
