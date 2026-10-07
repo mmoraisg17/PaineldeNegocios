@@ -28,7 +28,7 @@ Saberemos que estamos certos quando **a simetria e a estabilidade medidas melhor
 
 - Login e contas reais: o protótipo usa um modo demonstração sem senha.
 - Conexão Bluetooth com hardware: os sensores são simulados.
-- Painel do fisioterapeuta e painel da família: ficam no roadmap (o Figma já tem um esboço da família).
+- Chat em tempo real, videochamada ou telemonitoramento: o acompanhante vê relatórios e envia recados de mão única.
 - Diagnóstico, prescrição ou promessa de reabilitação: risco regulatório (ANVISA); a linguagem é de treino e acompanhamento.
 - Os outros 8 exercícios do Figma: o protótipo foca em 8 exercícios com animação 3D completa.
 - Backend e banco de dados: os dados ficam no próprio aparelho (localStorage).
@@ -79,6 +79,9 @@ Idosos frágeis com alto risco de queda sem supervisão; pós-operatório imedia
 
 | Priority | Capability | Rationale |
 |---|---|---|
+| Must | **Login com dois perfis**: Praticante (quem treina) e Acompanhante (personal, fisioterapeuta; familiar só leitura) | Pedido do grupo: o profissional acompanha alunos específicos (ex.: o personal da Dona Lúcia) |
+| Must | **Vínculo por código de convite**: a praticante gera, autoriza e pode revogar (LGPD, dados de saúde) | Acesso só a quem a praticante escolheu |
+| Must | **Painel do acompanhante**: lista de alunos, adesão, simetria/estabilidade, alertas, histórico; profissional ajusta a rotina e envia recados | Dá sentido ao uso com personal/fisio |
 | Must | Mobile-first + **moldura de smartphone no desktop** | Avaliadores abrem no celular; se só tiverem computador, simula o app |
 | Must | Modo demonstração (entrar sem senha) | Zero atrito para o avaliador |
 | Must | Perfil rápido (objetivo, confiança, acessórios) + **avaliação na plataforma** (calibração do peso + 10 s de equilíbrio simulados) | Base da adaptação da rotina (R2) |
@@ -88,26 +91,28 @@ Idosos frágeis com alto risco de queda sem supervisão; pós-operatório imedia
 | Must | **Sensores simulados** sincronizados com a animação + **correção em tempo real** por exercício | R4, o diferencial do produto |
 | Must | Painel do avaliador para forçar erros (ex.: "peso na ponta") | Demonstração controlada |
 | Must | Tela de conclusão + progresso (dados de exemplo) | Mostra a perspectiva evolutiva |
-| Must | **Manual de uso (plataforma + app)** | Pedido do grupo; base do POP |
+| Must | **Manual de uso (plataforma + app)**, entregue em 07/10 | Pedido do grupo; base do POP |
 | Must | Nome e tema centralizados (constante + tokens) | Nome e cores ainda vão mudar |
 | Should | Avisos por voz em português | Acessibilidade 60+ |
 | Should | Gráfico de progresso semanal | Pitch da hipótese |
 | Should | QR code para abrir o app | Facilita na apresentação |
 | Could | Modo alto contraste / tamanho de fonte | Acessibilidade extra |
-| Won't | Bluetooth/hardware, contas reais, painel do fisio e da família, recuperar senha | Fora do prazo; roadmap |
+| Won't | Bluetooth/hardware, contas reais, chat/vídeo, recuperar senha | Fora do prazo; roadmap |
 
 ### Os 8 exercícios (ordem de prioridade de animação)
 
 | # | Trilha | Exercício | Acessório | O que o sensor corrige |
 |---|---|---|---|---|
-| 1 | Fisio, joelho | Agachamento búlgaro (pé da frente na base) | Banco/assento atrás | % do peso na perna da frente (meta de 80–90%), calcanhar × ponta, desvio médio-lateral (indício de valgo) |
-| 2 | 60+ | Sentar e levantar | Barras + assento | Simetria E/D ao levantar, dependência das barras |
+| 1 | 60+ | Sentar e levantar | Barras + assento | Simetria E/D ao levantar, dependência das barras |
+| 2 | Fisio, joelho | Miniagachamento com descarga simétrica | Barras | % de peso em cada perna (meta definida pelo profissional, ex.: 50/50), calcanhar × ponta |
 | 3 | Fisio, tornozelo | Elevação de panturrilha unilateral | Barras | Subida reta, sem rolar para fora |
 | 4 | 60+ | Pés em linha (tandem) | Barras (2 mãos → 1 → nenhuma) | Oscilação; quando reduzir o apoio |
 | 5 | Fisio, joelho | Descida de degrau (step-down) | A base como degrau | Descida controlada, sem desvio lateral |
 | 6 | 60+ | Abdução de quadril com elástico | Elástico preso à barra | Estabilidade da perna de apoio |
 | 7 | Fisio, tornozelo | Equilíbrio num pé só com inclinação | Inclinação | Oscilação; progressão por inclinação |
 | 8 | 60+ | Transferência de peso com alvos | Inclinação | Controle do centro de pressão até o alvo |
+
+*O búlgaro foi só um exemplo do grupo e saiu do escopo (07/10). Entrou o miniagachamento simétrico: após cirurgias e lesões de joelho, a pessoa tende a descarregar menos peso na perna afetada (NCT01333189).*
 
 ### MVP Scope
 
@@ -122,6 +127,8 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 5. **Concluído** → resumo (simetria, estabilidade) + "fácil / ok / difícil" → ajuste do próximo treino.
 6. **Progresso** → evolução semanal (dados de exemplo) + subida de nível.
 
+**Fluxo do acompanhante:** Início → "Sou acompanhante" → (demo: Carlos, personal / Ana, fisioterapeuta / Marta, filha) → **Meus alunos** → aluno → relatório (adesão, simetria, estabilidade, alertas, histórico) → **ajustar rotina** e **enviar recado** (profissional). O vínculo nasce do **código de convite** que a praticante gera em *Perfil → Acompanhantes*, onde também revoga o acesso.
+
 ---
 
 ## Technical Approach
@@ -134,7 +141,8 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 - **Sincronia pose → sensor**: cada keyframe declara a distribuição de carga esperada; o simulador interpola o centro de pressão e injeta erros (automáticos ou pelo painel do avaliador).
 - **Regras de correção** puras e testáveis por exercício (entrada: leitura simulada; saída: estado + mensagem).
 - **Estado e persistência**: estado local + `localStorage` com try/catch (perfil, nível, histórico).
-- **Configuração central**: `APP_NAME` e tokens de tema (CSS custom properties) num só lugar.
+- **Configuração central**: `APP_NAME` e tokens de tema (CSS custom properties) num só lugar. Textos usam "a plataforma" e "o app" até o nome ser decidido.
+- **Perfis e permissões**: papel `praticante` | `acompanhante` (`profissional` ou `familiar`); permissões puras e testadas (familiar não ajusta rotina nem envia recado); contas de demonstração locais.
 - **Deploy**: GitHub Pages via GitHub Actions a partir de `app/` no repositório PaineldeNegocios.
 
 **Technical Risks**
@@ -162,11 +170,11 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 |---|---|---|---|---|---|---|
 | 1 | Fundação | Projeto Vite/React/TS em `app/`, tema e nome centralizados, moldura de celular, rotas, deploy no Pages | pending | - | - | - |
 | 2 | Domínio | Catálogo dos 8 exercícios, perfil, motor de rotina adaptativa, persistência (TDD) | pending | with 3 | 1 | - |
-| 3 | Motor 3D + búlgaro | Boneco procedural, plataforma, sistema de keyframes; pesquisa e animação do búlgaro | pending | with 2 | 1 | - |
+| 3 | Motor 3D + 1º exercício | Boneco procedural, plataforma, sistema de keyframes; pesquisa e animação de "sentar e levantar" | pending | with 2 | 1 | - |
 | 4 | Sensores e correção | Simulador de centro de pressão sincronizado com a pose, regras de correção, painel do avaliador, voz | pending | with 5 | 2, 3 | - |
-| 5 | Telas do MVP | Início, perfil + avaliação, Hoje, Biblioteca, Exercício, Concluído, Progresso | pending | with 4 | 2 | - |
+| 5 | Telas do MVP | Início com 2 perfis, perfil + avaliação, Hoje, Biblioteca, Exercício, Concluído, Progresso, Acompanhantes (convite), painel do acompanhante | pending | with 4 | 2 | - |
 | 6 | 7 animações restantes | Pesquisa sistemática + animação de cada exercício, na ordem de prioridade | pending | with 4, 5 | 3 | - |
-| 7 | Manual de uso | Tela "Como usar" + documento plataforma + app (base do POP) | pending | with 6 | 5 | - |
+| 7 | Manual de uso | Documento plataforma + app (Markdown + PDF) em 07/10; depois, a tela "Como usar" no app | in-progress | - | - | - |
 | 8 | QA e entrega | E2E, acessibilidade, desempenho mobile, revisão de código e segurança, deploy final, QR code | pending | - | 4, 5, 6, 7 | - |
 
 ### Phase Details
@@ -181,19 +189,19 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 - **Scope**: tipos e catálogo dos exercícios (trilha, nível, acessório, métricas do sensor); perfil; geração da rotina; regra de progressão; persistência.
 - **Success signal**: testes unitários verdes com cobertura ≥ 80%.
 
-**Phase 3: Motor 3D + búlgaro**
+**Phase 3: Motor 3D + 1º exercício**
 - **Goal**: provar o pipeline 3D com o exercício mais difícil.
-- **Scope**: boneco procedural articulado; plataforma (base, barras, abas laterais); player de keyframes com loop e controle; pesquisa sistemática do búlgaro; animação fiel.
-- **Success signal**: búlgaro roda a ≥ 30 fps no celular, revisado contra o checklist da pesquisa.
+- **Scope**: boneco procedural articulado; plataforma (base, barras, abas laterais); player de keyframes com loop e controle; pesquisa sistemática de "sentar e levantar"; animação fiel.
+- **Success signal**: o exercício roda a ≥ 30 fps no celular, revisado contra o checklist da pesquisa.
 
 **Phase 4: Sensores e correção**
 - **Goal**: o diferencial visível.
 - **Scope**: simulador de centro de pressão por pose; injeção de erros; regras por exercício; mapa de pressão (base na tela S1 do Figma); painel do avaliador; voz (Should).
-- **Success signal**: no búlgaro, forçar "peso na ponta" gera a correção certa em < 0,5 s.
+- **Success signal**: no miniagachamento, forçar "peso só numa perna" gera a correção certa em < 0,5 s.
 
 **Phase 5: Telas do MVP**
 - **Goal**: fluxo completo de ponta a ponta.
-- **Scope**: as 6 telas do fluxo + Biblioteca com 2 trilhas; linguagem 60+ (fonte grande, alto contraste).
+- **Scope**: as 6 telas do fluxo + Biblioteca com 2 trilhas + login com 2 perfis, convite/revogação e painel do acompanhante (lista, relatório, ajustar rotina, recado); linguagem 60+ (fonte grande, alto contraste).
 - **Success signal**: fluxo percorrido em < 2 min por alguém de fora do grupo.
 
 **Phase 6: 7 animações restantes**
@@ -202,7 +210,7 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 - **Success signal**: os 8 animados e com correções; nenhum na reserva simplificada, ou reserva documentada.
 
 **Phase 7: Manual de uso**
-- **Goal**: orientar o uso da plataforma + app.
+- **Goal**: orientar o uso da plataforma + app (prazo: 07/10).
 - **Scope**: montagem/segurança da plataforma, ajuste de barras e inclinação, primeiro uso do app, calibração, leitura das correções, cuidados; tela "Como usar" no app + documento no repositório.
 - **Success signal**: o manual cobre do desembalar ao primeiro treino; o grupo aprova como base do POP.
 
@@ -219,9 +227,9 @@ As fases 2 (lógica pura) e 3 (3D) não compartilham código e podem andar junta
 
 | Dia | Foco |
 |---|---|
-| Qua 07/10 | Fases 1, 2 e 3 (fundação, domínio, motor 3D + búlgaro) |
+| Qua 07/10 | **Fase 7 (manual)** + fases 1, 2 e 3 (fundação, domínio, motor 3D + 1º exercício) |
 | Qui 08/10 | Fases 4, 5 e 6 (sensores, telas, animações 2–5) |
-| Sex 09/10 | Fases 6, 7 e 8 (animações 6–8, manual, QA e deploy) |
+| Sex 09/10 | Fases 6 e 8 (animações 6–8, tela "Como usar", QA e deploy) |
 
 ---
 
@@ -239,6 +247,10 @@ As fases 2 (lógica pura) e 3 (3D) não compartilham código e podem andar junta
 | Nome e visual | Constante `APP_NAME` + tokens de tema | Valores espalhados | Nome e cores ainda vão mudar |
 | Trilhas | Equilíbrio 60+ (foco) + Fisioterapia | Trilha única | Público principal idoso; fisio como expansão |
 | Exercícios | 4 + 4 (lista acima) | Os 16 do Figma | Prazo; profundidade > quantidade |
+| Búlgaro | Removido (07/10) → miniagachamento simétrico | Manter o búlgaro | Era só exemplo; o simétrico é mais comum e mede melhor com a base |
+| Perfis | Praticante + Acompanhante (profissional ajusta e envia recados; familiar só lê) | Só praticante | Pedido do grupo (07/10) |
+| Vínculo | Código de convite, revogável | Busca por e-mail | Consentimento explícito (LGPD) e simples de demonstrar |
+| Nome | Adiado; termos neutros + `APP_NAME` | Escolher agora | Decisão do grupo (07/10); finalista sugerido: PRUMO |
 
 ---
 
