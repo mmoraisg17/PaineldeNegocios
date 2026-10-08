@@ -175,7 +175,7 @@ Fluxo completo das 6 telas abaixo com as 2 trilhas, os 8 exercícios em 3D, o se
 | 5 | Telas do MVP | Início com 2 perfis, perfil + avaliação, Hoje, Biblioteca, Exercício, Concluído, Progresso, Acompanhantes (convite), painel do acompanhante | complete | with 4 | 2 | [relatório](../reports/fase-5-telas-do-mvp-report.md) |
 | 6 | 7 animações restantes | Pesquisa sistemática + animação de cada exercício, na ordem de prioridade | complete | with 4, 5 | 3 | [relatório](../reports/fase-6-animacoes-report.md) |
 | 7 | Manual de uso | Documento plataforma + app (Markdown + PDF) em 07/10; depois, a tela "Como usar" no app | in-progress | - | - | - |
-| 8 | QA e entrega | E2E, acessibilidade, desempenho mobile, revisão de código e segurança, deploy final, QR code | pending | - | 4, 5, 6, 7 | - |
+| 8 | QA e entrega | E2E, acessibilidade, desempenho mobile, revisão de código e segurança, deploy final, QR code | complete | - | 4, 5, 6, 7 | [relatório](../reports/fase-8-qa-e-entrega-report.md) |
 
 ### Phase Details
 
