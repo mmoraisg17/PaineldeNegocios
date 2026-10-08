@@ -42,7 +42,6 @@ type Opcoes = {
   desvioForcado: Desvio | null;
   automatico: boolean;
   cargaEsquerdaMeta?: number;
-  aoMudarDesvio?: () => void;
 };
 
 /* Junta a animação (o que a pessoa está fazendo), o simulador (o que a base
@@ -71,7 +70,6 @@ export function useSimulacaoDeSensores(opcoes: Opcoes): SimulacaoDeSensores {
       if (desvio !== desvioAnterior) {
         desvioAnterior = desvio;
         o.relogio.current.desvio = desvio;
-        o.aoMudarDesvio?.();
       }
       const leitura = simularLeitura(esperado, desvio, parede, anterior);
       anterior = leitura;

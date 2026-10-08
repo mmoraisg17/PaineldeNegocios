@@ -11,9 +11,10 @@ export type Musculo = 'quadriceps' | 'gluteos' | 'panturrilhas' | 'abdomen' | 'a
 
 const limitar = (x: number) => Math.min(1, Math.max(0, x));
 
-/* Ângulo de flexão do joelho esquerdo, em graus (0 = perna estendida). */
-export function flexaoDoJoelho(e: Esqueleto): number {
-  const l = e.lados.esquerdo;
+/* Ângulo de flexão do joelho, em graus (0 = perna estendida). Cada perna é
+   medida à parte: nos exercícios num pé só os dois joelhos são diferentes. */
+export function flexaoDoJoelho(e: Esqueleto, lado: 'esquerdo' | 'direito' = 'esquerdo'): number {
+  const l = e.lados[lado];
   return 180 - anguloEntre(sub(l.tornozelo, l.joelho), sub(l.quadril, l.joelho));
 }
 

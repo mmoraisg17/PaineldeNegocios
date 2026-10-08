@@ -9,6 +9,8 @@ import { Color, type WebGLProgramParametersWithUniforms } from 'three';
 
 const POTENCIA_DA_BORDA = 2.6; // maior = borda mais fina
 const INTENSIDADE_DA_BORDA = 0.85;
+/* Fora do componente: uma função nova a cada render seria reatribuída ao material. */
+const chaveDoPrograma = () => 'manequim-fresnel';
 
 export function MaterialManequim({ cor, borda }: { cor: string; borda: string }) {
   const corDaBorda = useMemo(() => new Color(borda), [borda]);
@@ -40,7 +42,7 @@ export function MaterialManequim({ cor, borda }: { cor: string; borda: string })
       onBeforeCompile={aoCompilar}
       // Programa próprio: sem isso o three reaproveitaria o shader de outro
       // meshStandardMaterial (plataforma) e a borda sumiria ou vazaria.
-      customProgramCacheKey={() => 'manequim-fresnel'}
+      customProgramCacheKey={chaveDoPrograma}
     />
   );
 }

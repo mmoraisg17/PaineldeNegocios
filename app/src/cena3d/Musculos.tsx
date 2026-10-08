@@ -114,6 +114,18 @@ export const CASCAS: readonly Casca[] = [
 
 const radianos = (graus: number) => (graus * Math.PI) / 180;
 
+/* Argumentos do LatheGeometry de cada casca, calculados uma vez: um array
+   novo a cada render faria o R3F recriar a geometria (revisão da fase 8). */
+const GEOMETRIAS = CASCAS.map(
+  (c) =>
+    [
+      pontosDoPerfil(trechoDoPerfil(c.perfil, c.trecho[0], c.trecho[1], ESCALA_DA_CASCA)),
+      LADOS_DA_REVOLUCAO,
+      c.centro - radianos(c.abertura) / 2,
+      radianos(c.abertura),
+    ] as const,
+);
+
 /* As malhas das cascas dos músculos que o exercício trabalha. */
 export function CascasDosMusculos({
   musculos,
@@ -135,14 +147,7 @@ export function CascasDosMusculos({
             }}
             renderOrder={2}
           >
-            <latheGeometry
-              args={[
-                pontosDoPerfil(trechoDoPerfil(c.perfil, c.trecho[0], c.trecho[1], ESCALA_DA_CASCA)),
-                LADOS_DA_REVOLUCAO,
-                c.centro - radianos(c.abertura) / 2,
-                radianos(c.abertura),
-              ]}
-            />
+            <latheGeometry args={GEOMETRIAS[i]} />
             <meshBasicMaterial
               color={cor}
               transparent
@@ -161,7 +166,9 @@ export function CascasDosMusculos({
 /* Chamado no useFrame do boneco, logo depois do esqueleto: posiciona as
    cascas e aproxima o brilho do esforço do instante. */
 export function atualizarMusculos(malhas: (Mesh | null)[], esqueleto: Esqueleto, carga: Carga, delta: number) {
-  const flexao = flexaoDoJoelho(esqueleto);
+  const flexao = { esquerdo: flexaoDoJoelho(esqueleto, 'esquerdo'), direito: flexaoDoJoelho(esqueleto, 'direito') };
+  // Músculo sem lado (glúteos, abdômen): vale a perna que mais trabalha.
+  const flexaoSemLado = Math.max(flexao.esquerdo, flexao.direito);
   const fator = fatorDeAproximacao(delta, TAXA_DO_BRILHO);
   CASCAS.forEach((c, i) => {
     const malha = malhas[i];
@@ -175,7 +182,7 @@ export function atualizarMusculos(malhas: (Mesh | null)[], esqueleto: Esqueleto,
     );
     const material = malha.material as MeshBasicMaterial;
     const pernaNoAr = c.lado !== undefined && !esqueleto.lados[c.lado].apoiado;
-    const alvo = pernaNoAr ? 0 : OPACIDADE_MAXIMA * brilhoDoMusculo(esforcoDoMusculo(c.musculo, carga, flexao));
+    const alvo = pernaNoAr ? 0 : OPACIDADE_MAXIMA * brilhoDoMusculo(esforcoDoMusculo(c.musculo, carga, c.lado ? flexao[c.lado] : flexaoSemLado));
     material.opacity += (alvo - material.opacity) * fator;
   });
 }

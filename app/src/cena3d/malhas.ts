@@ -9,8 +9,17 @@ export const LADOS_DA_REVOLUCAO = 18;
 
 type Perfil = readonly (readonly [raio: number, altura: number])[];
 
-/* Perfil [raio, 0..1] → pontos do LatheGeometry, centrados na altura. */
-export const pontosDoPerfil = (perfil: Perfil) => perfil.map(([raio, altura]) => new Vector2(raio, altura - 0.5));
+/* Perfil [raio, 0..1] → pontos do LatheGeometry, centrados na altura. Mesmo
+   perfil, mesmo array: o R3F compara os `args` por referência e recriaria a
+   geometria a cada render se recebesse um array novo (revisão da fase 8). */
+const pontosJaCalculados = new WeakMap<Perfil, Vector2[]>();
+export function pontosDoPerfil(perfil: Perfil): Vector2[] {
+  const salvos = pontosJaCalculados.get(perfil);
+  if (salvos) return salvos;
+  const pontos = perfil.map(([raio, altura]) => new Vector2(raio, altura - 0.5));
+  pontosJaCalculados.set(perfil, pontos);
+  return pontos;
+}
 
 export type Orientacao = { lateral: Vec3; largura: number; profundidade: number };
 

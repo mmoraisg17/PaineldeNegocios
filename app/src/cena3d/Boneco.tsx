@@ -118,10 +118,6 @@ export function Boneco({
   cores: CoresDaCena;
   relogio: React.MutableRefObject<RelogioDaAnimacao>;
   aoAmostrar?: (amostra: Amostra) => void;
-  /* Muda quando a tela troca o desvio simulado. Só existe para o React
-     reconciliar este componente e o R3F desenhar um quadro novo quando a
-     animação está pausada (frameloop "demand"). */
-  versao?: number;
 }) {
   const segmentos = useRef<(Mesh | null)[]>([]);
   const juntas = useRef<(Mesh | null)[]>([]);

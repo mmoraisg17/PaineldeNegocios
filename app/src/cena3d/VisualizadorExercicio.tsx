@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Amostra, Animacao } from '../movimento/animacao';
 import { iconeDoEstado } from '../movimento/setas';
 import { RAMPA_DE_PAUSA } from '../movimento/transicoes';
@@ -8,6 +8,7 @@ import { Boneco } from './Boneco';
 import { Cadeira, Chao, Plataforma } from './Cenario';
 import { lerCoresDaCena } from './cores';
 import { Orbita } from './Orbita';
+import { RedesenhoSobDemanda } from './RedesenhoSobDemanda';
 import type { RelogioDaAnimacao } from './relogio';
 
 /* Câmera em três-quartos, de frente e de lado: o "sentar e levantar" é um
@@ -24,19 +25,22 @@ const ALVO_CAMERA: [number, number, number] = [0, 0.98, -0.12];
    maior dependência do app, e quem só abre o início não deveria baixá-lo.
 
    O relógio vem da tela, que o divide com a simulação dos sensores: a cena
-   avança o tempo, os sensores leem o mesmo tempo. `versao` muda quando a tela
-   troca o desvio simulado, para redesenhar mesmo com a animação pausada. */
-export default function VisualizadorExercicio({
+   avança o tempo, os sensores leem o mesmo tempo.
+
+   memo: a tela re-renderiza 10 vezes por segundo (a cada leitura do
+   simulador), mas a cena só precisa do React quando o exercício ou o estado
+   mostrado mudam; o resto ela lê do relógio a cada quadro (revisão da fase 8). */
+export default memo(VisualizadorExercicio);
+
+function VisualizadorExercicio({
   animacao,
   nomeExercicio,
   relogio,
-  versao,
   estado,
 }: {
   animacao: Animacao;
   nomeExercicio: string;
   relogio: React.MutableRefObject<RelogioDaAnimacao>;
-  versao: number;
   /* Estado mostrado ao praticante (o mesmo do AvisoDeCorrecao): vira o selo
      ✓ / ! / ✕ no canto da cena (auditoria visual, V6). */
   estado?: EstadoDaExecucao;
@@ -72,7 +76,7 @@ export default function VisualizadorExercicio({
     relogio.current.velocidade = lento ? 1 : 0.5;
     setLento(!lento);
   };
-  const aoAmostrar = (a: Amostra) => setFase(a.fase);
+  const aoAmostrar = useCallback((a: Amostra) => setFase(a.fase), []);
 
   return (
     <figure className="flex flex-col gap-2">
@@ -105,18 +109,26 @@ export default function VisualizadorExercicio({
           <Chao cores={cores} />
           <Plataforma cores={cores} inclinacao={animacao.inclinacaoDaBase ?? 0} />
           {animacao.cadeira && <Cadeira cadeira={animacao.cadeira} cores={cores} />}
-          <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} versao={versao} />
+          <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} />
           <Orbita alvo={alvoDaCamera} relogio={relogio} />
+          <RedesenhoSobDemanda relogio={relogio} />
         </Canvas>
         {estado && <SeloDoEstado estado={estado} />}
         <div className="absolute bottom-2 right-2 flex gap-2">
+          {/* Botão de alternar: o texto não muda, o estado vem do aria-pressed
+              e da cor. Trocar o texto junto com o estado deixava o leitor de
+              tela dizendo "1×, pressionado" sem saber o que estava ligado
+              (revisão da fase 8). */}
           <button
             type="button"
             onClick={alternarVelocidade}
             aria-pressed={lento}
-            className="min-h-12 min-w-12 rounded-full bg-superficie/90 px-3 text-base font-bold text-texto shadow"
+            aria-label="Câmera lenta, 0,5×"
+            className={`min-h-12 min-w-12 rounded-full px-3 text-base font-bold shadow ${
+              lento ? 'bg-primaria text-sobre-primaria' : 'bg-superficie/90 text-texto'
+            }`}
           >
-            {lento ? '1×' : '0,5×'}
+            0,5×
           </button>
           <button
             type="button"
@@ -153,7 +165,7 @@ function SeloDoEstado({ estado }: { estado: EstadoDaExecucao }) {
     <div
       key={estado}
       aria-hidden="true"
-      className="pointer-events-none absolute right-2 top-2 flex animate-aparecer items-center gap-2 rounded-full bg-black/60 py-1 pl-1 pr-3 text-sm font-bold text-white"
+      className="pointer-events-none absolute right-2 top-2 flex animate-aparecer items-center gap-2 rounded-full bg-black/60 py-1 pl-1 pr-3 text-base font-bold text-white"
     >
       <span className="flex size-8 items-center justify-center rounded-full text-lg text-cena-fundo" style={{ backgroundColor: `var(--color-cena-${cor})` }}>
         {simbolo}

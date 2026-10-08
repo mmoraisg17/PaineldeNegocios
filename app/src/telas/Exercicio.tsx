@@ -65,7 +65,6 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
   const [automatico, setAutomatico] = useState(true);
   const [desvioForcado, setDesvioForcado] = useState<Desvio | null>(null);
   const [voz, setVoz] = useState(preferencias.voz);
-  const [versaoDesvio, setVersaoDesvio] = useState(0);
 
   const sim = useSimulacaoDeSensores({
     exercicio,
@@ -75,7 +74,6 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
     desvioForcado: automatico ? null : desvioForcado,
     automatico,
     ...(meta === undefined ? {} : { cargaEsquerdaMeta: meta / 100 }),
-    aoMudarDesvio: () => setVersaoDesvio((v) => v + 1),
   });
 
   const concluir = () => {
@@ -138,7 +136,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
             </div>
           }
         >
-          <VisualizadorExercicio animacao={animacao} nomeExercicio={exercicio.nome} relogio={relogio} versao={versaoDesvio} estado={sim.avaliacao.estado} />
+          <VisualizadorExercicio animacao={animacao} nomeExercicio={exercicio.nome} relogio={relogio} estado={sim.avaliacao.estado} />
         </Suspense>
       ) : (
         <p className="rounded-cartao bg-superficie p-4 text-texto-suave">A animação 3D deste exercício chega numa próxima etapa. Siga os passos abaixo.</p>

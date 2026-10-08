@@ -22,7 +22,7 @@ import type { RelogioDaAnimacao } from './relogio';
 const TAXA_DA_CAMERA = 3.5; // 1/s: ~0,6 s para chegar perto do novo enquadramento
 
 export function Orbita({ alvo, relogio }: { alvo: [number, number, number]; relogio?: React.MutableRefObject<RelogioDaAnimacao> }) {
-  const { camera, gl } = useThree();
+  const { camera, gl, invalidate } = useThree();
   const controles = useRef<OrbitControls | null>(null);
   const distanciaBase = useRef(1);
   const deslocamento = useRef(new Vector3());
@@ -42,8 +42,16 @@ export function Orbita({ alvo, relogio }: { alvo: [number, number, number]; relo
     c.update();
     distanciaBase.current = camera.position.distanceTo(c.target);
     controles.current = c;
-    return () => c.dispose();
-  }, [camera, gl, alvo]);
+    /* Pausada, a cena só desenha sob demanda: cada giro (e cada passo do
+       amortecimento e do close-up, que também mudam a câmera) pede o
+       próximo quadro (revisão da fase 8). */
+    const aoMudar = () => invalidate();
+    c.addEventListener('change', aoMudar);
+    return () => {
+      c.removeEventListener('change', aoMudar);
+      c.dispose();
+    };
+  }, [camera, gl, alvo, invalidate]);
 
   useFrame((_, delta) => {
     const c = controles.current;

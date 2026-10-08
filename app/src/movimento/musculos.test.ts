@@ -66,3 +66,14 @@ describe('trechoDoPerfil', () => {
     expect(trechoDoPerfil(perfil, 0.25, 0.75, 1.1)[0]?.[0]).toBeCloseTo(0.055, 6);
   });
 });
+
+describe('flexão do joelho por lado', () => {
+  test('mede cada perna: num pé só, o joelho da perna no ar dobra e o da perna de apoio não', () => {
+    const emPe = montarEsqueleto(amostrar(animacao, 5.0).pose);
+    const pose = { ...amostrar(animacao, 5.0).pose, pes: { direito: { elevacao: 0.2, dz: -0.15 } } };
+    const e = montarEsqueleto(pose);
+    expect(flexaoDoJoelho(e, 'direito')).toBeGreaterThan(flexaoDoJoelho(e, 'esquerdo') + 30);
+    // Sem lado, continua medindo a esquerda (compatível com os testes antigos).
+    expect(flexaoDoJoelho(emPe)).toBeCloseTo(flexaoDoJoelho(emPe, 'esquerdo'), 6);
+  });
+});
