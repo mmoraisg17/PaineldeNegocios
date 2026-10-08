@@ -74,11 +74,15 @@ O CLS da tela do exercício estava em 0,10, no limite. O carregamento da cena n�
 - **Endereço local errado:** com `base: './'`, o `vite preview` serve o app na raiz (`localhost:4173/`), e não em `/PaineldeNegocios/`. Esse subcaminho só existe no Pages. O `curl` "passava" porque o servidor devolvia o `index.html` no lugar do JS.
 - **Primeira versão do vigia de redesenho:** redesenhava a 60 fps com a cena pausada, porque a leitura da base muda o tempo todo e cada mudança renovava 1 s de quadros. Separei leitura nova (1 quadro) de troca de situação (quadros seguidos).
 
+## Configurações do repositório (feitas pelo grupo, 08/10)
+Conferidas pela API do GitHub:
+- **Ruleset `proteger-main`:** ativo no branch padrão. Impede apagar o `main` e reescrever o histórico (force push), sem exceções. Publicar normalmente continua liberado.
+- **Dependabot:** avisos de vulnerabilidade e correções automáticas ligados.
+
 ## Pendências que dependem do grupo
 - **Ler o QR code com a câmera do celular** e conferir se abre o app.
 - **Teste de corredor:** 2 ou 3 pessoas de fora do grupo, cronometrando o fluxo.
 - **Celular físico:** abrir um exercício e ver se a animação está fluida.
-- **Configurações do repositório (GitHub):** ativar o Dependabot e proteger o branch `main`.
 - **E-mail nos commits:** os commits mostram o e-mail pessoal. Dá para usar o endereço "noreply" do GitHub daqui para a frente.
 - **Link do Figma:** conferir se a permissão é "qualquer pessoa com o link pode ver".
 - **Playwright:** decidir se vale instalar, para os E2E virarem teste automático.
