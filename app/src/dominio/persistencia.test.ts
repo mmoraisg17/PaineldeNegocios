@@ -1,8 +1,12 @@
 import { describe, expect, test } from 'vitest';
 import { estadoInicial, type EstadoApp } from './estado';
 import {
+  CHAVES_ANTIGAS,
+  CHAVE_DA_SESSAO,
   CHAVE_DO_ESTADO,
   apagarDados,
+  apagarVersoesAntigas,
+  armazenamentoDaSessao,
   armazenamentoDoNavegador,
   carregarEstado,
   salvarEstado,
@@ -41,7 +45,6 @@ function estadoComDados(): EstadoApp {
           nome: 'Dona Lúcia',
           objetivo: 'equilibrio',
           firmeza: 'as-vezes',
-          acessoriosEmCasa: ['cadeira'],
           inclinacaoMaxima: 2,
         },
         niveis: { 'pes-em-linha': 2 },
@@ -60,20 +63,30 @@ const guardar = (estado: unknown): Armazenamento & { dados: Map<string, string> 
 
 describe('chave do armazenamento', () => {
   test('é versionada', () => {
-    expect(CHAVE_DO_ESTADO).toBe('app-equilibrio:v1');
+    expect(CHAVE_DO_ESTADO).toBe('app-equilibrio:v2');
+  });
+
+  test('a chave da sessão é versionada e diferente da chave do estado', () => {
+    expect(CHAVE_DA_SESSAO).toBe('app-equilibrio:sessao:v2');
+    expect(CHAVE_DA_SESSAO).not.toBe(CHAVE_DO_ESTADO);
+  });
+
+  test('a versão 1 está na lista de chaves antigas', () => {
+    expect(CHAVES_ANTIGAS).toEqual(['app-equilibrio:v1']);
   });
 });
 
 describe('estadoInicial', () => {
-  test('começa sem conta, sem dados e na versão 1', () => {
+  test('começa sem conta, sem dados e na versão 2', () => {
     expect(estadoInicial()).toEqual({
-      versao: 1,
+      versao: 2,
       contaAtual: null,
       praticantes: {},
       acompanhantes: [],
       vinculos: [],
       convites: [],
       recados: [],
+      credenciais: [],
     });
   });
 
@@ -102,7 +115,7 @@ describe('carregarEstado', () => {
   });
 
   test('JSON corrompido volta ao estado inicial, sem lançar erro', () => {
-    const armazenamento = armazenamentoFalso({ [CHAVE_DO_ESTADO]: '{"versao": 1, ' });
+    const armazenamento = armazenamentoFalso({ [CHAVE_DO_ESTADO]: '{"versao": 2, ' });
 
     expect(carregarEstado(armazenamento)).toEqual(estadoInicial());
   });
@@ -122,7 +135,8 @@ describe('carregarEstado', () => {
     ['um texto', 'oi'],
     ['um vetor', []],
     ['uma versão antiga', { ...estadoInicial(), versao: 0 }],
-    ['uma versão futura', { ...estadoInicial(), versao: 2 }],
+    ['uma versão futura', { ...estadoInicial(), versao: 3 }],
+    ['a versão 1, de antes das contas com senha', { ...estadoInicial(), versao: 1 }],
   ])('formato de topo inválido (%s) volta ao estado inicial', (_descricao, conteudo) => {
     expect(carregarEstado(guardar(conteudo))).toEqual(estadoInicial());
   });
@@ -218,6 +232,245 @@ describe('apagarDados', () => {
   test('armazenamento que falha ou ausente devolve false, sem lançar erro', () => {
     expect(apagarDados(armazenamentoQueFalha())).toBe(false);
     expect(apagarDados(null)).toBe(false);
+  });
+});
+
+const comConta = (manterConectado?: boolean): EstadoApp => ({
+  ...estadoComDados(),
+  contaAtual: { papel: 'praticante', id: 'lucia', ...(manterConectado === undefined ? {} : { manterConectado }) },
+});
+
+describe('manter conectado (local x sessão)', () => {
+  test('manterConectado true grava o estado inteiro no local e nada na sessão', () => {
+    const local = armazenamentoFalso();
+    const sessao = armazenamentoFalso();
+
+    const gravou = salvarEstado(local, comConta(true), sessao);
+
+    expect(gravou).toBe(true);
+    expect(JSON.parse(local.dados.get(CHAVE_DO_ESTADO) ?? 'null')).toEqual(comConta(true));
+    expect(sessao.dados.has(CHAVE_DA_SESSAO)).toBe(false);
+  });
+
+  test('manterConectado ausente vale como true', () => {
+    const local = armazenamentoFalso();
+    const sessao = armazenamentoFalso();
+
+    salvarEstado(local, comConta(), sessao);
+
+    expect(JSON.parse(local.dados.get(CHAVE_DO_ESTADO) ?? 'null').contaAtual).toEqual({ papel: 'praticante', id: 'lucia' });
+    expect(sessao.dados.has(CHAVE_DA_SESSAO)).toBe(false);
+  });
+
+  test('manterConectado false tira a conta do local e guarda só a conta na sessão', () => {
+    const local = armazenamentoFalso();
+    const sessao = armazenamentoFalso();
+
+    salvarEstado(local, comConta(false), sessao);
+
+    const noLocal = JSON.parse(local.dados.get(CHAVE_DO_ESTADO) ?? 'null');
+    expect(noLocal.contaAtual).toBeNull();
+    expect(noLocal.praticantes.lucia.id).toBe('lucia');
+    expect(JSON.parse(sessao.dados.get(CHAVE_DA_SESSAO) ?? 'null')).toEqual({
+      papel: 'praticante',
+      id: 'lucia',
+      manterConectado: false,
+    });
+  });
+
+  test('o estado recebido não é alterado quando a conta vai para a sessão', () => {
+    const estado = Object.freeze({ ...comConta(false) });
+
+    expect(() => salvarEstado(armazenamentoFalso(), estado, armazenamentoFalso())).not.toThrow();
+    expect(estado.contaAtual?.id).toBe('lucia');
+  });
+
+  test('sem armazenamento de sessão, manterConectado false não deixa a conta no local', () => {
+    const local = armazenamentoFalso();
+
+    salvarEstado(local, comConta(false));
+
+    expect(JSON.parse(local.dados.get(CHAVE_DO_ESTADO) ?? 'null').contaAtual).toBeNull();
+  });
+
+  test('sair (sem conta) apaga a conta que estava na sessão', () => {
+    const local = armazenamentoFalso();
+    const sessao = armazenamentoFalso({ [CHAVE_DA_SESSAO]: '{"papel":"praticante","id":"lucia"}' });
+
+    salvarEstado(local, { ...comConta(false), contaAtual: null }, sessao);
+
+    expect(sessao.dados.has(CHAVE_DA_SESSAO)).toBe(false);
+  });
+
+  test('trocar de "não manter" para "manter" apaga a conta da sessão', () => {
+    const local = armazenamentoFalso();
+    const sessao = armazenamentoFalso();
+    salvarEstado(local, comConta(false), sessao);
+
+    salvarEstado(local, comConta(true), sessao);
+
+    expect(sessao.dados.has(CHAVE_DA_SESSAO)).toBe(false);
+  });
+
+  test('carrega a conta da sessão quando o local veio sem conta (reabrir a mesma aba)', () => {
+    const local = armazenamentoFalso();
+    const sessao = armazenamentoFalso();
+    salvarEstado(local, comConta(false), sessao);
+
+    const estado = carregarEstado(local, sessao);
+
+    expect(estado.contaAtual).toEqual({ papel: 'praticante', id: 'lucia', manterConectado: false });
+    expect(estado.praticantes['lucia']?.id).toBe('lucia');
+  });
+
+  test('numa aba nova (sessão vazia) a pessoa que não quis ficar conectada volta sem conta', () => {
+    const local = armazenamentoFalso();
+    salvarEstado(local, comConta(false), armazenamentoFalso());
+
+    expect(carregarEstado(local, armazenamentoFalso()).contaAtual).toBeNull();
+  });
+
+  test('a conta do local vence a da sessão', () => {
+    const local = guardar({ ...estadoComDados(), contaAtual: { papel: 'acompanhante', id: 'carlos' } });
+    const sessao = armazenamentoFalso({ [CHAVE_DA_SESSAO]: '{"papel":"praticante","id":"lucia"}' });
+
+    expect(carregarEstado(local, sessao).contaAtual).toEqual({ papel: 'acompanhante', id: 'carlos' });
+  });
+
+  test.each([
+    ['JSON corrompido', '{"papel": "prat'],
+    ['conta que não existe', '{"papel":"praticante","id":"fantasma"}'],
+    ['papel inválido', '{"papel":"admin","id":"lucia"}'],
+    ['null', 'null'],
+    ['texto solto', '"lucia"'],
+  ])('sessão com %s é ignorada, sem lançar erro', (_nome, conteudo) => {
+    const local = guardar({ ...estadoComDados(), contaAtual: null });
+    const sessao = armazenamentoFalso({ [CHAVE_DA_SESSAO]: conteudo });
+
+    expect(carregarEstado(local, sessao).contaAtual).toBeNull();
+  });
+
+  test('sessão que lança erro ao ler é ignorada', () => {
+    const local = guardar({ ...estadoComDados(), contaAtual: null });
+
+    expect(carregarEstado(local, armazenamentoQueFalha()).contaAtual).toBeNull();
+  });
+
+  test('sessão ausente (null) é ignorada', () => {
+    const local = guardar({ ...estadoComDados(), contaAtual: null });
+
+    expect(carregarEstado(local, null).contaAtual).toBeNull();
+  });
+
+  test('salvar com sessão que falha não lança e devolve false, mas o local fica gravado', () => {
+    const local = armazenamentoFalso();
+
+    const gravou = salvarEstado(local, comConta(false), armazenamentoQueFalha());
+
+    expect(gravou).toBe(false);
+    expect(local.dados.has(CHAVE_DO_ESTADO)).toBe(true);
+  });
+
+  test('salvar com sessão que falha e manterConectado true não lança', () => {
+    expect(() => salvarEstado(armazenamentoFalso(), comConta(true), armazenamentoQueFalha())).not.toThrow();
+  });
+});
+
+describe('apagarDados com sessão', () => {
+  test('apaga o estado e a conta da sessão', () => {
+    const local = guardar(estadoComDados());
+    const sessao = armazenamentoFalso({ [CHAVE_DA_SESSAO]: '{"papel":"praticante","id":"lucia"}', outra: 'x' });
+
+    const apagou = apagarDados(local, sessao);
+
+    expect(apagou).toBe(true);
+    expect(local.dados.has(CHAVE_DO_ESTADO)).toBe(false);
+    expect(sessao.dados.has(CHAVE_DA_SESSAO)).toBe(false);
+    expect(sessao.dados.get('outra')).toBe('x');
+  });
+
+  test('sessão que falha não impede de apagar o local, mas devolve false', () => {
+    const local = guardar(estadoComDados());
+
+    expect(apagarDados(local, armazenamentoQueFalha())).toBe(false);
+    expect(local.dados.has(CHAVE_DO_ESTADO)).toBe(false);
+  });
+
+  test('sem local ainda apaga a sessão, e devolve false', () => {
+    const sessao = armazenamentoFalso({ [CHAVE_DA_SESSAO]: '{}' });
+
+    expect(apagarDados(null, sessao)).toBe(false);
+    expect(sessao.dados.has(CHAVE_DA_SESSAO)).toBe(false);
+  });
+});
+
+describe('apagarVersoesAntigas', () => {
+  test('remove a chave da versão 1 e preserva a atual e as outras', () => {
+    const armazenamento = armazenamentoFalso({
+      'app-equilibrio:v1': '{"versao":1}',
+      [CHAVE_DO_ESTADO]: '{}',
+      'app-equilibrio:preferencias': '{}',
+      outra: 'x',
+    });
+
+    const apagou = apagarVersoesAntigas(armazenamento);
+
+    expect(apagou).toBe(true);
+    expect([...armazenamento.dados.keys()].toSorted()).toEqual(['app-equilibrio:preferencias', CHAVE_DO_ESTADO, 'outra'].toSorted());
+  });
+
+  test('não faz nada (e não falha) quando não há chave antiga', () => {
+    const armazenamento = armazenamentoFalso({ [CHAVE_DO_ESTADO]: '{}' });
+
+    expect(apagarVersoesAntigas(armazenamento)).toBe(true);
+    expect(armazenamento.dados.has(CHAVE_DO_ESTADO)).toBe(true);
+  });
+
+  test('armazenamento que falha ou ausente devolve false, sem lançar erro', () => {
+    expect(apagarVersoesAntigas(armazenamentoQueFalha())).toBe(false);
+    expect(apagarVersoesAntigas(null)).toBe(false);
+    expect(apagarVersoesAntigas(undefined)).toBe(false);
+  });
+
+  test('tenta apagar todas as chaves antigas mesmo se uma falhar', () => {
+    const tentadas: string[] = [];
+    const armazenamento: Armazenamento = {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: (chave) => {
+        tentadas.push(chave);
+        throw new Error('bloqueado');
+      },
+    };
+
+    expect(apagarVersoesAntigas(armazenamento)).toBe(false);
+    expect(tentadas).toEqual([...CHAVES_ANTIGAS]);
+  });
+});
+
+describe('armazenamentoDaSessao', () => {
+  test('devolve o sessionStorage do ambiente quando está disponível', () => {
+    expect(armazenamentoDaSessao()).toBe(globalThis.sessionStorage);
+  });
+
+  test('devolve o sessionStorage do escopo informado', () => {
+    const armazenamento = armazenamentoFalso();
+
+    expect(armazenamentoDaSessao({ sessionStorage: armazenamento as unknown as Storage })).toBe(armazenamento);
+  });
+
+  test('devolve null quando só acessar o sessionStorage já lança erro', () => {
+    const bloqueado = {
+      get sessionStorage(): Storage {
+        throw new Error('SecurityError');
+      },
+    };
+
+    expect(armazenamentoDaSessao(bloqueado)).toBeNull();
+  });
+
+  test('devolve null quando o ambiente não tem sessionStorage', () => {
+    expect(armazenamentoDaSessao({ sessionStorage: undefined as unknown as Storage })).toBeNull();
   });
 });
 

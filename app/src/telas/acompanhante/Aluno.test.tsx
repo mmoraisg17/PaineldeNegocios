@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test } from 'vitest';
-import { type EstadoApp, rotinaDoPraticante } from '../../dominio';
+import { type DadosPraticante, type EstadoApp, rotinaDoPraticante } from '../../dominio';
 import { gerarConviteDe, revogarVinculo, usarCodigo } from '../../estado/acoes';
 import { AGORA_DA_DEMO, renderizarApp, usarAmbienteDeTeste } from '../../test/renderizarApp';
 
@@ -90,13 +90,14 @@ describe('relatório', () => {
     expect(within(alertas).getByText('Atenção')).toBeInTheDocument();
   });
 
-  test('o histórico começa pelo treino mais recente e traz exercício, nível, nota e percepção', async () => {
+  test('na aba Treinos, o histórico começa pelo treino mais recente e traz exercício, nível, nota e percepção', async () => {
     // Arrange
     const usuario = userEvent.setup();
     abrir('carlos', 'lucia');
 
     // Act
     const historico = screen.getByRole('region', { name: 'Histórico de treinos' });
+    await usuario.click(within(historico).getByRole('tab', { name: 'Treinos' }));
     const treinos = within(historico).getAllByRole('listitem', { name: /^Treino de / });
 
     // Assert
@@ -110,6 +111,167 @@ describe('relatório', () => {
 
     // Assert: 16 treinos feitos (18 planejados, 2 faltas)
     expect(within(historico).getAllByRole('listitem', { name: /^Treino de / })).toHaveLength(16);
+  });
+});
+
+const historicoDaTela = () => screen.getByRole('region', { name: 'Histórico de treinos' });
+
+/* Cenário: troca campos da Dona Lúcia antes de a tela abrir. */
+const alterarLucia =
+  (mudancas: Partial<DadosPraticante>) =>
+  (e: EstadoApp): EstadoApp => {
+    const lucia = e.praticantes['lucia'];
+    return lucia ? { ...e, praticantes: { ...e.praticantes, lucia: { ...lucia, ...mudancas } } } : e;
+  };
+
+describe('histórico de treinos: gráficos, tabelas e treinos', () => {
+  test('abre na aba Gráficos, com as três abas e o painel dos gráficos', () => {
+    // Arrange / Act
+    abrir('carlos', 'lucia');
+
+    // Assert
+    const historico = historicoDaTela();
+    expect(within(historico).getAllByRole('tab').map((aba) => aba.textContent)).toEqual(['Gráficos', 'Tabelas', 'Treinos']);
+    expect(within(historico).getByRole('tab', { name: 'Gráficos' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(historico).getByRole('tabpanel', { name: 'Gráficos' })).toBeInTheDocument();
+    expect(within(historico).queryByRole('table')).not.toBeInTheDocument();
+    expect(within(historico).queryByRole('listitem', { name: /^Treino de / })).not.toBeInTheDocument();
+  });
+
+  test('troca de aba pelo clique e pelas setas do teclado', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    abrir('carlos', 'lucia');
+    const historico = historicoDaTela();
+
+    // Act: clique
+    await usuario.click(within(historico).getByRole('tab', { name: 'Tabelas' }));
+
+    // Assert
+    expect(within(historico).getByRole('tabpanel', { name: 'Tabelas' })).toBeInTheDocument();
+    expect(within(historico).getAllByRole('table')).toHaveLength(2);
+
+    // Act: seta para a direita vai a Treinos
+    await usuario.keyboard('{ArrowRight}');
+
+    // Assert
+    expect(within(historico).getByRole('tab', { name: 'Treinos' })).toHaveFocus();
+    expect(within(historico).getByRole('tabpanel', { name: 'Treinos' })).toBeInTheDocument();
+    expect(within(historico).getAllByRole('listitem', { name: /^Treino de / })).toHaveLength(5);
+  });
+
+  test('os gráficos têm nome acessível com o valor de cada semana', () => {
+    // Arrange / Act
+    abrir('carlos', 'lucia');
+
+    // Assert
+    const historico = historicoDaTela();
+    const treinos = within(historico).getByRole('img', { name: /^Treinos por semana/ });
+    expect(treinos).toHaveAccessibleName(/semana até 07\/10: \d de 3/);
+    expect(treinos).toHaveAccessibleName(/semana até 02\/09: \d de 3/);
+    for (const titulo of ['Nota média', 'Simetria', 'Estabilidade', 'Apoio nas barras']) {
+      const grafico = within(historico).getByRole('img', { name: new RegExp(`^${titulo}\\.`) });
+      expect(grafico).toHaveAccessibleName(/semana até 07\/10: \d+( pontos|%)/);
+      expect(grafico).toHaveAccessibleName(new RegExp(`${titulo}: `));
+    }
+  });
+
+  test('a soma dos treinos por semana no gráfico bate com os 16 treinos feitos', () => {
+    // Arrange / Act
+    abrir('carlos', 'lucia');
+
+    // Assert
+    const nome = within(historicoDaTela()).getByRole('img', { name: /^Treinos por semana/ }).getAttribute('aria-label') ?? '';
+    const feitos = [...nome.matchAll(/semana até \d{2}\/\d{2}: (\d+) de 3/g)].map((m) => Number(m[1]));
+    expect(feitos).toHaveLength(6);
+    expect(feitos.reduce((soma, valor) => soma + valor, 0)).toBe(16);
+  });
+
+  test('a tabela "Semana a semana" tem 6 linhas de dados e a soma de treinos bate com o histórico', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    abrir('carlos', 'lucia');
+    const historico = historicoDaTela();
+
+    // Act
+    await usuario.click(within(historico).getByRole('tab', { name: 'Tabelas' }));
+
+    // Assert
+    const tabela = within(historico).getByRole('table', { name: 'Semana a semana' });
+    const linhas = within(tabela).getAllByRole('row').slice(1);
+    expect(linhas).toHaveLength(6);
+    expect(within(linhas.at(-1)!).getByRole('rowheader')).toHaveTextContent('07/10');
+    const feitos = linhas.map((linha) => Number(within(linha).getAllByRole('cell')[0]?.textContent?.match(/^(\d+) de 3$/)?.[1]));
+    expect(feitos.reduce((soma, valor) => soma + valor, 0)).toBe(16);
+  });
+
+  test('a tabela "Por exercício" traz um exercício da rotina da aluna com nível, nota e variação', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = abrir('carlos', 'lucia');
+    const historico = historicoDaTela();
+    const notas = (app.estado().praticantes['lucia']?.sessoes ?? [])
+      .toSorted((a, b) => Date.parse(a.data) - Date.parse(b.data))
+      .flatMap((sessao) => sessao.exercicios.filter((e) => e.id === 'sentar-e-levantar').map((e) => Math.round(e.nota)));
+    const variacao = notas.at(-1)! - notas[0]!;
+    const textoDaVariacao = `${variacao > 0 ? '+' : variacao < 0 ? '−' : ''}${Math.abs(variacao)}`;
+
+    // Act
+    await usuario.click(within(historico).getByRole('tab', { name: 'Tabelas' }));
+
+    // Assert
+    const tabela = within(historico).getByRole('table', { name: 'Por exercício' });
+    const linha = within(tabela).getByRole('row', { name: /^Sentar e levantar/ });
+    const celulas = within(linha).getAllByRole('cell');
+    expect(celulas[0]).toHaveTextContent(String(notas.length));
+    expect(celulas[2]).toHaveAccessibleName(`de ${notas[0]} para ${notas.at(-1)}`);
+    expect(celulas[3]).toHaveTextContent(`${textoDaVariacao} ${Math.abs(variacao) === 1 ? 'ponto' : 'pontos'}`);
+  });
+
+  test('as tabelas rolam na horizontal dentro de regiões focáveis pelo teclado', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    abrir('carlos', 'lucia');
+    const historico = historicoDaTela();
+
+    // Act
+    await usuario.click(within(historico).getByRole('tab', { name: 'Tabelas' }));
+
+    // Assert
+    const regioes = within(historico).getAllByRole('region');
+    expect(regioes).toHaveLength(2);
+    for (const regiao of regioes) expect(regiao).toHaveAttribute('tabindex', '0');
+  });
+
+  test('um aluno sem treinos vê a mensagem nos gráficos e nas tabelas, e nenhum gráfico vazio', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    abrir('carlos', 'lucia', alterarLucia({ sessoes: [] }));
+    const historico = historicoDaTela();
+
+    // Assert: gráficos
+    expect(within(historico).getByText('Ainda não há treinos registrados.')).toBeInTheDocument();
+    expect(within(historico).queryByRole('img')).not.toBeInTheDocument();
+
+    // Act / Assert: tabelas
+    await usuario.click(within(historico).getByRole('tab', { name: 'Tabelas' }));
+    expect(within(historico).getByText('Ainda não há treinos registrados.')).toBeInTheDocument();
+    expect(within(historico).queryByRole('table')).not.toBeInTheDocument();
+
+    // Act / Assert: treinos
+    await usuario.click(within(historico).getByRole('tab', { name: 'Treinos' }));
+    expect(within(historico).getByText('Ainda não há treinos registrados.')).toBeInTheDocument();
+  });
+
+  test('os treinos planejados vêm da rotina ajustada pelo profissional', () => {
+    // Arrange
+    const ajuste = { autor: 'Carlos', autorId: 'carlos', niveisFixados: {}, metas: {}, frequenciaSemanal: 4 };
+
+    // Act
+    abrir('carlos', 'lucia', alterarLucia({ ajuste }));
+
+    // Assert
+    expect(within(historicoDaTela()).getByRole('img', { name: /^Treinos por semana/ })).toHaveAccessibleName(/semana até 07\/10: \d de 4/);
   });
 });
 

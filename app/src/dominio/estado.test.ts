@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { Vinculo } from './acompanhamento';
-import { ajusteVigente, estadoInicial, rotinaDoPraticante, type EstadoApp } from './estado';
+import type { Credencial } from './credenciais';
+import { VERSAO_DO_ESTADO, ajusteVigente, estadoInicial, precisaDoPrimeiroUso, rotinaDoPraticante, type EstadoApp } from './estado';
 import { congelarProfundo } from './imutavel';
 import type { AjusteProfissional } from './rotina';
 
@@ -33,7 +34,6 @@ function estadoCom(vinculos: Vinculo[], ajuste: AjusteProfissional | null = AJUS
           nome: 'Lúcia',
           objetivo: 'equilibrio',
           firmeza: 'as-vezes',
-          acessoriosEmCasa: ['cadeira', 'elastico'],
           inclinacaoMaxima: 2,
         },
         niveis: {},
@@ -121,5 +121,93 @@ describe('rotinaDoPraticante', () => {
 
   test('devolve undefined para praticante inexistente', () => {
     expect(rotinaDoPraticante(estadoCom([]), 'ninguem')).toBeUndefined();
+  });
+});
+
+function credencial(sobrescrever: Partial<Credencial> = {}): Credencial {
+  return {
+    email: 'nova@exemplo.com',
+    papel: 'praticante',
+    pessoaId: 'nova',
+    sal: '00'.repeat(16),
+    hash: '11'.repeat(32),
+    iteracoes: 600_000,
+    criadaEm: '2026-10-07T12:00:00.000Z',
+    ...sobrescrever,
+  };
+}
+
+describe('estadoInicial', () => {
+  test('está na versão 2, sem credenciais e sem conta', () => {
+    const estado = estadoInicial();
+
+    expect(VERSAO_DO_ESTADO).toBe(2);
+    expect(estado.versao).toBe(2);
+    expect(estado.credenciais).toEqual([]);
+    expect(estado.contaAtual).toBeNull();
+  });
+
+  test('devolve uma lista de credenciais nova a cada chamada', () => {
+    expect(estadoInicial().credenciais).not.toBe(estadoInicial().credenciais);
+  });
+});
+
+const semPraticante = (conta: EstadoApp['contaAtual'], credenciais: Credencial[]): EstadoApp => ({
+  ...estadoInicial(),
+  contaAtual: conta,
+  credenciais,
+});
+
+describe('precisaDoPrimeiroUso', () => {
+  test('é verdadeiro para praticante com credencial e ainda sem triagem', () => {
+    const estado = semPraticante({ papel: 'praticante', id: 'nova' }, [credencial()]);
+
+    expect(precisaDoPrimeiroUso(estado)).toBe(true);
+  });
+
+  test('é falso quando o praticante já existe (triagem concluída)', () => {
+    const base = estadoCom([], null);
+    const estado: EstadoApp = {
+      ...base,
+      contaAtual: { papel: 'praticante', id: 'lucia' },
+      credenciais: [credencial({ pessoaId: 'lucia' })],
+    };
+
+    expect(precisaDoPrimeiroUso(estado)).toBe(false);
+  });
+
+  test('é falso sem conta atual', () => {
+    expect(precisaDoPrimeiroUso(semPraticante(null, [credencial()]))).toBe(false);
+  });
+
+  test('é falso para acompanhante, mesmo com credencial de mesmo id', () => {
+    const estado = semPraticante({ papel: 'acompanhante', id: 'nova' }, [credencial({ papel: 'acompanhante' })]);
+
+    expect(precisaDoPrimeiroUso(estado)).toBe(false);
+  });
+
+  test('é falso quando não existe credencial de praticante para o id (conta que não veio do cadastro)', () => {
+    expect(precisaDoPrimeiroUso(semPraticante({ papel: 'praticante', id: 'nova' }, []))).toBe(false);
+    expect(
+      precisaDoPrimeiroUso(semPraticante({ papel: 'praticante', id: 'nova' }, [credencial({ pessoaId: 'outra' })])),
+    ).toBe(false);
+  });
+
+  test('não confunde com credencial de acompanhante do mesmo id', () => {
+    const estado = semPraticante({ papel: 'praticante', id: 'nova' }, [credencial({ papel: 'acompanhante' })]);
+
+    expect(precisaDoPrimeiroUso(estado)).toBe(false);
+  });
+
+  test('ignora manterConectado', () => {
+    const estado = semPraticante({ papel: 'praticante', id: 'nova', manterConectado: false }, [credencial()]);
+
+    expect(precisaDoPrimeiroUso(estado)).toBe(true);
+  });
+
+  test('não é enganado por id herdado de Object (constructor)', () => {
+    const estado = semPraticante({ papel: 'praticante', id: 'constructor' }, [credencial({ pessoaId: 'constructor' })]);
+
+    expect(precisaDoPrimeiroUso(estado)).toBe(true);
   });
 });

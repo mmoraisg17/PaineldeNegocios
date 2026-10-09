@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { TOLERANCIA_DA_META_EM_PONTOS, alertasDoAluno, podeVer, permissoes, revogar } from './acompanhamento';
-import { criarEstadoDemo, criarGeradorPseudoaleatorio, IDS_DEMO } from './demo';
+import { CONTAS_DA_DEMO, SENHA_DA_DEMO, criarEstadoDemo, criarGeradorPseudoaleatorio, IDS_DEMO } from './demo';
+import { ITERACOES_DA_SENHA, buscarCredencial, conferirSenha } from './credenciais';
 import { carregarEstado, salvarEstado, type Armazenamento } from './persistencia';
 import { buscarExercicio } from './catalogo';
 import { ajusteVigente, rotinaDoPraticante } from './estado';
@@ -360,7 +361,8 @@ describe('estado de demonstração: isolamento de referências', () => {
     const outro = criarEstadoDemo(AGORA);
 
     expect(outro.praticantes['lucia']?.perfil).not.toBe(lucia?.perfil);
-    expect(outro.praticantes['lucia']?.perfil.acessoriosEmCasa).not.toBe(lucia?.perfil.acessoriosEmCasa);
+    expect(outro.credenciais).not.toBe(demo.credenciais);
+    expect(outro.credenciais[0]).not.toBe(demo.credenciais[0]);
     expect(outro.praticantes['rafael']?.ajuste).not.toBe(rafael?.ajuste);
     expect(outro.praticantes['rafael']?.ajuste?.metas).not.toBe(rafael?.ajuste?.metas);
     expect(outro.acompanhantes[0]).not.toBe(demo.acompanhantes[0]);
@@ -373,14 +375,98 @@ describe('estado de demonstração: isolamento de referências', () => {
     const perfil = primeiro.praticantes['lucia']?.perfil;
     if (perfil) {
       perfil.nome = 'ALTERADO';
-      perfil.acessoriosEmCasa.push('barras');
     }
+    const credencial = primeiro.credenciais[0];
+    if (credencial) credencial.email = 'alterado@demo.test';
     const ajuste = primeiro.praticantes['rafael']?.ajuste;
     if (ajuste?.metas) ajuste.metas['miniagachamento-simetrico'] = { simetriaEsquerda: 99 };
 
     const segundo = criarEstadoDemo(AGORA);
     expect(segundo.praticantes['lucia']?.perfil.nome).toBe(nomeOriginal);
-    expect(segundo.praticantes['lucia']?.perfil.acessoriosEmCasa).toEqual(['cadeira', 'elastico']);
+    expect(segundo.credenciais[0]?.email).toBe('lucia@demo.test');
     expect(segundo.praticantes['rafael']?.ajuste?.metas).toEqual({ 'miniagachamento-simetrico': { simetriaEsquerda: 50 } });
+  });
+});
+
+describe('estado de demonstração: contas com senha', () => {
+  test('a senha pública da demonstração é demo1234', () => {
+    expect(SENHA_DA_DEMO).toBe('demo1234');
+  });
+
+  test('lista as 5 contas na ordem lucia, rafael, carlos, ana, marta', () => {
+    expect(CONTAS_DA_DEMO).toEqual([
+      { papel: 'praticante', pessoaId: 'lucia', email: 'lucia@demo.test' },
+      { papel: 'praticante', pessoaId: 'rafael', email: 'rafael@demo.test' },
+      { papel: 'acompanhante', pessoaId: 'carlos', email: 'carlos@demo.test' },
+      { papel: 'acompanhante', pessoaId: 'ana', email: 'ana@demo.test' },
+      { papel: 'acompanhante', pessoaId: 'marta', email: 'marta@demo.test' },
+    ]);
+  });
+
+  test('cada conta da lista tem uma credencial com o mesmo e-mail, papel e pessoa', () => {
+    for (const conta of CONTAS_DA_DEMO) {
+      const credencial = buscarCredencial(demo.credenciais, conta.email, conta.papel);
+      expect(credencial).toMatchObject({ email: conta.email, papel: conta.papel, pessoaId: conta.pessoaId });
+    }
+    expect(demo.credenciais).toHaveLength(CONTAS_DA_DEMO.length);
+  });
+
+  test('cada credencial aponta para uma pessoa que existe no estado', () => {
+    for (const credencial of demo.credenciais) {
+      const existe =
+        credencial.papel === 'praticante'
+          ? credencial.pessoaId in demo.praticantes
+          : demo.acompanhantes.some((pessoa) => pessoa.id === credencial.pessoaId);
+      expect(existe).toBe(true);
+    }
+  });
+
+  test('usa sal diferente em cada conta, 600 mil iterações e valores em hexadecimal', () => {
+    const sais = new Set(demo.credenciais.map((credencial) => credencial.sal));
+
+    expect(sais.size).toBe(demo.credenciais.length);
+    for (const credencial of demo.credenciais) {
+      expect(credencial.iteracoes).toBe(ITERACOES_DA_SENHA);
+      expect(credencial.sal).toMatch(/^[0-9a-f]{32}$/);
+      expect(credencial.hash).toMatch(/^[0-9a-f]{64}$/);
+    }
+  });
+
+  test('nenhum hash guarda a senha em texto', () => {
+    expect(JSON.stringify(demo.credenciais)).not.toContain(SENHA_DA_DEMO);
+  });
+
+  test(
+    'a senha demo1234 abre uma conta de praticante e uma de acompanhante, e outra senha não abre',
+    async () => {
+      const praticante = buscarCredencial(demo.credenciais, 'lucia@demo.test', 'praticante');
+      const acompanhante = buscarCredencial(demo.credenciais, 'ana@demo.test', 'acompanhante');
+
+      expect(praticante && (await conferirSenha(praticante, SENHA_DA_DEMO))).toBe(true);
+      expect(acompanhante && (await conferirSenha(acompanhante, SENHA_DA_DEMO))).toBe(true);
+      expect(praticante && (await conferirSenha(praticante, 'demo12345'))).toBe(false);
+      expect(acompanhante && (await conferirSenha(acompanhante, 'Demo1234'))).toBe(false);
+    },
+    20000,
+  );
+
+  test(
+    'as outras três contas também aceitam demo1234',
+    async () => {
+      for (const email of ['rafael@demo.test', 'carlos@demo.test', 'marta@demo.test']) {
+        const papel = email.startsWith('rafael') ? 'praticante' : 'acompanhante';
+        const credencial = buscarCredencial(demo.credenciais, email, papel);
+        expect(credencial && (await conferirSenha(credencial, SENHA_DA_DEMO))).toBe(true);
+      }
+    },
+    20000,
+  );
+
+  test('a rotina e o histórico das contas de demonstração seguem o mesmo sem a pergunta "o que há em casa"', () => {
+    // Lúcia fica com a trilha inteira (4 exercícios); Rafael também (4, da trilha de fisio).
+    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(4);
+    expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(4);
+    expect(lucia?.sessoes).toHaveLength(16);
+    expect(rafael?.sessoes).toHaveLength(17);
   });
 });

@@ -1,4 +1,13 @@
 import type { Convite, StatusDoVinculo, TipoAcompanhante, Vinculo } from './acompanhamento';
+import {
+  BYTES_DO_HASH,
+  BYTES_DO_SAL,
+  ITERACOES_MAXIMAS_ACEITAS,
+  ITERACOES_MINIMAS_ACEITAS,
+  emailValido,
+  normalizarEmail,
+  type Credencial,
+} from './credenciais';
 import { TAMANHO_MAXIMO_DO_RECADO } from './estado';
 import {
   estadoInicial,
@@ -13,7 +22,7 @@ import {
 import { TAMANHO_MAXIMO_DA_FUNCAO, limparNome, type Firmeza, type Objetivo, type Perfil } from './perfil';
 import type { AjusteProfissional, MetaDeSimetria, NiveisAtuais } from './rotina';
 import type { ResultadoExercicio, Sessao } from './sessao';
-import { IDS_DOS_EXERCICIOS, type Acessorio, type IdExercicio, type Inclinacao, type Nivel, type Percepcao } from './tipos';
+import { IDS_DOS_EXERCICIOS, type IdExercicio, type Inclinacao, type Nivel, type Percepcao } from './tipos';
 
 /* Sanitização do estado lido do aparelho. O dado salvo é "não confiável": pode
    ter vindo de uma versão antiga, de uma edição manual ou de corrupção.
@@ -26,7 +35,6 @@ type Objeto = Record<string, unknown>;
 
 const OBJETIVOS: readonly Objetivo[] = ['equilibrio', 'fortalecimento', 'joelho', 'tornozelo'];
 const FIRMEZAS: readonly Firmeza[] = ['preciso-apoio', 'as-vezes', 'firme'];
-const ACESSORIOS: readonly Acessorio[] = ['barras', 'elastico', 'inclinacao', 'cadeira'];
 const TIPOS: readonly TipoAcompanhante[] = ['profissional', 'familiar'];
 const STATUS: readonly StatusDoVinculo[] = ['pendente', 'autorizado', 'revogado'];
 const PERCEPCOES: readonly Percepcao[] = ['facil', 'ok', 'dificil'];
@@ -105,8 +113,7 @@ function sanearPerfil(valor: unknown): Perfil | undefined {
   const firmeza = dentroDe(FIRMEZAS, valor['firmeza']);
   const inclinacaoMaxima = dentroDe(INCLINACOES, valor['inclinacaoMaxima']);
   if (!ehTexto(valor['nome']) || !objetivo || !firmeza || inclinacaoMaxima === undefined) return undefined;
-  const acessoriosEmCasa = sanearLista(valor['acessoriosEmCasa'], (item) => dentroDe(ACESSORIOS, item));
-  return { nome: limparNome(valor['nome']), objetivo, firmeza, acessoriosEmCasa, inclinacaoMaxima };
+  return { nome: limparNome(valor['nome']), objetivo, firmeza, inclinacaoMaxima };
 }
 
 function sanearResultado(valor: unknown): ResultadoExercicio | undefined {
@@ -198,29 +205,89 @@ function sanearRecado(valor: unknown): Recado | undefined {
   return campos ? { ...campos, texto: campos.texto.slice(0, TAMANHO_MAXIMO_DO_RECADO), lido: valor['lido'] } : undefined;
 }
 
+const hexadecimalDe = (bytes: number): RegExp => new RegExp(`^[0-9a-f]{${bytes * 2}}$`);
+const SAL_VALIDO = hexadecimalDe(BYTES_DO_SAL);
+const HASH_VALIDO = hexadecimalDe(BYTES_DO_HASH);
+
+/* Credencial lida do aparelho. As iterações têm piso e teto (ver
+   credenciais.ts) para um localStorage adulterado nem enfraquecer nem travar o
+   login. Montada campo a campo: um campo extra (uma senha em texto que alguém
+   escreveu ali) não passa. */
+function sanearCredencial(valor: unknown): Credencial | undefined {
+  if (!ehObjeto(valor)) return undefined;
+  const { email, papel: papelBruto, pessoaId, sal, hash, iteracoes, criadaEm } = valor;
+  const papel = dentroDe(PAPEIS, papelBruto);
+  if (!ehTexto(email) || !emailValido(email) || !papel) return undefined;
+  if (!ehTexto(pessoaId) || !ehTexto(criadaEm)) return undefined;
+  if (!ehTexto(sal) || !SAL_VALIDO.test(sal) || !ehTexto(hash) || !HASH_VALIDO.test(hash)) return undefined;
+  const iteracoesValidas =
+    ehNumero(iteracoes) &&
+    Number.isInteger(iteracoes) &&
+    iteracoes >= ITERACOES_MINIMAS_ACEITAS &&
+    iteracoes <= ITERACOES_MAXIMAS_ACEITAS;
+  if (!iteracoesValidas) return undefined;
+  return { email: normalizarEmail(email), papel, pessoaId, sal, hash, iteracoes, criadaEm };
+}
+
+/* E-mail é único por papel: se houver repetida (dado corrompido), vale a
+   primeira, a mais antiga. */
+function sanearCredenciais(valor: unknown): Credencial[] {
+  const lidas = sanearLista(valor, sanearCredencial);
+  return lidas.filter(
+    (credencial, posicao) =>
+      lidas.findIndex((outra) => outra.email === credencial.email && outra.papel === credencial.papel) === posicao,
+  );
+}
+
+type PessoasConhecidas = {
+  praticantes: Objeto;
+  acompanhantes: readonly Acompanhante[];
+  credenciais: readonly Credencial[];
+};
+
 /* Uma conta atual que aponta para alguém que não existe mais (cadastro
    descartado, por exemplo) viraria uma tela quebrada: volta para "ninguém
-   entrou". */
-function sanearConta(valor: unknown, praticantes: Objeto, acompanhantes: readonly Acompanhante[]): ContaAtual | null {
+   entrou". O praticante existe quando tem dados OU quando tem credencial de
+   praticante (cadastrou-se, mas a triagem ainda não terminou). */
+function contaExiste(papel: PapelDaConta, id: string, pessoas: PessoasConhecidas): boolean {
+  if (papel === 'acompanhante') return pessoas.acompanhantes.some((pessoa) => pessoa.id === id);
+  return (
+    Object.hasOwn(pessoas.praticantes, id) ||
+    pessoas.credenciais.some((credencial) => credencial.papel === 'praticante' && credencial.pessoaId === id)
+  );
+}
+
+function sanearConta(valor: unknown, pessoas: PessoasConhecidas): ContaAtual | null {
   if (!ehObjeto(valor) || !ehTexto(valor['id'])) return null;
   const papel = dentroDe(PAPEIS, valor['papel']);
   const id = valor['id'];
-  const existe =
-    papel === 'praticante' ? Object.hasOwn(praticantes, id) : acompanhantes.some((pessoa) => pessoa.id === id);
-  return papel && existe ? { papel, id } : null;
+  if (!papel || !contaExiste(papel, id, pessoas)) return null;
+  const manterConectado = valor['manterConectado'];
+  return { papel, id, ...(typeof manterConectado === 'boolean' ? { manterConectado } : {}) };
+}
+
+/* A conta guardada na sessionStorage (quem NÃO marcou "manter conectado") é
+   conferida contra o estado já saneado, como qualquer outro dado do aparelho.
+   Ela só existe porque a pessoa não quis ficar conectada, então volta sempre
+   com `manterConectado: false`, seja qual for o texto salvo. */
+export function sanearContaDaSessao(valor: unknown, estado: EstadoApp): ContaAtual | null {
+  const conta = sanearConta(valor, estado);
+  return conta ? { papel: conta.papel, id: conta.id, manterConectado: false } : null;
 }
 
 export function sanearEstado(valor: unknown): EstadoApp {
   if (!ehObjeto(valor) || valor['versao'] !== VERSAO_DO_ESTADO) return estadoInicial();
   const praticantes = sanearPraticantes(valor['praticantes']);
   const acompanhantes = sanearLista(valor['acompanhantes'], sanearAcompanhante);
+  const credenciais = sanearCredenciais(valor['credenciais']);
   return {
     versao: VERSAO_DO_ESTADO,
-    contaAtual: sanearConta(valor['contaAtual'], praticantes, acompanhantes),
+    contaAtual: sanearConta(valor['contaAtual'], { praticantes, acompanhantes, credenciais }),
     praticantes,
     acompanhantes,
     vinculos: sanearLista(valor['vinculos'], sanearVinculo),
     convites: sanearLista(valor['convites'], sanearConvite),
     recados: sanearLista(valor['recados'], sanearRecado),
+    credenciais,
   };
 }

@@ -123,6 +123,23 @@ function expirou(convite: Convite, agora: Date): boolean {
   return !(agora.getTime() < Date.parse(convite.expiraEm));
 }
 
+/* Olha o convite sem consumi-lo: a tela do link "/convite/CÓDIGO" usa isto
+   para dizer "código válido" ou "expirado" antes de a pessoa entrar. Mesma
+   normalização e mesma regra de expiração do resgate; quem consome é só
+   `resgatarConvite`, quando o acompanhante confirma. */
+export function consultarConvite(
+  codigo: string,
+  convites: readonly Convite[],
+  agora: Date,
+): { ok: true; convite: Convite } | { ok: false; erro: 'nao-encontrado' | 'expirado' } {
+  const procurado = normalizarCodigo(codigo);
+  if (procurado === '') return { ok: false, erro: 'nao-encontrado' };
+  const encontrado = convites.find((convite) => convite.codigo === procurado && !expirou(convite, agora));
+  if (encontrado) return { ok: true, convite: encontrado };
+  const vencido = convites.some((convite) => convite.codigo === procurado);
+  return { ok: false, erro: vencido ? 'expirado' : 'nao-encontrado' };
+}
+
 /* Consome o convite: o código só vale uma vez. Com códigos repetidos na lista
    (dado antigo ou corrompido), prefere o válido ao expirado; só um é consumido. */
 export function resgatarConvite(

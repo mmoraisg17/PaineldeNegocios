@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buscarExercicio } from './catalogo';
+import { buscarExercicio, exerciciosDaTrilha } from './catalogo';
 import { congelarProfundo } from './imutavel';
 import type { Perfil } from './perfil';
 import {
@@ -16,7 +16,6 @@ function perfilDe(sobrescrever: Partial<Perfil> = {}): Perfil {
     nome: 'Teste',
     objetivo: 'equilibrio',
     firmeza: 'as-vezes',
-    acessoriosEmCasa: ['elastico', 'cadeira'],
     inclinacaoMaxima: 3,
     ...sobrescrever,
   } satisfies Perfil);
@@ -62,30 +61,18 @@ describe('montarRotina: trilha Equilíbrio 60+', () => {
     expect(rotina.itens).toHaveLength(4);
   });
 
-  test('remove a abdução quando a pessoa não tem elástico', () => {
-    const rotina = montarRotina(perfilDe({ acessoriosEmCasa: ['cadeira'] }), {});
+  test('todos os exercícios da trilha entram na rotina padrão, porque o kit traz todos os itens', () => {
+    const rotina = montarRotina(perfilDe(), {});
+    const naTrilha = exerciciosDaTrilha('equilibrio60').map((exercicio) => exercicio.id);
 
-    expect(idsDaRotina(rotina)).not.toContain('abducao-com-elastico');
-    expect(rotina.itens).toHaveLength(3);
+    expect(idsDaRotina(rotina)).toEqual(naTrilha);
   });
 
-  test('remove o sentar e levantar quando a pessoa não tem cadeira', () => {
-    const rotina = montarRotina(perfilDe({ acessoriosEmCasa: ['elastico'] }), {});
+  test('a abdução com elástico e o sentar e levantar entram sem nenhuma pergunta sobre a casa', () => {
+    const rotina = montarRotina(perfilDe(), {});
 
-    expect(idsDaRotina(rotina)).not.toContain('sentar-e-levantar');
-    expect(rotina.itens).toHaveLength(3);
-  });
-
-  test('sem elástico nem cadeira sobram tandem e transferência de peso', () => {
-    const rotina = montarRotina(perfilDe({ acessoriosEmCasa: [] }), {});
-
-    expect(idsDaRotina(rotina)).toEqual(['pes-em-linha', 'transferencia-de-peso']);
-  });
-
-  test('barras e inclinação não precisam constar nos acessórios de casa', () => {
-    const rotina = montarRotina(perfilDe({ acessoriosEmCasa: [] }), {});
-
-    expect(idsDaRotina(rotina)).toContain('transferencia-de-peso');
+    expect(idsDaRotina(rotina)).toContain('abducao-com-elastico');
+    expect(idsDaRotina(rotina)).toContain('sentar-e-levantar');
   });
 });
 
@@ -112,10 +99,11 @@ describe('montarRotina: trilha Fisioterapia', () => {
     ]);
   });
 
-  test('a fisioterapia não depende de elástico nem de cadeira', () => {
-    const rotina = montarRotina(perfilDe({ objetivo: 'joelho', acessoriosEmCasa: [] }), {});
+  test('todos os exercícios da trilha entram na rotina padrão', () => {
+    const rotina = montarRotina(perfilDe({ objetivo: 'joelho' }), {});
+    const naTrilha = exerciciosDaTrilha('fisio').map((exercicio) => exercicio.id);
 
-    expect(rotina.itens).toHaveLength(4);
+    expect(idsDaRotina(rotina).toSorted()).toEqual(naTrilha.toSorted());
   });
 });
 
@@ -196,8 +184,9 @@ describe('montarRotina: tempo estimado', () => {
   test('soma as doses e 1 minuto de transição por exercício, arredondando para cima', () => {
     // tandem nível 1: 10 s; transferência nível 1: 8 repetições x 4 s = 32 s.
     // (10 + 32 + 2 x 60) s = 162 s = 2,7 min -> 3 min.
-    const rotina = montarRotina(perfilDe({ acessoriosEmCasa: [] }), {});
+    const rotina = montarRotina(perfilDe(), {}, { autor: 'Ana', exerciciosRemovidos: ['sentar-e-levantar', 'abducao-com-elastico'] });
 
+    expect(idsDaRotina(rotina)).toEqual(['pes-em-linha', 'transferencia-de-peso']);
     expect(rotina.minutosEstimados).toBe(3);
   });
 
@@ -262,15 +251,6 @@ describe('montarRotina: ajustes do profissional', () => {
 
     expect(idsDaRotina(rotina).at(-1)).toBe('miniagachamento-simetrico');
     expect(rotina.itens).toHaveLength(5);
-  });
-
-  test('a inclusão prevalece sobre o filtro de acessórios', () => {
-    const rotina = montarRotina(perfilDe({ acessoriosEmCasa: [] }), {}, {
-      ...ajusteBase,
-      exerciciosIncluidos: ['abducao-com-elastico'],
-    });
-
-    expect(idsDaRotina(rotina)).toContain('abducao-com-elastico');
   });
 
   test('incluir um exercício que já está na rotina não o duplica', () => {

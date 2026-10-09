@@ -3,12 +3,13 @@
    ninguém. */
 
 export * from './tipos';
-export { ACESSORIOS_DA_PLATAFORMA, CATALOGO, buscarExercicio, exerciciosDaTrilha } from './catalogo';
+export { CATALOGO, buscarExercicio, exerciciosDaTrilha } from './catalogo';
 export {
   TAMANHO_MAXIMO_DA_FUNCAO,
   TAMANHO_MAXIMO_DO_NOME,
   limparNome,
   nivelInicial,
+  nivelPelaFirmeza,
   trilhaDoObjetivo,
   type Firmeza,
   type MedidasDaAvaliacao,
@@ -51,6 +52,7 @@ export {
   adesao,
   alertasDoAluno,
   autorizar,
+  consultarConvite,
   criarVinculoPendente,
   gerarConvite,
   permissoes,
@@ -71,6 +73,7 @@ export {
   VERSAO_DO_ESTADO,
   ajusteVigente,
   estadoInicial,
+  precisaDoPrimeiroUso,
   rotinaDoPraticante,
   type Acompanhante,
   type ContaAtual,
@@ -80,13 +83,34 @@ export {
   type Recado,
   TAMANHO_MAXIMO_DO_RECADO,
 } from './estado';
-export { novoId } from './aleatorio';
+export { bytesAleatoriosEmHex, novoId } from './aleatorio';
 export {
+  ErroSemCriptografia,
+  ITERACOES_DA_SENHA,
+  TAMANHO_MAXIMO_DA_SENHA,
+  TAMANHO_MAXIMO_DO_EMAIL,
+  TAMANHO_MINIMO_DA_SENHA,
+  buscarCredencial,
+  conferirSenha,
+  criarCredencial,
+  derivarHash,
+  emailValido,
+  normalizarEmail,
+  problemaDaSenha,
+  temCriptografia,
+  type Credencial,
+  type OpcoesDaCredencial,
+} from './credenciais';
+export {
+  CHAVES_ANTIGAS,
+  CHAVE_DA_SESSAO,
   CHAVE_DO_ESTADO,
   apagarDados,
+  apagarVersoesAntigas,
+  armazenamentoDaSessao,
   armazenamentoDoNavegador,
   carregarEstado,
   salvarEstado,
   type Armazenamento,
 } from './persistencia';
-export { IDS_DEMO, criarEstadoDemo } from './demo';
+export { CONTAS_DA_DEMO, IDS_DEMO, SENHA_DA_DEMO, criarEstadoDemo } from './demo';

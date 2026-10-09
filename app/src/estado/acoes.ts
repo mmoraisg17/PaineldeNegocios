@@ -1,10 +1,13 @@
 import {
+  ITERACOES_DA_SENHA,
   type AjusteProfissional,
   type ContaAtual,
+  type Credencial,
   type DecisaoDeNivel,
   type EstadoApp,
   type IdExercicio,
   type Nivel,
+  type PapelDaConta,
   type Percepcao,
   type Perfil,
   type Recado,
@@ -12,7 +15,13 @@ import {
   type TipoAcompanhante,
   type Vinculo,
   ajusteVigente,
+  buscarCredencial,
   buscarExercicio,
+  conferirSenha,
+  derivarHash,
+  temCriptografia,
+  emailValido,
+  problemaDaSenha,
   TAMANHO_MAXIMO_DA_FUNCAO,
   decidirNivel,
   limparNome,
@@ -33,6 +42,7 @@ import {
   type Acompanhante,
   type DadosPraticante,
 } from '../dominio';
+import { codigoDoTexto } from './linkDoConvite';
 
 /* Ações do app sobre o estado. Funções puras: recebem o estado e devolvem um
    estado NOVO (nunca alteram o recebido). O Provider (ContextoApp.tsx) só as
@@ -45,6 +55,107 @@ const idPadrao: GerarId = novoId;
 export const entrar = (estado: EstadoApp, conta: ContaAtual): EstadoApp => ({ ...estado, contaAtual: conta });
 export const sair = (estado: EstadoApp): EstadoApp => ({ ...estado, contaAtual: null });
 
+/* ---------- cadastro e login com e-mail e senha ---------- */
+
+export type ErroDoCadastro = 'email-invalido' | 'senha-curta' | 'senha-longa' | 'email-em-uso';
+
+/* Síncrona de propósito: a tela mostra o erro na hora, antes de gastar os
+   ~0,4 s do hash. Para quem já tem conta, "e-mail em uso" revela que o
+   endereço existe; é o preço de avisar no cadastro e não tem como evitar sem
+   servidor que mande um e-mail de confirmação. O login, esse sim, não revela
+   (ver `entrarComSenha`). */
+export function validarCadastro(
+  estado: EstadoApp,
+  dados: { email: string; senha: string; papel: PapelDaConta },
+): ErroDoCadastro | null {
+  if (!emailValido(dados.email)) return 'email-invalido';
+  const problema = problemaDaSenha(dados.senha);
+  if (problema) return problema === 'curta' ? 'senha-curta' : 'senha-longa';
+  return buscarCredencial(estado.credenciais, dados.email, dados.papel) ? 'email-em-uso' : null;
+}
+
+/* Cadastro do praticante. NÃO cria o praticante: ele nasce no fim da triagem
+   (`criarPraticante` com `gerarId = () => conta.id`), e até lá `precisaDoPrimeiroUso`
+   é verdadeiro. Com a credencial do mesmo e-mail e papel já guardada (toque
+   duplo no botão, enquanto o hash era calculado), devolve o estado sem mudar. */
+export function cadastrarPraticante(estado: EstadoApp, credencial: Credencial, manterConectado: boolean): EstadoApp {
+  if (credencial.papel !== 'praticante') return estado;
+  if (buscarCredencial(estado.credenciais, credencial.email, 'praticante')) return estado;
+  return {
+    ...estado,
+    credenciais: [...estado.credenciais, credencial],
+    contaAtual: { papel: 'praticante', id: credencial.pessoaId, manterConectado },
+  };
+}
+
+const FUNCAO_PADRAO: Record<TipoAcompanhante, string> = { profissional: 'Profissional', familiar: 'Familiar' };
+
+/* Cadastro do acompanhante: aqui a pessoa já nasce completa (nome, tipo e
+   função), com o id da credencial. Mesma proteção contra toque duplo. */
+export function cadastrarAcompanhante(
+  estado: EstadoApp,
+  dados: { nome: string; tipo: TipoAcompanhante; funcao: string },
+  credencial: Credencial,
+  manterConectado: boolean,
+): EstadoApp {
+  if (credencial.papel !== 'acompanhante') return estado;
+  if (buscarCredencial(estado.credenciais, credencial.email, 'acompanhante')) return estado;
+  const funcao = limparNome(dados.funcao, TAMANHO_MAXIMO_DA_FUNCAO) || FUNCAO_PADRAO[dados.tipo];
+  const acompanhante: Acompanhante = { id: credencial.pessoaId, nome: limparNome(dados.nome), tipo: dados.tipo, funcao };
+  return {
+    ...estado,
+    acompanhantes: [...estado.acompanhantes, acompanhante],
+    credenciais: [...estado.credenciais, credencial],
+    contaAtual: { papel: 'acompanhante', id: credencial.pessoaId, manterConectado },
+  };
+}
+
+/* Sal sem significado, só para o hash descartável de quem não tem conta. */
+const SAL_DESCARTAVEL = '00'.repeat(16);
+
+/* 'sem-criptografia' não é erro da pessoa: o app aberto por http fora de
+   localhost não tem WebCrypto, então nenhuma senha poderia ser conferida. */
+export type ResultadoDoLogin =
+  | { ok: true; conta: ContaAtual }
+  | { ok: false; erro: 'credenciais-invalidas' | 'sem-criptografia' };
+
+/* Não altera o estado: devolve a conta e quem chama usa `entrar`. Um único
+   erro para e-mail inexistente, senha errada, papel trocado e conta sumida: a
+   tela diz "e-mail ou senha incorretos" e não revela quais e-mails existem.
+   Quando o e-mail não existe, deriva mesmo assim um hash descartável, para o
+   tempo de resposta também não revelar isso. Sem WebCrypto, avisa antes de
+   qualquer hash: dizer "senha incorreta" a quem digitou a senha certa só
+   faria a pessoa tentar de novo, sem chance de entrar. O aviso vale para
+   qualquer e-mail, então também não revela quais contas existem. */
+export async function entrarComSenha(
+  estado: EstadoApp,
+  dados: { email: string; senha: string; papel: PapelDaConta; manterConectado: boolean },
+): Promise<ResultadoDoLogin> {
+  if (!temCriptografia()) return { ok: false, erro: 'sem-criptografia' };
+  const invalido: ResultadoDoLogin = { ok: false, erro: 'credenciais-invalidas' };
+  const credencial = buscarCredencial(estado.credenciais, dados.email, dados.papel);
+  if (!credencial) {
+    await derivarHash(dados.senha, SAL_DESCARTAVEL, ITERACOES_DA_SENHA).catch(() => '');
+    return invalido;
+  }
+  if (!(await conferirSenha(credencial, dados.senha))) return invalido;
+  const pessoaExiste =
+    dados.papel === 'praticante' || estado.acompanhantes.some((pessoa) => pessoa.id === credencial.pessoaId);
+  if (!pessoaExiste) return invalido;
+  return { ok: true, conta: { papel: dados.papel, id: credencial.pessoaId, manterConectado: dados.manterConectado } };
+}
+
+/* Para onde ir depois de entrar. O convite (código ou link colado) só vale
+   para o acompanhante; passa por `codigoDoTexto`, que deixa só letras e
+   dígitos, então o caminho nunca carrega "&", "#" nem outro texto da pessoa. */
+export function destinoDepoisDeEntrar(estado: EstadoApp, conta: ContaAtual, convite?: string): string {
+  if (conta.papel === 'acompanhante') {
+    const codigo = codigoDoTexto(convite ?? '');
+    return codigo ? `/acompanhante/adicionar?codigo=${codigo}` : '/acompanhante/alunos';
+  }
+  return Object.hasOwn(estado.praticantes, conta.id) ? '/praticante/hoje' : '/primeiro-uso';
+}
+
 /* ---------- praticante ---------- */
 
 export function criarPraticante(
@@ -54,7 +165,7 @@ export function criarPraticante(
   gerarId: GerarId = idPadrao,
 ): { estado: EstadoApp; id: string } {
   const id = gerarId();
-  // O nível sugerido pela avaliação vale para todos os exercícios da trilha,
+  // O nível inicial (ver `nivelPelaFirmeza`) vale para todos os exercícios da trilha,
   // limitado ao que a inclinação da plataforma da pessoa permite.
   const niveis = Object.fromEntries(
     exerciciosDaTrilha(trilhaDoObjetivo(perfil.objetivo)).map((e) => [e.id, Math.min(nivel, nivelMaximoCompativel(e, perfil.inclinacaoMaxima))]),

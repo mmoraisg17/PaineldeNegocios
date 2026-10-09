@@ -7,6 +7,7 @@ import {
   adesao,
   alertasDoAluno,
   autorizar,
+  consultarConvite,
   criarVinculoPendente,
   gerarConvite,
   permissoes,
@@ -256,6 +257,69 @@ describe('resgatarConvite', () => {
 
     expect(() => resgatarConvite('K7M2QX', original, AGORA)).not.toThrow();
     expect(original).toHaveLength(1);
+  });
+});
+
+describe('consultarConvite', () => {
+  const lista = congelarProfundo([convite(), convite({ codigo: 'AB23CD', tipo: 'familiar' })]);
+
+  test('encontra o convite pelo código sem consumi-lo', () => {
+    const resultado = consultarConvite('K7M2QX', lista, AGORA);
+
+    expect(resultado).toEqual({ ok: true, convite: lista[0] });
+    expect(lista).toHaveLength(2);
+  });
+
+  test('consultar duas vezes dá o mesmo resultado (o código continua valendo)', () => {
+    expect(consultarConvite('K7M2QX', lista, AGORA)).toEqual(consultarConvite('K7M2QX', lista, AGORA));
+  });
+
+  test('ignora maiúsculas, minúsculas e espaços, como o resgate', () => {
+    expect(consultarConvite('  k7m 2qx ', lista, AGORA)).toEqual({ ok: true, convite: lista[0] });
+  });
+
+  test('devolve nao-encontrado para código que não existe, vazio ou lista vazia', () => {
+    expect(consultarConvite('ZZZZZZ', lista, AGORA)).toEqual({ ok: false, erro: 'nao-encontrado' });
+    expect(consultarConvite('', lista, AGORA)).toEqual({ ok: false, erro: 'nao-encontrado' });
+    expect(consultarConvite('   ', lista, AGORA)).toEqual({ ok: false, erro: 'nao-encontrado' });
+    expect(consultarConvite('K7M2QX', [], AGORA)).toEqual({ ok: false, erro: 'nao-encontrado' });
+  });
+
+  test('devolve expirado depois das 48 horas', () => {
+    const depois = new Date('2026-10-09T00:00:01.000Z');
+
+    expect(consultarConvite('K7M2QX', lista, depois)).toEqual({ ok: false, erro: 'expirado' });
+  });
+
+  test('um milissegundo antes de expirar ainda vale; no instante exato já expirou', () => {
+    const antes = new Date('2026-10-08T23:59:59.999Z');
+    const exato = new Date('2026-10-09T00:00:00.000Z');
+
+    expect(consultarConvite('K7M2QX', lista, antes).ok).toBe(true);
+    expect(consultarConvite('K7M2QX', lista, exato)).toEqual({ ok: false, erro: 'expirado' });
+  });
+
+  test('trata data de expiração inválida como expirado, por segurança', () => {
+    expect(consultarConvite('K7M2QX', [convite({ expiraEm: 'lixo' })], AGORA)).toEqual({ ok: false, erro: 'expirado' });
+  });
+
+  test('com código duplicado, prefere o convite válido ao expirado', () => {
+    const vencido = convite({ expiraEm: '2026-10-07T00:00:00.000Z', tipo: 'familiar' });
+    const valido = convite({ tipo: 'profissional' });
+
+    expect(consultarConvite('K7M2QX', [vencido, valido], AGORA)).toEqual({ ok: true, convite: valido });
+  });
+
+  test('concorda com resgatarConvite em todos os casos', () => {
+    const depois = new Date('2026-10-09T00:00:01.000Z');
+    const casos: [string, Date][] = [['K7M2QX', AGORA], ['k7m2qx', AGORA], ['ZZZZZZ', AGORA], ['', AGORA], ['K7M2QX', depois]];
+
+    for (const [codigo, quando] of casos) {
+      const consulta = consultarConvite(codigo, lista, quando);
+      const resgate = resgatarConvite(codigo, lista, quando);
+      const resumo = (r: typeof consulta | typeof resgate) => (r.ok ? { ok: true, convite: r.convite } : { ok: false, erro: r.erro });
+      expect(resumo(consulta)).toEqual(resumo(resgate));
+    }
   });
 });
 

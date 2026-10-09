@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
-import { Navigate, Outlet, createHashRouter, type RouteObject } from 'react-router';
+import { Navigate, Outlet, createHashRouter, useParams, type RouteObject } from 'react-router';
 import { MolduraCelular } from './components/MolduraCelular';
 import { ABAS_PRATICANTE, BarraDeAbas } from './components/BarraDeAbas';
-import type { PapelDaConta } from './dominio';
+import { papelDoTexto } from './components/acesso/enderecos';
+import { type PapelDaConta, precisaDoPrimeiroUso } from './dominio';
 import { useApp } from './estado/ContextoApp';
-import { EscolherConta } from './telas/EscolherConta';
+import { AbrirConvite } from './telas/AbrirConvite';
+import { Cadastro } from './telas/Cadastro';
 import { Exercicio } from './telas/Exercicio';
 import { Inicio } from './telas/Inicio';
 import { NaoEncontrada } from './telas/NaoEncontrada';
@@ -27,10 +29,24 @@ function LayoutRaiz() {
 }
 
 /* Só entra quem está logado com o papel certo; os outros voltam ao início.
-   Evita, por exemplo, abrir #/acompanhante/alunos sem ter escolhido conta. */
+   Evita, por exemplo, abrir #/acompanhante/alunos sem ter entrado. O praticante
+   tem uma saída a mais: quem acabou de criar a conta e ainda não fez a triagem
+   (não tem dados) vai para o primeiro uso, não para o início. */
 function ExigeConta({ papel, children }: { papel: PapelDaConta; children: ReactNode }) {
   const { estado } = useApp();
-  return estado.contaAtual?.papel === papel ? <>{children}</> : <Navigate to="/" replace />;
+  const conta = estado.contaAtual;
+  if (conta?.papel !== papel) return <Navigate to="/" replace />;
+  if (papel === 'praticante' && !Object.hasOwn(estado.praticantes, conta.id)) {
+    return <Navigate to={precisaDoPrimeiroUso(estado) ? '/primeiro-uso' : '/'} replace />;
+  }
+  return <>{children}</>;
+}
+
+/* Endereço da versão anterior (#/entrar/praticante): hoje o login mora no
+   início, com a aba escolhida pelo parâmetro. Papel desconhecido vai ao início. */
+function EntrarAntigo() {
+  const papel = papelDoTexto(useParams().papel);
+  return <Navigate to={papel ? `/?papel=${papel}` : '/'} replace />;
 }
 
 /* O exercício e a conclusão ocupam a tela toda (sem barra de abas) para a
@@ -65,7 +81,9 @@ export const rotas: RouteObject[] = [
     ),
     children: [
       { index: true, element: <Inicio /> },
-      { path: 'entrar/:papel', element: <TelaCheia><EscolherConta /></TelaCheia> },
+      { path: 'entrar/:papel', element: <EntrarAntigo /> },
+      { path: 'cadastro/:papel', element: <TelaCheia><Cadastro /></TelaCheia> },
+      { path: 'convite/:codigo', element: <AbrirConvite /> },
       { path: 'primeiro-uso', element: <TelaCheia><PrimeiroUso /></TelaCheia> },
       {
         path: 'praticante',

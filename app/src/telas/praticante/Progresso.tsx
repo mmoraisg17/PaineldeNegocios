@@ -10,7 +10,7 @@ import {
   type ItemRotina,
   type Nivel,
 } from '../../dominio';
-import { GraficoSemanal } from '../../components/praticante/GraficoSemanal';
+import { GraficoSemanal } from '../../components/evolucao/GraficoSemanal';
 import { useApp, usePraticanteAtual } from '../../estado/ContextoApp';
 import { formatarData } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
@@ -20,7 +20,7 @@ import {
   resumirSemanas,
   semanasSeguidas,
   type SemanaResumida,
-} from './evolucao';
+} from '../../components/evolucao/evolucao';
 
 /* Progresso (manual, seção 10): adesão, evolução semana a semana, nível de
    cada exercício e conquistas simples. */

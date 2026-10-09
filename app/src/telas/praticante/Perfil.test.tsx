@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { type EstadoApp } from '../../dominio';
 import { gerarConviteDe, usarCodigo } from '../../estado/acoes';
 import { AGORA_DA_DEMO, renderizarApp, usarAmbienteDeTeste } from '../../test/renderizarApp';
@@ -176,6 +176,201 @@ describe('convidar', () => {
 
     // Assert
     expect(await screen.findByText(/Não deu para copiar/)).toBeInTheDocument();
+  });
+});
+
+/* O navegador de teste (jsdom) não tem Web Share: cada teste instala o seu. */
+const instalarShare = (valor: unknown) =>
+  Object.defineProperty(navigator, 'share', { value: valor, configurable: true, writable: true });
+
+const gerarCodigo = async (usuario: ReturnType<typeof userEvent.setup>) => {
+  await usuario.click(screen.getByRole('button', { name: 'Gerar código' }));
+};
+
+describe('convidar por link', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(navigator, 'share');
+  });
+
+  test('ao gerar, mostra o link completo do convite com o código', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+
+    // Act
+    await gerarCodigo(usuario);
+
+    // Assert
+    const codigo = app.estado().convites.at(-1)?.codigo ?? '';
+    expect(screen.getByText('Link do convite')).toBeInTheDocument();
+    expect(screen.getByText(`${window.location.href.split('#')[0]}#/convite/${codigo}`)).toBeInTheDocument();
+  });
+
+  test('o link quebra linha para não estourar a tela', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+
+    // Act
+    await gerarCodigo(usuario);
+
+    // Assert
+    const codigo = app.estado().convites.at(-1)?.codigo ?? '';
+    expect(screen.getByText(new RegExp(`#/convite/${codigo}$`))).toHaveClass('break-all');
+  });
+
+  test('"Copiar link" envia o endereço para a área de transferência e confirma', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+    const copiar = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+    await gerarCodigo(usuario);
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Copiar link' }));
+
+    // Assert
+    const codigo = app.estado().convites.at(-1)?.codigo ?? '';
+    expect(copiar).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`#/convite/${codigo}$`)));
+    expect(await screen.findByText('Link copiado.')).toBeInTheDocument();
+  });
+
+  test('se copiar o link falhar, orienta a selecionar o texto em vez de quebrar', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    entrarComo('lucia');
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('sem permissão'));
+    await gerarCodigo(usuario);
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Copiar link' }));
+
+    // Assert
+    expect(await screen.findByText(/Não deu para copiar o link/)).toBeInTheDocument();
+  });
+
+  test('"Copiar código" continua copiando só o código', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+    const copiar = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+    await gerarCodigo(usuario);
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Copiar código' }));
+
+    // Assert
+    expect(copiar).toHaveBeenCalledWith(app.estado().convites.at(-1)?.codigo);
+  });
+
+  test('sem Web Share no aparelho, não oferece "Enviar link"', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    entrarComo('lucia');
+
+    // Act
+    await gerarCodigo(usuario);
+
+    // Assert
+    expect(screen.queryByRole('button', { name: 'Enviar link' })).not.toBeInTheDocument();
+  });
+
+  test('com Web Share, "Enviar link" abre o envio do aparelho com título, texto e o link', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const compartilhar = vi.fn<(dados: ShareData) => Promise<void>>().mockResolvedValue(undefined);
+    instalarShare(compartilhar);
+    const app = entrarComo('lucia');
+    await gerarCodigo(usuario);
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Enviar link' }));
+
+    // Assert
+    const codigo = app.estado().convites.at(-1)?.codigo ?? '';
+    expect(compartilhar).toHaveBeenCalledTimes(1);
+    expect(compartilhar).toHaveBeenCalledWith({
+      title: expect.any(String),
+      text: expect.stringContaining('acompanhar'),
+      url: expect.stringMatching(new RegExp(`#/convite/${codigo}$`)),
+    });
+  });
+
+  test('quem cancela o envio do aparelho não vê erro', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    instalarShare(vi.fn().mockRejectedValue(new DOMException('cancelado', 'AbortError')));
+    entrarComo('lucia');
+    await gerarCodigo(usuario);
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Enviar link' }));
+
+    // Assert
+    expect(screen.queryByText(/Não deu para abrir o envio/)).not.toBeInTheDocument();
+  });
+
+  test('uma falha real do envio do aparelho sugere copiar o link', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    instalarShare(vi.fn().mockRejectedValue(new Error('quebrou')));
+    entrarComo('lucia');
+    await gerarCodigo(usuario);
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Enviar link' }));
+
+    // Assert
+    expect(await screen.findByText(/Não deu para abrir o envio/)).toBeInTheDocument();
+  });
+
+  test('o link do WhatsApp leva o texto e o link, e abre em outra aba com segurança', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+
+    // Act
+    await gerarCodigo(usuario);
+
+    // Assert
+    const codigo = app.estado().convites.at(-1)?.codigo ?? '';
+    const whatsapp = screen.getByRole('link', { name: 'Enviar pelo WhatsApp' });
+    expect(whatsapp).toHaveAttribute('target', '_blank');
+    expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer');
+    const href = whatsapp.getAttribute('href') ?? '';
+    expect(href.startsWith('https://wa.me/?text=')).toBe(true);
+    expect(decodeURIComponent(href.slice('https://wa.me/?text='.length))).toContain(`#/convite/${codigo}`);
+  });
+
+  test('explica que o link serve para entrar como acompanhante e que o protótipo guarda tudo no aparelho', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    entrarComo('lucia');
+
+    // Act
+    await gerarCodigo(usuario);
+
+    // Assert
+    expect(screen.getByText(/Envie o código ou o link/)).toBeInTheDocument();
+    expect(
+      screen.getByText('No protótipo, os dados ficam só neste aparelho: o link funciona aqui, no mesmo navegador.'),
+    ).toBeInTheDocument();
+  });
+
+  test('gerar outro código troca o link e apaga o aviso anterior', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    entrarComo('lucia');
+    vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+    await gerarCodigo(usuario);
+    await usuario.click(screen.getByRole('button', { name: 'Copiar link' }));
+    expect(await screen.findByText('Link copiado.')).toBeInTheDocument();
+
+    // Act
+    await usuario.click(screen.getByRole('button', { name: 'Gerar outro código' }));
+
+    // Assert
+    expect(screen.queryByText('Link copiado.')).not.toBeInTheDocument();
   });
 });
 

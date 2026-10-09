@@ -1,5 +1,5 @@
 import { limitar } from './numeros';
-import type { Acessorio, Inclinacao, Nivel, Trilha } from './tipos';
+import type { Inclinacao, Nivel, Trilha } from './tipos';
 
 export type Objetivo = 'equilibrio' | 'fortalecimento' | 'joelho' | 'tornozelo';
 
@@ -10,7 +10,6 @@ export type Perfil = {
   nome: string;
   objetivo: Objetivo;
   firmeza: Firmeza;
-  acessoriosEmCasa: Acessorio[];
   /* Até que nível o seletor da plataforma da pessoa chega (manual, 13.1). */
   inclinacaoMaxima: Inclinacao;
 };
@@ -31,6 +30,17 @@ const OSCILACAO_QUE_EXIGE_NIVEL_1 = 0.6;
 const APOIO_QUE_EXIGE_NIVEL_1 = 0.3;
 const OSCILACAO_MAXIMA_PARA_NIVEL_3 = 0.3;
 const APOIO_MAXIMO_PARA_NIVEL_3 = 0.1;
+
+/* Nível de partida quando a triagem NÃO tem a avaliação de 10 segundos: só a
+   resposta de "Sua firmeza hoje". Segue a mesma regra assimétrica de
+   `nivelInicial`: a autoavaliação sozinha não basta para o nível 3, então
+   "firme" começa no 2 e as outras duas respostas no 1. Errar para baixo custa
+   um treino fácil demais; errar para cima custa uma queda. A progressão
+   (`decidirNivel`) sobe o nível, exercício por exercício, depois de treinos
+   bons, então quem começou baixo não fica preso ali. */
+export function nivelPelaFirmeza(firmeza: Firmeza): Nivel {
+  return firmeza === 'firme' ? 2 : 1;
+}
 
 export function trilhaDoObjetivo(objetivo: Objetivo): Trilha {
   return objetivo === 'joelho' || objetivo === 'tornozelo' ? 'fisio' : 'equilibrio60';

@@ -1,7 +1,9 @@
-import { Link, Navigate, useNavigate } from 'react-router';
+import { useId } from 'react';
+import { Navigate, useNavigate } from 'react-router';
 import { CartaoDoAluno } from '../../components/acompanhante/CartaoDoAluno';
-import { BOTAO_PRINCIPAL, BOTAO_SECUNDARIO, CARTAO, CORPO_DA_TELA, TITULO_DA_TELA } from '../../components/acompanhante/estilos';
+import { BOTAO_SECUNDARIO, CARTAO, CORPO_DA_TELA, TITULO_DA_TELA } from '../../components/acompanhante/estilos';
 import { resumoDoAluno } from '../../components/acompanhante/resumoDoAluno';
+import { VincularAluno } from '../../components/acompanhante/VincularAluno';
 import { alunosDe, sair } from '../../estado/acoes';
 import { useAcompanhanteAtual, useApp } from '../../estado/ContextoApp';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
@@ -13,6 +15,7 @@ export function Alunos() {
   const { estado, atualizar } = useApp();
   const acompanhante = useAcompanhanteAtual();
   const navegar = useNavigate();
+  const idAdicionar = useId();
 
   /* Sessão encerrada (ou conta que não existe mais): volta ao início. */
   if (!acompanhante) return <Navigate to="/" replace />;
@@ -37,16 +40,20 @@ export function Alunos() {
         </p>
       </header>
 
-      <Link to="/acompanhante/adicionar" className={BOTAO_PRINCIPAL}>
-        Adicionar aluno
-      </Link>
+      <section aria-labelledby={idAdicionar} className={`${CARTAO} flex flex-col gap-3`}>
+        <h2 id={idAdicionar} className="text-xl font-bold text-texto">
+          Adicionar aluno
+        </h2>
+        <p className="text-lg text-texto-suave">Cole o código ou o link que o aluno enviou.</p>
+        <VincularAluno acompanhanteId={acompanhante.id} />
+      </section>
 
       {alunos.length === 0 ? (
         <div className={`${CARTAO} flex flex-col gap-2`}>
           <p className="text-lg font-semibold text-texto">Você ainda não tem alunos.</p>
           <p className="text-lg text-texto">
-            Peça para o aluno abrir Perfil → Acompanhantes → Convidar, gerar o código e enviar para você. Depois toque em
-            &ldquo;Adicionar aluno&rdquo;, digite o código e aguarde a autorização.
+            Peça para o aluno abrir Perfil → Acompanhantes → Convidar, gerar o código ou o link e enviar para você. Depois cole
+            aqui em cima e aguarde a autorização.
           </p>
         </div>
       ) : (

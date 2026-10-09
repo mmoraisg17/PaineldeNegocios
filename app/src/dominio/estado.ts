@@ -1,15 +1,19 @@
 import { permissoesDoVinculo, type Convite, type TipoAcompanhante, type Vinculo } from './acompanhamento';
+import type { Credencial } from './credenciais';
 import type { Perfil } from './perfil';
 import { montarRotina, type AjusteProfissional, type NiveisAtuais, type Rotina } from './rotina';
 import type { Sessao } from './sessao';
 
 /* Formato salvo no aparelho. Subir este número exige uma migração (ou, no
    protótipo, aceitar começar do zero): ver `carregarEstado`. */
-export const VERSAO_DO_ESTADO = 1;
+export const VERSAO_DO_ESTADO = 2;
 
 export type PapelDaConta = 'praticante' | 'acompanhante';
 
-export type ContaAtual = { papel: PapelDaConta; id: string };
+/* `manterConectado` ausente vale `true` (o padrão e o que os testes antigos
+   criam). Só `false` explícito faz a conta valer apenas na aba aberta: ver
+   `salvarEstado`. */
+export type ContaAtual = { papel: PapelDaConta; id: string; manterConectado?: boolean };
 
 export type DadosPraticante = {
   id: string;
@@ -51,6 +55,8 @@ export type EstadoApp = {
   vinculos: Vinculo[];
   convites: Convite[];
   recados: Recado[];
+  /* E-mail e senha derivada de cada conta (ver credenciais.ts). */
+  credenciais: Credencial[];
 };
 
 /* Estado de "primeiro uso": ninguém entrou e não há dados. Devolve um objeto
@@ -65,7 +71,19 @@ export function estadoInicial(): EstadoApp {
     vinculos: [],
     convites: [],
     recados: [],
+    credenciais: [],
   };
+}
+
+/* Quem se cadastrou como praticante mas ainda não terminou a triagem tem
+   credencial e conta atual, porém nenhum `DadosPraticante`: o praticante só
+   nasce no fim da triagem (com o id da credencial). `Object.hasOwn` evita
+   confundir o id "constructor" com uma propriedade herdada. */
+export function precisaDoPrimeiroUso(estado: EstadoApp): boolean {
+  const conta = estado.contaAtual;
+  if (!conta || conta.papel !== 'praticante') return false;
+  if (Object.hasOwn(estado.praticantes, conta.id)) return false;
+  return estado.credenciais.some((credencial) => credencial.papel === 'praticante' && credencial.pessoaId === conta.id);
 }
 
 /* O ajuste do profissional só vale enquanto ele tem vínculo autorizado com
