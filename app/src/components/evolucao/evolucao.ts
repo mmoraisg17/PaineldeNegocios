@@ -17,6 +17,8 @@ export type SemanaResumida = {
   /* Último instante da semana (a janela é de 7 dias terminando aqui). */
   fim: Date;
   treinos: number;
+  /* Média da nota (0 a 100) das sessões da semana; nulo sem treino com exercícios. */
+  nota: number | null;
   /* 0 a 100; nulo quando a semana não teve treino com exercícios medidos. */
   simetria: number | null;
   estabilidade: number | null;
@@ -56,6 +58,7 @@ export function resumirSemanas(sessoes: readonly Sessao[], agora: Date, semanas:
     return {
       fim: new Date(fim),
       treinos: daSemana.length,
+      nota: mediaDaMedida(daSemana, (sessao) => sessao.exercicios.map((e) => e.nota)),
       simetria: mediaDaMedida(daSemana, (sessao) => sessao.exercicios.map((e) => e.simetria)),
       estabilidade: mediaDaMedida(daSemana, (sessao) => sessao.exercicios.map((e) => e.estabilidade)),
       apoio,

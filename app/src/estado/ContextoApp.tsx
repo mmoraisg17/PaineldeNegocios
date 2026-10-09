@@ -1,5 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
+  CHAVE_DO_ESTADO,
+  type Armazenamento,
+  type ContaAtual,
   type DadosPraticante,
   type EstadoApp,
   type ItemRotina,
@@ -7,6 +10,8 @@ import {
   type ResultadoExercicio,
   type Acompanhante,
   apagarDados,
+  apagarVersoesAntigas,
+  armazenamentoDaSessao,
   armazenamentoDoNavegador,
   carregarEstado,
   criarEstadoDemo,
@@ -66,11 +71,53 @@ function lerPreferencias(): Preferencias {
 }
 
 /* Primeira visita (ou dados apagados): o protótipo já nasce com as contas de
-   demonstração do manual (seção 17), sem ninguém logado. */
-function estadoDeArranque(): EstadoApp {
-  const salvo = carregarEstado(armazenamentoDoNavegador());
-  const vazio = Object.keys(salvo.praticantes).length === 0 && salvo.acompanhantes.length === 0;
+   demonstração do manual (seção 17), sem ninguém logado. "Vazio" inclui as
+   credenciais: quem acabou de se cadastrar e ainda não terminou a triagem não
+   tem praticante, mas tem credencial, e não pode perder o cadastro. Também
+   apaga os dados de versões antigas (dado de saúde não fica esquecido). */
+function estadoSalvoOuDemo(): EstadoApp {
+  const salvo = carregarEstado(armazenamentoDoNavegador(), armazenamentoDaSessao());
+  const vazio =
+    Object.keys(salvo.praticantes).length === 0 && salvo.acompanhantes.length === 0 && salvo.credenciais.length === 0;
   return vazio ? { ...criarEstadoDemo(new Date()), contaAtual: null } : salvo;
+}
+
+function estadoDeArranque(): EstadoApp {
+  apagarVersoesAntigas(armazenamentoDoNavegador());
+  return estadoSalvoOuDemo();
+}
+
+/* Mesma regra de existência que o carregamento aplica à conta atual: o
+   praticante existe com dados OU com credencial (triagem pendente). */
+function contaExiste(conta: ContaAtual, estado: EstadoApp): boolean {
+  if (conta.papel === 'acompanhante') return estado.acompanhantes.some((pessoa) => pessoa.id === conta.id);
+  return (
+    Object.hasOwn(estado.praticantes, conta.id) ||
+    estado.credenciais.some((c) => c.papel === 'praticante' && c.pessoaId === conta.id)
+  );
+}
+
+/* O estado gravado por outra aba vale (conta nova, vínculo e convite não se
+   perdem), com uma exceção: a conta de quem não marcou "manter conectado" mora
+   só nesta aba (sessionStorage) e continua valendo, se a pessoa ainda existir.
+   Nos outros casos a conta é a do estado novo: se a outra aba clicou em
+   "Sair" ela vem nula, e esta aba também sai. */
+function conciliarComOutraAba(atual: EstadoApp, deFora: EstadoApp): EstadoApp {
+  const conta = atual.contaAtual;
+  return conta?.manterConectado === false && contaExiste(conta, deFora) ? { ...deFora, contaAtual: conta } : deFora;
+}
+
+/* Só grava quando o texto muda: regravar o mesmo valor é trabalho à toa, e
+   numa aba que acabou de receber o estado de outra evita ecos entre abas. */
+function semRegravarIgual(armazenamento: Armazenamento | null): Armazenamento | null {
+  if (!armazenamento) return null;
+  return {
+    getItem: (chave) => armazenamento.getItem(chave),
+    removeItem: (chave) => armazenamento.removeItem(chave),
+    setItem: (chave, valor) => {
+      if (armazenamento.getItem(chave) !== valor) armazenamento.setItem(chave, valor);
+    },
+  };
 }
 
 export function ProvedorDoApp({ children, estadoInicial }: { children: ReactNode; estadoInicial?: EstadoApp }) {
@@ -79,9 +126,29 @@ export function ProvedorDoApp({ children, estadoInicial }: { children: ReactNode
   const [treino, setTreino] = useState<TreinoEmAndamento | null>(null);
   const [ultimoResumo, setUltimoResumo] = useState<ResumoDoTreino | null>(null);
 
+  const estadoAtual = useRef(estado);
+  // O estado que acabou de vir de outra aba já está salvo: regravá-lo (com a conta desta aba) apagaria a conta mantida de lá.
+  const veioDeOutraAba = useRef<EstadoApp | null>(null);
+
   useEffect(() => {
-    salvarEstado(armazenamentoDoNavegador(), estado);
+    estadoAtual.current = estado;
+    if (veioDeOutraAba.current === estado) return;
+    salvarEstado(semRegravarIgual(armazenamentoDoNavegador()), estado, armazenamentoDaSessao());
   }, [estado]);
+
+  /* O evento 'storage' só chega às OUTRAS abas. Sem ouvi-lo, esta aba segue com
+     o estado velho e, na próxima mudança, grava por cima do que a outra salvou.
+     `key === null` é o localStorage inteiro apagado. */
+  useEffect(() => {
+    const aoMudarNoArmazenamento = (evento: StorageEvent) => {
+      if (evento.key !== null && evento.key !== CHAVE_DO_ESTADO) return;
+      const novo = conciliarComOutraAba(estadoAtual.current, estadoSalvoOuDemo());
+      veioDeOutraAba.current = novo;
+      setEstado(novo);
+    };
+    window.addEventListener('storage', aoMudarNoArmazenamento);
+    return () => window.removeEventListener('storage', aoMudarNoArmazenamento);
+  }, []);
 
   useEffect(() => {
     try {
@@ -142,7 +209,7 @@ export function ProvedorDoApp({ children, estadoInicial }: { children: ReactNode
       recusarMudanca,
       ultimoResumo,
       reiniciarDemonstracao: () => {
-        apagarDados(armazenamentoDoNavegador());
+        apagarDados(armazenamentoDoNavegador(), armazenamentoDaSessao());
         setEstado({ ...criarEstadoDemo(new Date()), contaAtual: null });
         setTreino(null);
         setUltimoResumo(null);

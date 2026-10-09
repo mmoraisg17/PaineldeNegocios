@@ -16,3 +16,4 @@ docs/modelagem/
 # Sistema
 .DS_Store
 Thumbs.db
+*.tsbuildinfo

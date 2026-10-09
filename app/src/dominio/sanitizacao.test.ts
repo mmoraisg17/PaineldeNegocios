@@ -1,12 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { estadoInicial, type EstadoApp } from './estado';
-import { sanearEstado } from './sanitizacao';
+import { sanearContaDaSessao, sanearEstado } from './sanitizacao';
 
 const PERFIL = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
   firmeza: 'as-vezes',
-  acessoriosEmCasa: ['cadeira', 'elastico'],
   inclinacaoMaxima: 2,
 };
 
@@ -40,10 +39,20 @@ const PRATICANTE = {
   ajuste: AJUSTE,
 };
 
+const CREDENCIAL = {
+  email: 'lucia@exemplo.com',
+  papel: 'praticante',
+  pessoaId: 'lucia',
+  sal: 'ab'.repeat(16),
+  hash: 'cd'.repeat(32),
+  iteracoes: 600_000,
+  criadaEm: '2026-10-01T00:00:00.000Z',
+};
+
 /* Estado completo e válido, em "JSON solto" (unknown), como sai do localStorage. */
 function bruto(sobrescrever: Record<string, unknown> = {}): Record<string, unknown> {
   return {
-    versao: 1,
+    versao: 2,
     contaAtual: { papel: 'praticante', id: 'lucia' },
     praticantes: { lucia: PRATICANTE },
     acompanhantes: [{ id: 'carlos', nome: 'Carlos', tipo: 'profissional', funcao: 'Personal' }],
@@ -62,6 +71,7 @@ function bruto(sobrescrever: Record<string, unknown> = {}): Record<string, unkno
     recados: [
       { id: 'r1', deId: 'carlos', paraId: 'lucia', texto: 'Muito bem!', enviadoEm: '2026-10-02T00:00:00.000Z', lido: false },
     ],
+    credenciais: [CREDENCIAL],
     ...sobrescrever,
   };
 }
@@ -83,7 +93,7 @@ describe('sanearEstado: estado válido', () => {
     expect(estado).toEqual(original);
     expect(estado).not.toBe(original);
     expect(estado.praticantes['lucia']).not.toBe(PRATICANTE);
-    expect(estado.praticantes['lucia']?.perfil.acessoriosEmCasa).not.toBe(PERFIL.acessoriosEmCasa);
+    expect(estado.credenciais[0]).not.toBe(CREDENCIAL);
   });
 
   test.each([
@@ -92,8 +102,9 @@ describe('sanearEstado: estado válido', () => {
     ['um texto', 'oi'],
     ['um vetor', []],
     ['indefinido', undefined],
-    ['versão antiga', bruto({ versao: 0 })],
-    ['versão futura', bruto({ versao: 2 })],
+    ['versão antiga (1)', bruto({ versao: 1 })],
+    ['versão zero', bruto({ versao: 0 })],
+    ['versão futura', bruto({ versao: 3 })],
   ])('formato de topo inválido (%s) vira o estado inicial', (_nome, valor) => {
     expect(sanearEstado(valor)).toEqual(estadoInicial());
   });
@@ -102,13 +113,14 @@ describe('sanearEstado: estado válido', () => {
     const lixo = [null, undefined, NaN, 'x', 7, [], {}, () => 1, Symbol('s')];
     for (const item of lixo) {
       const estado = {
-        versao: 1,
+        versao: 2,
         contaAtual: item,
         praticantes: item,
         acompanhantes: item,
         vinculos: item,
         convites: item,
         recados: item,
+        credenciais: item,
       };
 
       expect(() => sanearEstado(estado)).not.toThrow();
@@ -118,7 +130,7 @@ describe('sanearEstado: estado válido', () => {
 });
 
 describe('sanearEstado: coleções de topo', () => {
-  test.each(['acompanhantes', 'vinculos', 'convites', 'recados'])('%s que não é vetor vira vetor vazio', (chave) => {
+  test.each(['acompanhantes', 'vinculos', 'convites', 'recados', 'credenciais'])('%s que não é vetor vira vetor vazio', (chave) => {
     const estado = sanearEstado(bruto({ [chave]: { nao: 'e vetor' } }));
 
     expect(estado[chave as 'recados']).toEqual([]);
@@ -209,16 +221,10 @@ describe('sanearEstado: praticantes', () => {
     expect(Object.keys(estado.praticantes)).toEqual(['lucia']);
   });
 
-  test('filtra acessórios inválidos do perfil sem descartar o praticante', () => {
-    const estado = sanearEstado(comPraticante({ perfil: { ...PERFIL, acessoriosEmCasa: ['cadeira', 'jetpack', 7, null, 'elastico'] } }));
+  test('ignora o campo antigo acessoriosEmCasa: o perfil não o carrega mais', () => {
+    const estado = sanearEstado(comPraticante({ perfil: { ...PERFIL, acessoriosEmCasa: ['cadeira'] } }));
 
-    expect(lucia(estado)?.perfil.acessoriosEmCasa).toEqual(['cadeira', 'elastico']);
-  });
-
-  test('acessórios que não são vetor viram vetor vazio', () => {
-    const estado = sanearEstado(comPraticante({ perfil: { ...PERFIL, acessoriosEmCasa: 'cadeira' } }));
-
-    expect(lucia(estado)?.perfil.acessoriosEmCasa).toEqual([]);
+    expect(lucia(estado)?.perfil).not.toHaveProperty('acessoriosEmCasa');
   });
 
   test('idade só é mantida se for número finito', () => {
@@ -388,7 +394,7 @@ describe('sanearEstado: ajuste do profissional', () => {
 
 test('o convite mantém quem o gerou (alunoId) e descarta alunoId inválido', () => {
   const base = { codigo: 'ABC234', tipo: 'profissional', criadoEm: '2026-10-07T10:00:00.000Z', expiraEm: '2026-10-09T10:00:00.000Z' };
-  const estado = sanearEstado({ versao: 1, convites: [{ ...base, alunoId: 'lucia' }, { ...base, codigo: 'XYZ234', alunoId: 42 }] });
+  const estado = sanearEstado({ versao: 2, convites: [{ ...base, alunoId: 'lucia' }, { ...base, codigo: 'XYZ234', alunoId: 42 }] });
   expect(estado.convites[0]?.alunoId).toBe('lucia');
   expect(estado.convites[1]).not.toHaveProperty('alunoId');
 });
@@ -412,4 +418,174 @@ test('recado lido do localStorage é cortado no tamanho máximo (280)', () => {
   const longo = 'x'.repeat(5000);
   const estado = sanearEstado(bruto({ recados: [{ id: 'r1', deId: 'carlos', paraId: 'lucia', texto: longo, enviadoEm: '2026-10-02T00:00:00.000Z', lido: false }] }));
   expect(estado.recados[0]?.texto.length).toBe(280);
+});
+
+const credenciais = (estado: EstadoApp) => estado.credenciais;
+
+describe('sanearEstado: credenciais', () => {
+  test('mantém uma credencial válida', () => {
+    expect(credenciais(sanearEstado(bruto()))).toEqual([CREDENCIAL]);
+  });
+
+  test('normaliza o e-mail (espaços e maiúsculas)', () => {
+    const estado = sanearEstado(bruto({ credenciais: [{ ...CREDENCIAL, email: '  Lucia@Exemplo.COM ' }] }));
+
+    expect(credenciais(estado)[0]?.email).toBe('lucia@exemplo.com');
+  });
+
+  test.each([
+    ['e-mail inválido', { email: 'sem-arroba' }],
+    ['e-mail que não é texto', { email: 7 }],
+    ['papel desconhecido', { papel: 'admin' }],
+    ['pessoaId que não é texto', { pessoaId: 42 }],
+    ['sal curto demais', { sal: 'ab'.repeat(8) }],
+    ['sal com caracteres que não são hexadecimais', { sal: 'zz'.repeat(16) }],
+    ['hash curto demais', { hash: 'cd'.repeat(16) }],
+    ['hash longo demais', { hash: 'cd'.repeat(33) }],
+    ['hash em maiúsculas (a derivação sempre gera minúsculas)', { hash: 'CD'.repeat(32) }],
+    ['iterações abaixo do mínimo (login rápido demais)', { iteracoes: 9_999 }],
+    ['iterações acima do máximo (login que trava o aparelho)', { iteracoes: 5_000_001 }],
+    ['iterações fracionárias', { iteracoes: 600_000.5 }],
+    ['iterações NaN', { iteracoes: Number.NaN }],
+    ['iterações em texto', { iteracoes: '600000' }],
+    ['criadaEm que não é texto', { criadaEm: 123 }],
+  ])('descarta credencial com %s', (_nome, defeito) => {
+    const estado = sanearEstado(bruto({ credenciais: [{ ...CREDENCIAL, ...defeito }] }));
+
+    expect(credenciais(estado)).toEqual([]);
+  });
+
+  test('aceita as iterações nos dois limites (10 mil e 5 milhões)', () => {
+    const estado = sanearEstado(
+      bruto({
+        credenciais: [
+          { ...CREDENCIAL, iteracoes: 10_000 },
+          { ...CREDENCIAL, email: 'b@exemplo.com', iteracoes: 5_000_000 },
+        ],
+      }),
+    );
+
+    expect(credenciais(estado).map((c) => c.iteracoes)).toEqual([10_000, 5_000_000]);
+  });
+
+  test('descarta só o item inválido e mantém os outros', () => {
+    const outra = { ...CREDENCIAL, email: 'outra@exemplo.com', pessoaId: 'outra' };
+    const estado = sanearEstado(bruto({ credenciais: [null, 7, 'x', { email: 'a@b.co' }, CREDENCIAL, outra] }));
+
+    expect(credenciais(estado).map((c) => c.email)).toEqual(['lucia@exemplo.com', 'outra@exemplo.com']);
+  });
+
+  test('com e-mail e papel repetidos, fica só a primeira (mesmo escrito de outro jeito)', () => {
+    const repetida = { ...CREDENCIAL, email: 'LUCIA@exemplo.com', pessoaId: 'intrusa' };
+    const estado = sanearEstado(bruto({ credenciais: [CREDENCIAL, repetida] }));
+
+    expect(credenciais(estado)).toEqual([CREDENCIAL]);
+  });
+
+  test('o mesmo e-mail em papéis diferentes são duas credenciais', () => {
+    const doAcompanhante = { ...CREDENCIAL, papel: 'acompanhante', pessoaId: 'carlos' };
+    const estado = sanearEstado(bruto({ credenciais: [CREDENCIAL, doAcompanhante] }));
+
+    expect(credenciais(estado)).toHaveLength(2);
+  });
+
+  test('não copia campos estranhos (nem uma senha em texto que alguém tenha escrito ali)', () => {
+    const estado = sanearEstado(bruto({ credenciais: [{ ...CREDENCIAL, senha: 'segredo', admin: true }] }));
+
+    expect(credenciais(estado)[0]).toEqual(CREDENCIAL);
+    expect(JSON.stringify(estado)).not.toContain('segredo');
+  });
+});
+
+describe('sanearEstado: conta atual com credencial e manterConectado', () => {
+  test('aceita praticante que ainda não existe mas tem credencial de praticante (triagem pendente)', () => {
+    const estado = sanearEstado(
+      bruto({
+        praticantes: {},
+        contaAtual: { papel: 'praticante', id: 'nova' },
+        credenciais: [{ ...CREDENCIAL, email: 'nova@exemplo.com', pessoaId: 'nova' }],
+      }),
+    );
+
+    expect(estado.contaAtual).toEqual({ papel: 'praticante', id: 'nova' });
+  });
+
+  test('recusa praticante inexistente quando a credencial é de acompanhante', () => {
+    const estado = sanearEstado(
+      bruto({
+        praticantes: {},
+        contaAtual: { papel: 'praticante', id: 'nova' },
+        credenciais: [{ ...CREDENCIAL, papel: 'acompanhante', pessoaId: 'nova' }],
+      }),
+    );
+
+    expect(estado.contaAtual).toBeNull();
+  });
+
+  test('recusa praticante inexistente cuja credencial foi descartada por estar adulterada', () => {
+    const estado = sanearEstado(
+      bruto({
+        praticantes: {},
+        contaAtual: { papel: 'praticante', id: 'nova' },
+        credenciais: [{ ...CREDENCIAL, pessoaId: 'nova', hash: 'curto' }],
+      }),
+    );
+
+    expect(estado.contaAtual).toBeNull();
+  });
+
+  test('preserva manterConectado booleano (true e false)', () => {
+    const falso = sanearEstado(bruto({ contaAtual: { papel: 'praticante', id: 'lucia', manterConectado: false } }));
+    const verdadeiro = sanearEstado(bruto({ contaAtual: { papel: 'praticante', id: 'lucia', manterConectado: true } }));
+
+    expect(falso.contaAtual).toEqual({ papel: 'praticante', id: 'lucia', manterConectado: false });
+    expect(verdadeiro.contaAtual).toEqual({ papel: 'praticante', id: 'lucia', manterConectado: true });
+  });
+
+  test('descarta manterConectado que não é booleano, sem derrubar a conta', () => {
+    const estado = sanearEstado(bruto({ contaAtual: { papel: 'praticante', id: 'lucia', manterConectado: 'sim' } }));
+
+    expect(estado.contaAtual).toEqual({ papel: 'praticante', id: 'lucia' });
+  });
+});
+
+describe('sanearContaDaSessao', () => {
+  const estado = sanearEstado(bruto({ contaAtual: null }));
+
+  test('aceita a conta e a marca como manterConectado: false, venha o que vier no texto salvo', () => {
+    expect(sanearContaDaSessao({ papel: 'praticante', id: 'lucia' }, estado)).toEqual({
+      papel: 'praticante',
+      id: 'lucia',
+      manterConectado: false,
+    });
+    expect(sanearContaDaSessao({ papel: 'acompanhante', id: 'carlos', manterConectado: true }, estado)).toEqual({
+      papel: 'acompanhante',
+      id: 'carlos',
+      manterConectado: false,
+    });
+  });
+
+  test.each([
+    ['null', null],
+    ['texto', 'lucia'],
+    ['papel inválido', { papel: 'admin', id: 'lucia' }],
+    ['id que não é texto', { papel: 'praticante', id: 7 }],
+    ['praticante inexistente', { papel: 'praticante', id: 'fantasma' }],
+    ['acompanhante inexistente', { papel: 'acompanhante', id: 'fantasma' }],
+    ['id de acompanhante usado como praticante', { papel: 'praticante', id: 'carlos' }],
+  ])('devolve null para %s', (_nome, valor) => {
+    expect(sanearContaDaSessao(valor, estado)).toBeNull();
+  });
+
+  test('aceita praticante com triagem pendente (credencial sem dados)', () => {
+    const pendente = sanearEstado(
+      bruto({ praticantes: {}, contaAtual: null, credenciais: [{ ...CREDENCIAL, pessoaId: 'nova' }] }),
+    );
+
+    expect(sanearContaDaSessao({ papel: 'praticante', id: 'nova' }, pendente)).toEqual({
+      papel: 'praticante',
+      id: 'nova',
+      manterConectado: false,
+    });
+  });
 });

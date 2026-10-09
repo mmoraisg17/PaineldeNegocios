@@ -52,3 +52,15 @@ export function gerarValorUnico<T>(gerar: () => T, jaExiste: (valor: T) => boole
   }
   throw new Error(`Não foi possível gerar ${descricao} único.`);
 }
+
+/* Bytes aleatórios em hexadecimal (2 caracteres por byte), para sais de senha.
+   Sem crypto o sal seria previsível, então aqui NÃO há reserva com
+   Math.random: lança, e quem chama decide (o cadastro mostra um erro). */
+export function bytesAleatoriosEmHex(quantidade: number): string {
+  const criptografia: Crypto | undefined = globalThis.crypto;
+  if (typeof criptografia?.getRandomValues !== 'function') {
+    throw new Error('Este navegador não oferece números aleatórios seguros.');
+  }
+  const bytes = criptografia.getRandomValues(new Uint8Array(quantidade));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}

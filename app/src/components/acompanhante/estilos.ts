@@ -10,7 +10,10 @@ export const BOTAO_SECUNDARIO =
 
 export const LINK_VOLTAR = 'flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-primaria';
 
-export const CAMPO = 'min-h-12 w-full rounded-botao border-2 border-borda bg-superficie px-3 text-lg text-texto';
+/* Borda de campo com contraste de 3:1 ou mais (WCAG 1.4.11) e placeholder na
+   cor suave, porque o cinza padrão do navegador some para quem enxerga pouco. */
+export const CAMPO =
+  'min-h-12 w-full rounded-botao border-2 border-borda-campo bg-superficie px-3 text-lg text-texto placeholder:text-texto-suave';
 
 export const CARTAO = 'rounded-cartao bg-superficie p-4';
 

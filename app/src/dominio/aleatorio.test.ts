@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { aleatorioSeguro, gerarValorUnico, novoId, TENTATIVAS_PARA_VALOR_UNICO } from './aleatorio';
+import { aleatorioSeguro, bytesAleatoriosEmHex, gerarValorUnico, novoId, TENTATIVAS_PARA_VALOR_UNICO } from './aleatorio';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -85,5 +85,31 @@ describe('gerarValorUnico', () => {
 
     expect(() => gerarValorUnico(gerar, () => true, 'um código')).toThrow(/um código/);
     expect(chamadas).toBe(TENTATIVAS_PARA_VALOR_UNICO);
+  });
+});
+
+describe('bytesAleatoriosEmHex', () => {
+  test('devolve 2 caracteres hexadecimais por byte', () => {
+    expect(bytesAleatoriosEmHex(16)).toMatch(/^[0-9a-f]{32}$/);
+    expect(bytesAleatoriosEmHex(0)).toBe('');
+  });
+
+  test('completa com zero à esquerda', () => {
+    vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(((vetor: Uint8Array) => {
+      vetor.set([0, 1, 15, 255]);
+      return vetor;
+    }) as typeof globalThis.crypto.getRandomValues);
+
+    expect(bytesAleatoriosEmHex(4)).toBe('00010fff');
+  });
+
+  test('dois sorteios seguidos não repetem', () => {
+    expect(bytesAleatoriosEmHex(16)).not.toBe(bytesAleatoriosEmHex(16));
+  });
+
+  test('sem crypto disponível, lança em vez de gerar um sal previsível', () => {
+    vi.stubGlobal('crypto', undefined);
+
+    expect(() => bytesAleatoriosEmHex(16)).toThrow('números aleatórios seguros');
   });
 });

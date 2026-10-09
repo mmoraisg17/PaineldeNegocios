@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
 import { AjustarRotina } from '../../components/acompanhante/AjustarRotina';
 import { AlertasDoAluno } from '../../components/acompanhante/AlertasDoAluno';
@@ -6,7 +7,15 @@ import { CARTAO, CORPO_DA_TELA, LINK_VOLTAR, TITULO_DA_TELA } from '../../compon
 import { HistoricoDoAluno } from '../../components/acompanhante/HistoricoDoAluno';
 import { ResumoDoRelatorio } from '../../components/acompanhante/ResumoDoRelatorio';
 import { mediasRecentes, resumoDoAluno } from '../../components/acompanhante/resumoDoAluno';
-import { type Acompanhante, type DadosPraticante, type Vinculo, permissoesDoVinculo, trilhaDoObjetivo } from '../../dominio';
+import {
+  FREQUENCIA_SEMANAL_PADRAO,
+  type Acompanhante,
+  type DadosPraticante,
+  type Vinculo,
+  permissoesDoVinculo,
+  rotinaDoPraticante,
+  trilhaDoObjetivo,
+} from '../../dominio';
 import { vinculoEntre } from '../../estado/acoes';
 import { useAcompanhanteAtual, useApp } from '../../estado/ContextoApp';
 import { ROTULO_DA_TRILHA, ROTULO_DO_OBJETIVO } from '../../estado/formatos';
@@ -50,7 +59,10 @@ function Relatorio({ aluno, acompanhante, vinculo }: PropsDoRelatorio) {
   const { estado } = useApp();
   const tituloRef = useTituloDaTela(`Relatório de ${aluno.perfil.nome}`);
   const permitido = permissoesDoVinculo(vinculo);
-  const resumo = resumoDoAluno(estado, aluno.id, new Date());
+  // Um só "agora" para o resumo e para as semanas do histórico não discordarem.
+  const agora = useMemo(() => new Date(), []);
+  const resumo = resumoDoAluno(estado, aluno.id, agora);
+  const planejadas = rotinaDoPraticante(estado, aluno.id)?.frequenciaSemanal ?? FREQUENCIA_SEMANAL_PADRAO;
 
   return (
     <div className={CORPO_DA_TELA}>
@@ -79,7 +91,7 @@ function Relatorio({ aluno, acompanhante, vinculo }: PropsDoRelatorio) {
         <p className={`${CARTAO} text-lg text-texto`}>Como familiar, você acompanha os relatórios, mas não altera a rotina.</p>
       ) : null}
 
-      <HistoricoDoAluno sessoes={aluno.sessoes} />
+      <HistoricoDoAluno sessoes={aluno.sessoes} planejadas={planejadas} agora={agora} />
     </div>
   );
 }

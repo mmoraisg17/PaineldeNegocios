@@ -1,4 +1,4 @@
-import { ACESSORIOS_DA_PLATAFORMA, buscarExercicio, exerciciosDaTrilha } from './catalogo';
+import { buscarExercicio, exerciciosDaTrilha } from './catalogo';
 import { trilhaDoObjetivo, type Perfil } from './perfil';
 import type { Apoio, Dose, Exercicio, IdExercicio, Inclinacao, Nivel } from './tipos';
 
@@ -58,27 +58,22 @@ export function segundosDaDose(dose: Dose): number {
   return dose.porLado === true ? segundos * 2 : segundos;
 }
 
-function temOsAcessoriosDeCasa(exercicio: Exercicio, perfil: Perfil): boolean {
-  return exercicio.acessorios.every(
-    (acessorio) => ACESSORIOS_DA_PLATAFORMA.includes(acessorio) || perfil.acessoriosEmCasa.includes(acessorio),
-  );
-}
-
-/* Na fisioterapia a região do objetivo vem primeiro: quem tem o joelho como
-   foco faz primeiro os exercícios do joelho, com a energia do começo do treino. */
+/* O kit do produto traz todos os itens (barras, inclinação, elástico e assento
+   acoplável), então a rotina padrão é a trilha inteira: ninguém precisa dizer
+   o que tem em casa. Na fisioterapia a região do objetivo vem primeiro: quem
+   tem o joelho como foco faz primeiro os exercícios do joelho, com a energia
+   do começo do treino. */
 function exerciciosDoPerfil(perfil: Perfil): Exercicio[] {
-  const trilha = exerciciosDaTrilha(trilhaDoObjetivo(perfil.objetivo)).filter((exercicio) =>
-    temOsAcessoriosDeCasa(exercicio, perfil),
-  );
+  const trilha = exerciciosDaTrilha(trilhaDoObjetivo(perfil.objetivo));
   const daRegiao = trilha.filter((exercicio) => exercicio.regiao === perfil.objetivo);
   const demais = trilha.filter((exercicio) => exercicio.regiao !== perfil.objetivo);
   return [...daRegiao, ...demais];
 }
 
-/* Inclusão e remoção do profissional prevalecem sobre o filtro de
-   acessórios (ele sabe o que o aluno tem). Se o mesmo id estiver nas duas
-   listas, a remoção vence: é a escolha mais segura. Ids desconhecidos, que
-   podem vir de dados salvos por uma versão antiga, são ignorados. */
+/* O profissional inclui exercícios de outra trilha ou remove os que não servem
+   ao aluno. Se o mesmo id estiver nas duas listas, a remoção vence: é a
+   escolha mais segura. Ids desconhecidos, que podem vir de dados salvos por
+   uma versão antiga, são ignorados. */
 function aplicarListasDoAjuste(base: Exercicio[], ajuste: AjusteProfissional | undefined): Exercicio[] {
   const incluidos = (ajuste?.exerciciosIncluidos ?? [])
     .map((id) => buscarExercicio(id))

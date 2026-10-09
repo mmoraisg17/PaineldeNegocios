@@ -26,6 +26,9 @@
   --color-perigo: #b3261e;
   --color-perigo-fundo: #fde8e6;
   --color-borda: #c9ced6;
+  /* Borda de campo de texto: componente de interface precisa de 3:1 contra o
+     fundo (WCAG 1.4.11); `--color-borda` (1,6:1) fica só para divisórias. */
+  --color-borda-campo: #6b7480;
   --color-moldura: #0b0f14;
   --color-mesa: #e5e5e5;
 
@@ -81,6 +84,7 @@ html.alto-contraste {
   --color-texto: #000000;
   --color-texto-suave: #1b1f24;
   --color-borda: #4a5360;
+  --color-borda-campo: #1b1f24;
   --color-primaria: #08503f;
   --color-primaria-escura: #053a2e;
   --color-alerta-texto: #5a2f00;

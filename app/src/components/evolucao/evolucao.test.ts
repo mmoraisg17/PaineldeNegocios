@@ -14,7 +14,7 @@ function sessaoHa(dias: number, exercicios: ResultadoExercicio[] = [resultado()]
 }
 
 function semana(treinos: number): SemanaResumida {
-  return { fim: AGORA, treinos, simetria: null, estabilidade: null, apoio: null };
+  return { fim: AGORA, treinos, nota: null, simetria: null, estabilidade: null, apoio: null };
 }
 
 describe('resumirSemanas', () => {
@@ -33,7 +33,7 @@ describe('resumirSemanas', () => {
     const semanas = resumirSemanas([], AGORA);
 
     // Assert
-    expect(semanas.every((s) => s.treinos === 0 && s.simetria === null && s.estabilidade === null && s.apoio === null)).toBe(true);
+    expect(semanas.every((s) => s.treinos === 0 && s.nota === null && s.simetria === null && s.estabilidade === null && s.apoio === null)).toBe(true);
   });
 
   test('coloca cada sessão na semana certa', () => {
@@ -70,6 +70,21 @@ describe('resumirSemanas', () => {
     expect(ultima).toMatchObject({ treinos: 2, simetria: 70, estabilidade: 60, apoio: 30 });
   });
 
+  test('tira a média da nota por sessão, arredondada; sem treino a nota é nula', () => {
+    // Arrange: a sessão de 1 exercício (nota 40) pesa o mesmo que a de 3 exercícios (média 90)
+    const sessoes = [
+      sessaoHa(1, [resultado({ nota: 40 })]),
+      sessaoHa(2, [resultado({ nota: 80 }), resultado({ nota: 90 }), resultado({ nota: 100 })]),
+    ];
+
+    // Act
+    const semanas = resumirSemanas(sessoes, AGORA);
+
+    // Assert
+    expect(semanas.at(-1)?.nota).toBe(65);
+    expect(semanas.at(-2)?.nota).toBeNull();
+  });
+
   test('uma sessão vale o mesmo que outra, mesmo com mais exercícios dentro', () => {
     // Arrange
     const sessoes = [
@@ -100,7 +115,7 @@ describe('resumirSemanas', () => {
     const ultima = resumirSemanas([sessaoHa(1, [])], AGORA).at(-1);
 
     // Assert
-    expect(ultima).toMatchObject({ treinos: 1, simetria: null, estabilidade: null, apoio: null });
+    expect(ultima).toMatchObject({ treinos: 1, nota: null, simetria: null, estabilidade: null, apoio: null });
   });
 
   test('não altera o vetor de sessões recebido', () => {

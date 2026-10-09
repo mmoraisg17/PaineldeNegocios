@@ -1,60 +1,69 @@
-import { useId, useState, type FormEvent } from 'react';
-import { Link, Navigate } from 'react-router';
-import { BOTAO_PRINCIPAL, CAMPO, CORPO_DA_TELA, LINK_VOLTAR, TITULO_DA_TELA } from '../../components/acompanhante/estilos';
-import { CODIGO_DO_CONVITE_TAMANHO, VALIDADE_DO_CONVITE_EM_HORAS } from '../../dominio';
-import { type ResultadoDoCodigo, usarCodigo } from '../../estado/acoes';
+import { useState } from 'react';
+import { Link, Navigate, useSearchParams } from 'react-router';
+import { CARTAO, CORPO_DA_TELA, LINK_VOLTAR, TITULO_DA_TELA } from '../../components/acompanhante/estilos';
+import { MENSAGEM_DE_ERRO_DO_CONVITE, type ErroDoConvite } from '../../components/acompanhante/mensagensDoConvite';
+import { AlertaDoConvite, VincularAluno } from '../../components/acompanhante/VincularAluno';
+import { CONTAS_DA_DEMO, SENHA_DA_DEMO, consultarConvite, type EstadoApp, type TipoAcompanhante } from '../../dominio';
 import { useAcompanhanteAtual, useApp } from '../../estado/ContextoApp';
+import { codigoDoTexto } from '../../estado/linkDoConvite';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
 
-const MENSAGEM_DE_ERRO: Record<Extract<ResultadoDoCodigo, { ok: false }>['erro'], string> = {
-  'nao-encontrado': 'Não encontramos esse código. Confira as letras e os números com o aluno.',
-  expirado: `Esse código venceu (ele vale ${VALIDADE_DO_CONVITE_EM_HORAS} horas). Peça ao aluno para gerar um novo.`,
-  'convite-sem-aluno': 'Esse convite não está ligado a nenhum aluno. Peça ao aluno para gerar um código novo.',
-};
+const EMAIL_DA_DEMO = CONTAS_DA_DEMO.find((conta) => conta.pessoaId === 'lucia')?.email ?? '';
 
-type Retorno = { tipo: 'ok' | 'erro'; texto: string };
+type ConviteDoLink = { ok: true; aluno: string; tipo: TipoAcompanhante } | { ok: false; erro: ErroDoConvite };
 
-/* Quem digita não vê diferença entre "ab c2" e "ABC2", e o convite usa só
-   maiúsculas: normalizar já no campo evita um erro que a pessoa não entenderia. */
-const normalizar = (texto: string): string => texto.replace(/\s+/g, '').toUpperCase();
+/* Confere o código que veio no link ANTES de a pessoa aceitar. Não consome o
+   convite: quem consome é o envio do formulário. */
+function avaliarLink(estado: EstadoApp, codigo: string): ConviteDoLink | null {
+  if (codigo === '') return null;
+  const consulta = consultarConvite(codigo, estado.convites, new Date());
+  if (!consulta.ok) return consulta;
+  const aluno = consulta.convite.alunoId ? estado.praticantes[consulta.convite.alunoId]?.perfil.nome : undefined;
+  return aluno ? { ok: true, aluno, tipo: consulta.convite.tipo } : { ok: false, erro: 'convite-sem-aluno' };
+}
 
-/* Adicionar aluno (manual 12.1): o acompanhante digita o código que o aluno
-   gerou em Perfil → Acompanhantes → Convidar. O pedido nasce pendente e só
-   vale depois que o aluno autoriza. */
+type AreaDoConviteProps = { codigoDoLink: string; acompanhanteId: string; aoEnviar: () => void };
+
+/* A avaliação do link é feita uma vez, ao abrir (a tela tem `key` do código).
+   Se fosse refeita a cada desenho, o convite recém-aceito, já consumido, viraria
+   "não encontrado" e esconderia a mensagem de sucesso. */
+function AreaDoConvite({ codigoDoLink, acompanhanteId, aoEnviar }: AreaDoConviteProps) {
+  const { estado } = useApp();
+  const [convite] = useState(() => avaliarLink(estado, codigoDoLink));
+
+  return (
+    <>
+      {convite?.ok ? (
+        <p className={`${CARTAO} text-lg font-semibold text-texto`}>
+          {convite.aluno} convidou você para acompanhar os treinos como {convite.tipo}.
+        </p>
+      ) : null}
+      {convite && !convite.ok ? (
+        <AlertaDoConvite texto={MENSAGEM_DE_ERRO_DO_CONVITE[convite.erro]} />
+      ) : null}
+      <VincularAluno
+        acompanhanteId={acompanhanteId}
+        valorInicial={convite?.ok ? codigoDoLink : ''}
+        rotuloDoBotao={convite?.ok ? 'Aceitar convite' : 'Enviar pedido'}
+        aoEnviar={aoEnviar}
+        esconderFormularioAposEnviar
+      />
+    </>
+  );
+}
+
+/* Adicionar aluno (manual 12.1): o acompanhante usa o código, ou o link, que o
+   aluno gerou em Perfil → Acompanhantes → Convidar. Quem chega pelo link vem
+   com ?codigo= e só precisa aceitar. O pedido nasce pendente e só vale depois
+   que o aluno autoriza. */
 export function AdicionarAluno() {
   const tituloRef = useTituloDaTela('Adicionar aluno');
-  const { estado, atualizar } = useApp();
   const acompanhante = useAcompanhanteAtual();
-  const [codigo, setCodigo] = useState('');
-  const [retorno, setRetorno] = useState<Retorno | null>(null);
-  const idCampo = useId();
-  const idRetorno = useId();
+  const [parametros] = useSearchParams();
+  const [pedidoEnviado, setPedidoEnviado] = useState(false);
+  const codigoDoLink = codigoDoTexto(parametros.get('codigo') ?? '');
 
   if (!acompanhante) return <Navigate to="/" replace />;
-
-  const enviar = (evento: FormEvent) => {
-    evento.preventDefault();
-    if (codigo.length !== CODIGO_DO_CONVITE_TAMANHO) {
-      setRetorno({ tipo: 'erro', texto: `Digite os ${CODIGO_DO_CONVITE_TAMANHO} caracteres do código.` });
-      return;
-    }
-    /* Mesmo no erro o estado volta com os convites vencidos já limpos. */
-    const { estado: novo, resultado } = usarCodigo(estado, codigo, acompanhante.id, new Date());
-    atualizar(() => novo);
-    if (!resultado.ok) {
-      setRetorno({ tipo: 'erro', texto: MENSAGEM_DE_ERRO[resultado.erro] });
-      return;
-    }
-    const aluno = estado.praticantes[resultado.vinculo.alunoId]?.perfil.nome ?? 'O aluno';
-    setCodigo('');
-    setRetorno({
-      tipo: 'ok',
-      texto:
-        resultado.vinculo.status === 'autorizado'
-          ? `Você já acompanha ${aluno}.`
-          : `Pedido enviado. Agora ${aluno} precisa autorizar no app.`,
-    });
-  };
 
   return (
     <div className={CORPO_DA_TELA}>
@@ -65,48 +74,25 @@ export function AdicionarAluno() {
         <h1 ref={tituloRef} tabIndex={-1} className={TITULO_DA_TELA}>
           Adicionar aluno
         </h1>
-        <p className="text-lg text-texto-suave">Digite o código de 6 caracteres que o aluno enviou.</p>
+        <p className="text-lg text-texto-suave">Use o código ou o link que o aluno enviou.</p>
       </header>
 
-      <form onSubmit={enviar} noValidate className="flex flex-col gap-3">
-        <label htmlFor={idCampo} className="text-lg font-semibold text-texto">
-          Código do aluno
-        </label>
-        <input
-          id={idCampo}
-          type="text"
-          value={codigo}
-          maxLength={CODIGO_DO_CONVITE_TAMANHO}
-          autoComplete="off"
-          autoCapitalize="characters"
-          inputMode="text"
-          spellCheck={false}
-          aria-invalid={retorno?.tipo === 'erro'}
-          aria-describedby={retorno ? idRetorno : undefined}
-          onChange={(evento) => {
-            setCodigo(normalizar(evento.target.value));
-            setRetorno(null);
-          }}
-          className={`${CAMPO} min-h-16 text-center text-3xl font-bold tracking-[0.3em]`}
-        />
-        <button type="submit" className={BOTAO_PRINCIPAL}>
-          Enviar pedido
-        </button>
-      </form>
+      <AreaDoConvite
+        key={codigoDoLink}
+        codigoDoLink={codigoDoLink}
+        acompanhanteId={acompanhante.id}
+        aoEnviar={() => setPedidoEnviado(true)}
+      />
 
-      {retorno ? (
-        <p
-          id={idRetorno}
-          role={retorno.tipo === 'ok' ? 'status' : 'alert'}
-          className={`rounded-botao p-3 text-lg font-semibold ${retorno.tipo === 'ok' ? 'bg-primaria-suave text-primaria-escura' : 'bg-perigo-fundo text-perigo'}`}
-        >
-          <span aria-hidden="true">{retorno.tipo === 'ok' ? '✓ ' : '! '}</span>
-          {retorno.texto}
-        </p>
+      {pedidoEnviado ? (
+        <Link to="/acompanhante/alunos" className="flex min-h-12 w-fit items-center text-lg font-semibold text-primaria underline">
+          Ver meus alunos
+        </Link>
       ) : null}
 
       <p className="rounded-botao bg-alerta-fundo p-3 text-base text-alerta-texto">
-        Para testar: entre como Dona Lúcia, vá em Perfil → Acompanhantes → Convidar e digite o código aqui.
+        Para testar: entre como {EMAIL_DA_DEMO} / {SENHA_DA_DEMO}, vá em Perfil → Acompanhantes → Convidar e copie o código ou
+        o link.
       </p>
     </div>
   );

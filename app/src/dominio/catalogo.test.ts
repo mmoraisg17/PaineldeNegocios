@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import {
-  ACESSORIOS_DA_PLATAFORMA,
   CATALOGO,
   buscarExercicio,
   exerciciosDaTrilha,
@@ -179,10 +178,6 @@ describe('catálogo: acessórios', () => {
   test('a abdução exige elástico e o sentar e levantar exige cadeira', () => {
     expect(buscarExercicio('abducao-com-elastico')?.acessorios).toContain('elastico');
     expect(buscarExercicio('sentar-e-levantar')?.acessorios).toContain('cadeira');
-  });
-
-  test('barras e inclinação vêm com a plataforma', () => {
-    expect(ACESSORIOS_DA_PLATAFORMA).toEqual(['barras', 'inclinacao']);
   });
 });
 

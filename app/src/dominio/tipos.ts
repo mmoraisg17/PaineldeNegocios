@@ -6,8 +6,9 @@ export type Trilha = 'equilibrio60' | 'fisio';
 
 export type Regiao = 'joelho' | 'tornozelo';
 
-/* Só "elastico" e "cadeira" dependem do que a pessoa tem em casa; "barras" e
-   "inclinacao" vêm com a plataforma (ver ACESSORIOS_DA_PLATAFORMA). */
+/* Itens que um exercício usa. O kit do produto traz todos (barras, inclinação,
+   elástico e assento acoplável), então a pessoa não precisa informar o que tem
+   em casa: a lista serve para a Biblioteca mostrar e filtrar "o que usa". */
 export type Acessorio = 'barras' | 'elastico' | 'inclinacao' | 'cadeira';
 
 export type Nivel = 1 | 2 | 3;

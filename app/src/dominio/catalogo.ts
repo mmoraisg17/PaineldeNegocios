@@ -1,15 +1,11 @@
 import { congelarProfundo } from './imutavel';
-import type { Acessorio, Dose, Exercicio, Trilha } from './tipos';
+import type { Dose, Exercicio, Trilha } from './tipos';
 
 /* Conteúdo transcrito do manual de uso, seção 7. O manual é a fonte: se um
    texto mudar lá, muda aqui (e o teste de catálogo acusa a divergência de
    dose, apoio e inclinação). Onde o manual não diz a dose ou o apoio de um
    nível, a escolha segue a regra geral da seção 7: subir de nível = mais
    repetição ou tempo, menos apoio nas barras e mais inclinação. */
-
-/* Acessórios que vêm com a plataforma: a pessoa nunca "deixa de ter" barras
-   ou inclinação, então eles não entram no filtro da rotina. */
-export const ACESSORIOS_DA_PLATAFORMA: readonly Acessorio[] = ['barras', 'inclinacao'];
 
 const repeticoes = (quantidade: number, porLado = false): Dose =>
   porLado

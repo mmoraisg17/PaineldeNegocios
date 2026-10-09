@@ -1,6 +1,14 @@
 import { autorizar, criarVinculoPendente, type Vinculo } from './acompanhamento';
 import { buscarExercicio } from './catalogo';
-import { estadoInicial, type Acompanhante, type DadosPraticante, type EstadoApp, type Recado } from './estado';
+import { ITERACOES_DA_SENHA, type Credencial } from './credenciais';
+import {
+  estadoInicial,
+  type Acompanhante,
+  type DadosPraticante,
+  type EstadoApp,
+  type PapelDaConta,
+  type Recado,
+} from './estado';
 import { copiarProfundo } from './imutavel';
 import { limitar } from './numeros';
 import { nivelInicial, type Perfil } from './perfil';
@@ -91,7 +99,6 @@ const PERFIL_DA_LUCIA: Perfil = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
   firmeza: 'as-vezes',
-  acessoriosEmCasa: ['cadeira', 'elastico'],
   inclinacaoMaxima: 2,
 };
 
@@ -99,7 +106,6 @@ const PERFIL_DO_RAFAEL: Perfil = {
   nome: 'Rafael',
   objetivo: 'joelho',
   firmeza: 'as-vezes',
-  acessoriosEmCasa: ['elastico'],
   inclinacaoMaxima: 3,
 };
 
@@ -272,6 +278,56 @@ function criarRecadoDoCarlos(agora: Date): Recado {
   };
 }
 
+/* SENHA PÚBLICA: é a mesma das 5 contas e aparece impressa na tela de login,
+   para o avaliador entrar sem cadastro. Não é um segredo e nunca deve ser a
+   senha de uma conta de verdade. */
+export const SENHA_DA_DEMO = 'demo1234';
+
+export const CONTAS_DA_DEMO: readonly { papel: PapelDaConta; pessoaId: string; email: string }[] = [
+  { papel: 'praticante', pessoaId: IDS_DEMO.lucia, email: 'lucia@demo.test' },
+  { papel: 'praticante', pessoaId: IDS_DEMO.rafael, email: 'rafael@demo.test' },
+  { papel: 'acompanhante', pessoaId: IDS_DEMO.carlos, email: 'carlos@demo.test' },
+  { papel: 'acompanhante', pessoaId: IDS_DEMO.ana, email: 'ana@demo.test' },
+  { papel: 'acompanhante', pessoaId: IDS_DEMO.marta, email: 'marta@demo.test' },
+];
+
+/* Sal e hash de SENHA_DA_DEMO por conta, calculados UMA vez (PBKDF2-HMAC-SHA-256,
+   ITERACOES_DA_SENHA iterações, 256 bits) e gravados aqui. Assim `criarEstadoDemo`
+   continua síncrono e determinístico (derivar 5 hashes custaria ~2 s a cada
+   chamada). O sal é fixo e legível de propósito: a senha é pública. Se
+   ITERACOES_DA_SENHA mudar, estes hashes precisam ser recalculados (o teste
+   "a senha demo1234 abre ..." acusa). */
+const SAL_E_HASH_DA_DEMO: Record<string, { sal: string; hash: string }> = {
+  [IDS_DEMO.lucia]: {
+    sal: '64656d6f2d6c756369615f5f5f5f5f5f',
+    hash: '39adf8e558a41e2f5a30fd697765af1d229554e48b14dd3c9132146cabfae42f',
+  },
+  [IDS_DEMO.rafael]: {
+    sal: '64656d6f2d72616661656c5f5f5f5f5f',
+    hash: '87e405274d23f996b2ede55f20f155e2f0a49a1a9cac45a211597d39ebff5bc2',
+  },
+  [IDS_DEMO.carlos]: {
+    sal: '64656d6f2d6361726c6f735f5f5f5f5f',
+    hash: 'df0bdbc8b77c227ef3ecb5a61ffc5afadb29c76a99684f92cb445a5b6a9e2d40',
+  },
+  [IDS_DEMO.ana]: {
+    sal: '64656d6f2d616e615f5f5f5f5f5f5f5f',
+    hash: '67cb2a66ec078a98bb7917139cdd691d2db0477e0cf2e7b634e6c04153df0209',
+  },
+  [IDS_DEMO.marta]: {
+    sal: '64656d6f2d6d617274615f5f5f5f5f5f',
+    hash: '63e8b6b2b8b2ed6f8850173bf88e6310a2f00453efc04da0c2f5ed34020eb7a4',
+  },
+};
+
+function criarCredenciaisDaDemo(agora: Date): Credencial[] {
+  const criadaEm = new Date(agora.getTime() - DIAS_DE_HISTORICO * MS_POR_DIA).toISOString();
+  return CONTAS_DA_DEMO.flatMap((conta) => {
+    const segredo = SAL_E_HASH_DA_DEMO[conta.pessoaId];
+    return segredo ? [{ ...conta, ...segredo, iteracoes: ITERACOES_DA_SENHA, criadaEm }] : [];
+  });
+}
+
 /* Estado completo da demonstração. `contaAtual` fica nula: quem escolhe a
    conta é a tela inicial. */
 export function criarEstadoDemo(agora: Date): EstadoApp {
@@ -287,5 +343,6 @@ export function criarEstadoDemo(agora: Date): EstadoApp {
     acompanhantes: copiarProfundo(ACOMPANHANTES),
     vinculos: criarVinculosAutorizados(agora),
     recados: [criarRecadoDoCarlos(agora)],
+    credenciais: criarCredenciaisDaDemo(agora),
   };
 }

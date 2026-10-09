@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { TAMANHO_MAXIMO_DO_NOME, limparNome, nivelInicial, trilhaDoObjetivo } from './perfil';
+import { TAMANHO_MAXIMO_DO_NOME, limparNome, nivelInicial, nivelPelaFirmeza, trilhaDoObjetivo } from './perfil';
 
 describe('trilhaDoObjetivo', () => {
   test.each([
@@ -62,6 +62,26 @@ describe('nivelInicial', () => {
   test('medidas fora de 0 a 1 são limitadas ao intervalo', () => {
     expect(nivelInicial({ oscilacao: -2, apoioNasBarras: -1 }, 'firme')).toBe(3);
     expect(nivelInicial({ oscilacao: 5, apoioNasBarras: 0 }, 'firme')).toBe(1);
+  });
+});
+
+describe('nivelPelaFirmeza', () => {
+  test.each([
+    ['preciso-apoio', 1],
+    ['as-vezes', 1],
+    ['firme', 2],
+  ] as const)('a firmeza "%s" começa no nível %i', (firmeza, nivel) => {
+    expect(nivelPelaFirmeza(firmeza)).toBe(nivel);
+  });
+
+  test('nunca começa no nível 3: a autoavaliação sozinha não basta', () => {
+    expect(nivelPelaFirmeza('firme')).toBeLessThan(3);
+  });
+
+  test('nunca começa acima do que nivelInicial daria com a mesma firmeza e uma medição ótima', () => {
+    for (const firmeza of ['preciso-apoio', 'as-vezes', 'firme'] as const) {
+      expect(nivelPelaFirmeza(firmeza)).toBeLessThanOrEqual(nivelInicial({ oscilacao: 0, apoioNasBarras: 0 }, firmeza));
+    }
   });
 });
 

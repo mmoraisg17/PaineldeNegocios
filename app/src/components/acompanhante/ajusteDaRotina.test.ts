@@ -110,19 +110,17 @@ describe('ajusteDoFormulario', () => {
     expect(ajuste.exerciciosIncluidos).toEqual([]);
   });
 
-  test('marcar um exercício que a rotina padrão não tem (falta de acessório) vira inclusão', () => {
-    // Arrange: sem elástico em casa, a abdução fica fora da rotina padrão
+  test('todos os exercícios da trilha já estão na rotina padrão (o kit traz tudo), então marcá-los não vira inclusão', () => {
+    // Arrange
     const lucia = estado.praticantes['lucia']!;
-    const semElastico = { ...lucia, perfil: { ...lucia.perfil, acessoriosEmCasa: [] } };
-    const base: EstadoApp = { ...estado, praticantes: { ...estado.praticantes, lucia: semElastico } };
-    const inicial = formularioDe(base, 'lucia');
-    expect(inicial.itens.find((i) => i.exercicioId === 'abducao-com-elastico')?.incluido).toBe(false);
+    const inicial = formularioDe(estado, 'lucia');
+    expect(inicial.itens.every((item) => item.incluido)).toBe(true);
 
     // Act
-    const ajuste = ajusteDoFormulario(comItem(inicial, 'abducao-com-elastico', { incluido: true }), semElastico);
+    const ajuste = ajusteDoFormulario(inicial, lucia);
 
     // Assert
-    expect(ajuste.exerciciosIncluidos).toEqual(['abducao-com-elastico']);
+    expect(ajuste.exerciciosIncluidos).toEqual([]);
     expect(ajuste.exerciciosRemovidos).toEqual([]);
   });
 

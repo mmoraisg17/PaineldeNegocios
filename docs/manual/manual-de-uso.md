@@ -1,6 +1,6 @@
 # Manual de uso: plataforma de equilíbrio + app
 
-*Versão 1.0 · 07/10/2026 · Grupo 7 · Painel de Negócios PJ Consultoria*
+*Versão 1.1 · 09/10/2026 · Grupo 7 · Painel de Negócios PJ Consultoria*
 
 > **Protótipo educacional.** Este produto ajuda a treinar equilíbrio e força em casa. Ele **não faz diagnóstico, não prescreve tratamento e não substitui** a orientação de um médico, fisioterapeuta ou profissional de educação física.
 
@@ -152,27 +152,33 @@ O app funciona no **navegador do celular**: não precisa instalar nada.
 
 > No computador, o app aparece dentro de uma **moldura de celular**, para simular como ele fica no telefone.
 
-### 4.2 Entrar
+### 4.2 Entrar ou criar conta
 
-Na tela inicial, escolha **quem você é**:
+A tela inicial tem **duas abas**. Escolha **quem você é**:
 
-| Opção | Para quem |
+| Aba | Para quem |
 |---|---|
-| **Sou praticante** | Quem vai treinar na plataforma |
-| **Sou acompanhante** | Personal, fisioterapeuta ou familiar que vai acompanhar alguém (ver seção 12) |
+| **Praticante** | Quem vai treinar na plataforma |
+| **Acompanhante** | Personal, fisioterapeuta ou familiar que vai acompanhar alguém (ver seção 12) |
 
-No protótipo, cada opção tem **contas de demonstração** que entram com um toque (seção 17).
+Em cada aba:
+
+1. **Já tem conta?** Digite o **e-mail** e a **senha** e toque em **Entrar**.
+2. **Primeira vez?** Toque em **Criar conta**, preencha os dados e crie uma senha de **8 caracteres ou mais**. Use uma senha só para este app: não use a senha do seu e-mail ou do banco.
+3. Toque no **ícone de olho** ao lado da senha para **mostrar ou ocultar** o que você digitou.
+4. **Manter conectado:** marque essa opção só no **seu próprio aparelho**. Sem a marca, o app pede a senha de novo quando você fecha o navegador.
+
+No protótipo, a senha fica **só neste aparelho**, protegida por uma conversão irreversível (hash). Nada vai para a internet. O bloco **Contas de demonstração** entra com um toque (seção 17).
 
 ### 4.3 Primeiro uso do praticante
 
-O app guia você em 4 passos:
+Depois de criar a conta, o app guia você em 4 passos:
 
-**Passo 1. Seu perfil (3 perguntas)**
+**Passo 1. Seu perfil (2 perguntas)**
 1. **Seu objetivo:** Equilíbrio · Fortalecimento · Joelho · Tornozelo.
 2. **Sua firmeza hoje:** "Preciso de apoio" · "Às vezes me desequilibro" · "Tenho firmeza".
-3. **O que você tem em casa:** elástico · cadeira firme ou assento acoplável.
 
-Com isso, o app escolhe a **trilha** (Equilíbrio 60+ ou Fisioterapia) e os exercícios que combinam com você.
+Com isso, o app escolhe a **trilha** (Equilíbrio 60+ ou Fisioterapia) e os exercícios que combinam com você. A plataforma já vem com todos os itens dos exercícios (barras, inclinação, elástico e assento acoplável): você não precisa informar o que tem em casa.
 
 **Passo 2. Conectar a plataforma**
 1. Ligue a plataforma (luz azul piscando).
@@ -184,12 +190,10 @@ Com isso, o app escolhe a **trilha** (Equilíbrio 60+ ou Fisioterapia) e os exer
 2. Segure as barras se quiser e fique parado até o app dizer **"Pronto"**.
 3. O app registra o seu **peso total**, que é a base para calcular as porcentagens dos exercícios.
 
-**Passo 4. Avaliação (10 segundos)**
-1. Fique em pé, olhando para a frente, **o mais parado possível**.
-2. O app mede **quanto o corpo oscila** e **quanto você usa as barras**.
-3. No fim, ele sugere o seu **nível inicial (1, 2 ou 3)**. Você pode aceitar ou escolher um nível mais fácil.
-
-> Refaça a avaliação quando quiser em **Perfil → Refazer avaliação**. O app também sugere refazê-la a cada 4 semanas.
+**Passo 4. Seu nível inicial**
+1. O app sugere o **nível inicial** a partir da sua resposta sobre a firmeza: **nível 1** para "Preciso de apoio" e "Às vezes me desequilibro"; **nível 2** para "Tenho firmeza".
+2. Você pode aceitar ou escolher um nível mais fácil.
+3. Depois, o app **sobe o nível** quando os seus treinos forem bem (seção 8.2).
 
 ---
 
@@ -363,9 +367,11 @@ Você pode **autorizar** pessoas de sua confiança a acompanhar os seus treinos.
 
 1. Vá em **Perfil → Acompanhantes → Convidar**.
 2. Escolha o tipo: **Profissional** ou **Familiar**.
-3. O app mostra um **código de 6 caracteres**, válido por **48 horas**.
-4. Envie o código à pessoa (por WhatsApp, por exemplo, ou mostre a tela).
-5. Quando ela digitar o código, você recebe um pedido: toque em **Autorizar**.
+3. O app mostra um **código de 6 caracteres** e um **link do convite**, válidos por **48 horas**.
+4. Envie o código **ou** o link à pessoa. Toque em **Copiar código**, **Copiar link**, **Enviar link** ou **Enviar pelo WhatsApp**.
+5. Quando ela usar o código ou abrir o link, você recebe um pedido: toque em **Autorizar**.
+
+> No protótipo, os dados ficam só neste aparelho. Por isso o link funciona **no mesmo navegador** onde você o gerou.
 
 ### 11.3 Ver e remover acompanhantes
 
@@ -383,9 +389,11 @@ Você pode **autorizar** pessoas de sua confiança a acompanhar os seus treinos.
 
 ### 12.1 Entrar e vincular um aluno
 
-1. Na tela inicial, toque em **Sou acompanhante**.
-2. Informe se você é **Profissional** (e a sua profissão) ou **Familiar**.
-3. Toque em **Adicionar aluno** e digite o **código** que o praticante enviou.
+1. Na tela inicial, abra a aba **Acompanhante**.
+2. **Entre** com e-mail e senha, ou toque em **Criar conta**: informe o nome, se você é **Profissional** (e a sua profissão) ou **Familiar**, o e-mail e uma senha.
+3. Para vincular um aluno, use o **código** ou o **link** que o praticante enviou:
+   - **Pelo link:** abra o link. O app leva você à aba Acompanhante; entre ou crie a conta, e o convite aparece pronto. Toque em **Aceitar convite**.
+   - **Pelo código:** na tela **Meus alunos**, cole ou digite o código ou o link no campo **Código ou link do convite** (o botão **Colar** ajuda) e toque em **Enviar pedido**.
 4. Aguarde o praticante **autorizar**. O aluno aparece na sua lista.
 
 ### 12.2 Meus alunos
@@ -399,8 +407,10 @@ Você pode **autorizar** pessoas de sua confiança a acompanhar os seus treinos.
 ### 12.3 Relatório do aluno
 
 - **Resumo:** adesão, nota média de execução, simetria, estabilidade e apoio nas barras.
-- **Gráficos** semana a semana.
-- **Histórico** de cada treino: exercícios, níveis, notas e a percepção (Fácil/Ok/Difícil) do aluno.
+- **Histórico de treinos**, com três abas:
+  - **Gráficos:** treinos feitos por semana (contra o planejado), nota média, simetria, estabilidade e apoio nas barras, nas últimas 6 semanas.
+  - **Tabelas:** a tabela **semana a semana** e a tabela **por exercício** (treinos, nível do início ao fim, nota do primeiro ao último treino e a variação).
+  - **Treinos:** cada treino, do mais recente ao mais antigo, com exercícios, níveis, notas e a percepção (Fácil/Ok/Difícil) do aluno.
 
 ### 12.4 Ajustar a rotina (somente profissional)
 
@@ -466,6 +476,9 @@ Se o aluno **remover o seu acesso**, ele some da sua lista e os dados deixam de 
 | Luz vermelha | Desligue, espere 10 segundos e ligue de novo. Se continuar, não use e procure o suporte. |
 | A barra está frouxa | **Não use.** Reencaixe a barra e recoloque os pinos até ficar firme. |
 | O texto está pequeno | Perfil → Ajustes → **Tamanho do texto**. |
+| "E-mail ou senha incorretos" | Confira o e-mail e a senha (toque no ícone de olho para ver o que digitou). O app não diz qual dos dois está errado, por segurança. |
+| O app avisa que precisa de um endereço seguro | Abra o app pelo link **https**. Em endereços sem https o navegador bloqueia a proteção da senha. |
+| O link do convite não encontra o convite | No protótipo o link só funciona no **mesmo navegador** onde foi gerado. Peça um novo código ou use o aparelho do aluno. |
 | Não quero mais que alguém veja meus dados | Perfil → Acompanhantes → **Remover acesso**. |
 
 ---
@@ -489,15 +502,17 @@ Se o aluno **remover o seu acesso**, ele some da sua lista e os dados deixam de 
 
 O protótipo **simula os sensores** porque a plataforma física ainda está em desenvolvimento.
 
-**Contas de demonstração** (entram com um toque na tela inicial):
+**Contas de demonstração.** Na tela inicial, abra o bloco **Contas de demonstração** e toque em **Usar** na conta que quiser: o app preenche o e-mail e a senha. Depois toque em **Entrar**. A senha de todas as contas é **`demo1234`** (pública, só para a demonstração).
 
-| Conta | Perfil | Para ver |
-|---|---|---|
-| **Dona Lúcia, 68** | Praticante · Equilíbrio 60+ | Rotina, exercício com correções, evolução |
-| **Rafael, 34** | Praticante · Fisioterapia (joelho) | Trilha de fisioterapia e metas do profissional |
-| **Carlos** | Acompanhante · Personal da Dona Lúcia | Lista de alunos, relatório, ajustar rotina, recados |
-| **Ana** | Acompanhante · Fisioterapeuta do Rafael | Metas de simetria e alertas |
-| **Marta** | Acompanhante · Filha da Dona Lúcia (familiar) | Relatórios somente leitura |
+| Conta | E-mail | Perfil | Para ver |
+|---|---|---|---|
+| **Dona Lúcia, 68** | `lucia@demo.test` | Praticante · Equilíbrio 60+ | Rotina, exercício com correções, evolução |
+| **Rafael, 34** | `rafael@demo.test` | Praticante · Fisioterapia (joelho) | Trilha de fisioterapia e metas do profissional |
+| **Carlos** | `carlos@demo.test` | Acompanhante · Personal da Dona Lúcia | Lista de alunos, relatório, ajustar rotina, recados |
+| **Ana** | `ana@demo.test` | Acompanhante · Fisioterapeuta do Rafael | Metas de simetria, alertas e gráficos de evolução |
+| **Marta** | `marta@demo.test` | Acompanhante · Filha da Dona Lúcia (familiar) | Relatórios somente leitura |
+
+**Testar o convite por link:** entre como Dona Lúcia, vá em **Perfil → Acompanhantes → Convidar** e copie o link. Saia da conta, abra o link e entre como Ana (ou crie uma conta de acompanhante). Toque em **Aceitar convite**. Depois entre de novo como Dona Lúcia e autorize o pedido.
 
 **Simular os sensores:** na tela do exercício, toque em **"Painel de demonstração"** para:
 - deixar a simulação **automática** (o app mostra uma execução certa, depois um erro e depois a correção);
