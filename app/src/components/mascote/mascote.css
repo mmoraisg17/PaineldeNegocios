@@ -1,0 +1,140 @@
+/* Mascote: cores e movimento. O desenho é o do ícone original (kettlebell escuro,
+   olhos e sorriso rosados). Aqui só se mexe em transform e opacity, e tudo para
+   quando a pessoa pede menos movimento. Cores seguem o fitbod.me: tinta
+   #191923 e salmão #ffb9b4. No tema escuro o corpo clareia (sem contorno, que
+   mudaria o desenho), senão sumiria contra o fundo #191923. */
+
+.mascote {
+  --m-corpo: #191923;
+  --m-corpo-claro: #34354a;
+  --m-rosto: #ffb9b4;
+  --m-sombra: rgb(25 25 35 / 0.16);
+
+  /* Um pulinho completo, a altura dele e o ritmo da respiração.
+     Mais forte = pulo mais decidido. */
+  --m-passo: 1.3s;
+  --m-salto: 10px;
+  --m-respiro: 3.4s;
+
+  display: block;
+  overflow: visible;
+}
+
+html[data-aparencia='escura'] .mascote {
+  --m-corpo: #2b2c3d;
+  --m-corpo-claro: #50516a;
+  --m-sombra: rgb(0 0 0 / 0.35);
+}
+
+/* Ritmo por nível. */
+.mascote[data-nivel='1'] { --m-passo: 2.4s; --m-salto: 3px; --m-respiro: 4.6s; }
+.mascote[data-nivel='2'] { --m-passo: 1.9s; --m-salto: 5px; --m-respiro: 4s; }
+.mascote[data-nivel='4'] { --m-passo: 1.1s; --m-salto: 13px; --m-respiro: 3s; }
+.mascote[data-nivel='5'] { --m-passo: 0.9s; --m-salto: 16px; --m-respiro: 2.6s; }
+
+/* Postura fixa: encolhido e meio caído quando cansado, maior e firme quando forte. */
+.m-todo,
+.m-postura { transform-origin: 100px 196px; }
+.mascote[data-nivel='1'] .m-postura { transform: rotate(-5deg) scale(1, 0.9); }
+.mascote[data-nivel='2'] .m-postura { transform: rotate(-2deg) scale(1, 0.95); }
+.mascote[data-nivel='4'] .m-postura { transform: scale(1.04); }
+.mascote[data-nivel='5'] .m-postura { transform: scale(1.08); }
+
+.m-alca { transform-origin: 100px 90px; }
+.m-olhos { transform-box: fill-box; transform-origin: center; }
+.m-sombra { transform-box: fill-box; transform-origin: center; }
+
+/* Piscar: dá vida sem mudar o desenho. */
+.m-olhos { animation: m-piscar-olhos 5s ease-in-out infinite; }
+
+/* Parado: respira. */
+.mascote[data-pose='parado'] .m-todo { animation: m-respirar var(--m-respiro) ease-in-out infinite; }
+
+/* Andando: pulinhos com achatar ao pousar e esticar ao subir; a alça balança um
+   pouco atrasada (movimento secundário). */
+.mascote[data-pose='andar'] .m-todo { animation: m-pulinho var(--m-passo) ease-in-out infinite; }
+.mascote[data-pose='andar'] .m-alca { animation: m-balanco-da-alca var(--m-passo) ease-in-out infinite; }
+.mascote[data-pose='andar'] .m-sombra { animation: m-sombra-do-pulo var(--m-passo) ease-in-out infinite; }
+
+/* Cumprimentando: balança de um lado ao outro 3 vezes e depois só respira
+   (movimento sem fim e sem controle cansa e distrai: WCAG 2.2.2). */
+.mascote[data-pose='acenar'] .m-todo {
+  animation: m-saudar 1.6s ease-in-out 3, m-respirar var(--m-respiro) ease-in-out 4.8s infinite;
+}
+.mascote[data-pose='acenar'] .m-alca { animation: m-balanco-da-alca 1.6s ease-in-out 3; }
+
+/* Comemorando: 5 pulos altos e depois respira. */
+.mascote[data-pose='comemorar'] .m-todo {
+  animation: m-pular 0.8s cubic-bezier(0.3, 0, 0.3, 1) 5, m-respirar var(--m-respiro) ease-in-out 4s infinite;
+}
+.mascote[data-pose='comemorar'] .m-alca { animation: m-balanco-da-alca 0.8s ease-in-out 5; }
+.mascote[data-pose='comemorar'] .m-sombra { animation: m-sombra-do-pulo 0.8s ease-in-out 5; }
+
+/* Nível 5: dois brilhos piscam em tempos diferentes. */
+.m-brilho { animation: m-brilhar 1.8s ease-in-out infinite; }
+.m-brilho-b { animation-delay: -0.9s; }
+
+@keyframes m-respirar {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.025, 0.97); }
+}
+
+@keyframes m-pulinho {
+  0%, 100% { transform: translateY(0) scale(1.06, 0.92); }
+  30% { transform: translateY(calc(var(--m-salto) * -0.8)) scale(0.96, 1.05); }
+  50% { transform: translateY(calc(var(--m-salto) * -1)) scale(1, 1); }
+  75% { transform: translateY(calc(var(--m-salto) * -0.2)) scale(0.97, 1.03); }
+}
+
+@keyframes m-balanco-da-alca {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-5deg); }
+  60% { transform: rotate(4deg); }
+}
+
+@keyframes m-sombra-do-pulo {
+  0%, 100% { transform: scaleX(1); opacity: 1; }
+  50% { transform: scaleX(0.82); opacity: 0.6; }
+}
+
+@keyframes m-saudar {
+  0%, 100% { transform: translateY(0) rotate(-5deg) scale(1.03, 0.95); }
+  25% { transform: translateY(-9px) rotate(0deg) scale(0.98, 1.03); }
+  50% { transform: translateY(0) rotate(5deg) scale(1.03, 0.95); }
+  75% { transform: translateY(-9px) rotate(0deg) scale(0.98, 1.03); }
+}
+
+@keyframes m-pular {
+  0%, 100% { transform: translateY(0) scale(1.08, 0.9); }
+  35% { transform: translateY(-22px) scale(0.95, 1.07); }
+  70% { transform: translateY(0) scale(1.02, 0.98); }
+}
+
+@keyframes m-piscar-olhos {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes m-brilhar {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+/* Menos movimento: pose parada, sem nenhuma animação. O nível continua visível
+   na postura e no rosto. */
+@media (prefers-reduced-motion: reduce) {
+  .mascote *,
+  .mascote { animation: none !important; }
+}
+
+/* Escolha do app (Perfil → Ajustes): mascote parado. */
+[data-mascote='parado'] .mascote *,
+[data-mascote='parado'] .mascote { animation: none !important; }
+
+/* Sobre a barra de abas (sempre escura, nos dois temas) o corpo usa o tom
+   claro do tema escuro, senão o #191923 do tema claro sumiria na barra. */
+.mascote.mascote-na-barra {
+  --m-corpo: #2b2c3d;
+  --m-corpo-claro: #5a5b78;
+  --m-sombra: rgb(0 0 0 / 0.4);
+}

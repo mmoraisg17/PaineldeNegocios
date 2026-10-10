@@ -157,7 +157,8 @@ describe('mascote na tela de entrada', () => {
     renderizarApp('/', null);
 
     const mascote = screen.getByRole('img', { name: 'Mascote do app: um kettlebell sorridente' });
-    expect(mascote).toHaveAttribute('src');
+    expect(mascote.tagName.toLowerCase()).toBe('svg');
+    expect(mascote).toHaveAttribute('data-pose', 'acenar');
     expect(screen.queryByRole('img', { name: /Pessoa em pé na plataforma/ })).not.toBeInTheDocument();
   });
 });

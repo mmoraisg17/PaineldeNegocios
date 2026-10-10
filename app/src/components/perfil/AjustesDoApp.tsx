@@ -83,6 +83,12 @@ export function AjustesDoApp() {
         ligado={preferencias.voz}
         aoMudar={(voz) => mudarPreferencias({ voz })}
       />
+      <Interruptor
+        rotulo="Animação do mascote"
+        descricao="Desligue se o movimento incomodar. O mascote fica sem se mexer."
+        ligado={preferencias.mascoteAnimado}
+        aoMudar={(mascoteAnimado) => mudarPreferencias({ mascoteAnimado })}
+      />
     </Secao>
   );
 }

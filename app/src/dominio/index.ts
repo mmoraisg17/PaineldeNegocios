@@ -34,6 +34,7 @@ export {
   type EntradaDaDecisao,
   type MedidasDeExecucao,
 } from './progressao';
+export { NIVEL_MAXIMO, NIVEL_MINIMO, forcaDoMascote, type NivelDoMascote } from './forcaDoMascote';
 export {
   apoioMedioDaSessao,
   notaMediaDaSessao,

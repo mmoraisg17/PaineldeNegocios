@@ -6,6 +6,8 @@ import { useApp } from '../../estado/ContextoApp';
 import { ROTULO_DA_PERCEPCAO } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
 import { Icone, type NomeDoIcone } from '../../components/Icone';
+import { CartaoDoMascote } from '../../components/mascote/CartaoDoMascote';
+import { useNivelDoMascote } from '../../hooks/useNivelDoMascote';
 
 /* Treino concluído (manual, 8.1): resume o que os sensores mediram e pergunta
    "Como foi para você?". A resposta, junto com as notas, decide o nível do
@@ -29,6 +31,7 @@ export function Concluido() {
   const temTreino = treino !== null || ultimoResumo !== null;
   const tituloRef = useTituloDaTela(temTreino ? 'Treino concluído' : 'Nenhum treino para concluir');
   const respondido = treino === null && ultimoResumo !== null;
+  const nivelDoMascote = useNivelDoMascote();
 
   // Ao responder, o botão clicado some da tela; sem isto o foco se perderia.
   useEffect(() => {
@@ -55,6 +58,7 @@ export function Concluido() {
           <ResumoDosResultados resultados={resultados} />
           {ultimoResumo && treino === null ? (
             <>
+              {nivelDoMascote ? <CartaoDoMascote nivel={nivelDoMascote} pose="comemorar" comDica={false} /> : null}
               <p className="text-lg text-texto-suave">Você marcou: {ROTULO_DA_PERCEPCAO[ultimoResumo.percepcao]}</p>
               <DecisoesDeNivel decisoes={ultimoResumo.decisoes} />
               <BotaoDeVolta />

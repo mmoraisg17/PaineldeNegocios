@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 
 type Aba = { para: string; rotulo: string; icone: ReactNode };
 
@@ -31,14 +31,17 @@ export const ABAS_PRATICANTE: Aba[] = [
 /* Alvo de toque de 56 px de altura (acima dos 48 px recomendados): parte do
    público tem tremor ou dedos menos precisos. O rótulo sempre aparece junto do
    ícone, porque ícone sozinho é adivinhação para quem não usa apps todo dia. */
-export function BarraDeAbas({ abas }: { abas: Aba[] }) {
+export function BarraDeAbas({ abas, meio }: { abas: Aba[]; meio?: ReactNode }) {
+  const posicaoDoMeio = Math.floor(abas.length / 2);
   return (
-    <nav aria-label="Navegação principal" className="shrink-0 bg-barra pb-[env(safe-area-inset-bottom)]">
+    <nav aria-label="Navegação principal" className="relative z-10 shrink-0 bg-barra pb-[env(safe-area-inset-bottom)]">
       {/* role="list" de propósito: o Safari tira a semântica de lista de <ul> sem marcadores. */}
       {/* oxlint-disable-next-line jsx-a11y/no-redundant-roles */}
-      <ul role="list" className="grid grid-cols-4">
-        {abas.map((aba) => (
-          <li key={aba.para}>
+      <ul role="list" className="grid" style={{ gridTemplateColumns: `repeat(${abas.length + (meio ? 1 : 0)}, minmax(0, 1fr))` }}>
+        {abas.map((aba, posicao) => (
+          <Fragment key={aba.para}>
+            {meio && posicao === posicaoDoMeio ? meio : null}
+          <li>
             <NavLink
               to={aba.para}
               className={({ isActive }) =>
@@ -63,6 +66,7 @@ export function BarraDeAbas({ abas }: { abas: Aba[] }) {
               )}
             </NavLink>
           </li>
+          </Fragment>
         ))}
       </ul>
     </nav>

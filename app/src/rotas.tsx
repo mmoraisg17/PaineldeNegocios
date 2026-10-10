@@ -3,6 +3,8 @@ import { Navigate, Outlet, createHashRouter, useParams, type RouteObject } from 
 import { MolduraCelular } from './components/MolduraCelular';
 import { ABAS_PRATICANTE, BarraDeAbas } from './components/BarraDeAbas';
 import { papelDoTexto } from './components/acesso/enderecos';
+import { MascoteDaBarra } from './components/mascote/MascoteDaBarra';
+import { useNivelDoMascote } from './hooks/useNivelDoMascote';
 import { type PapelDaConta, precisaDoPrimeiroUso } from './dominio';
 import { useApp } from './estado/ContextoApp';
 import { AbrirConvite } from './telas/AbrirConvite';
@@ -52,13 +54,19 @@ function EntrarAntigo() {
 /* O exercício e a conclusão ocupam a tela toda (sem barra de abas) para a
    animação 3D e o mapa de pressão terem espaço; por isso ficam fora deste
    layout. */
+/* O mascote fica no meio da barra de abas, entre Biblioteca e Progresso. */
+function BarraDoPraticante() {
+  const nivel = useNivelDoMascote();
+  return <BarraDeAbas abas={ABAS_PRATICANTE} meio={nivel ? <MascoteDaBarra nivel={nivel} /> : undefined} />;
+}
+
 function LayoutPraticante() {
   return (
     <ExigeConta papel="praticante">
       <main className="flex min-h-0 flex-1 flex-col">
         <Outlet />
       </main>
-      <BarraDeAbas abas={ABAS_PRATICANTE} />
+      <BarraDoPraticante />
     </ExigeConta>
   );
 }

@@ -22,6 +22,8 @@ import {
   type SemanaResumida,
 } from '../../components/evolucao/evolucao';
 import { Icone } from '../../components/Icone';
+import { CartaoDoMascote } from '../../components/mascote/CartaoDoMascote';
+import { useNivelDoMascote } from '../../hooks/useNivelDoMascote';
 
 /* Progresso (manual, seção 10): adesão, evolução semana a semana, nível de
    cada exercício e conquistas simples. */
@@ -79,6 +81,7 @@ function EvolucaoDoPraticante({ praticante, tituloRef }: { praticante: DadosPrat
   const totalDeTreinos = semanas.reduce((total, semana) => total + semana.treinos, 0);
   const niveis = niveisDosExercicios(praticante, rotina?.itens ?? []);
   const ehExemplo = CONTAS_DE_EXEMPLO.includes(praticante.id);
+  const nivelDoMascote = useNivelDoMascote();
 
   return (
     <div className={ROLAGEM}>
@@ -93,6 +96,12 @@ function EvolucaoDoPraticante({ praticante, tituloRef }: { praticante: DadosPrat
           </span>
           Dados de exemplo para demonstração
         </p>
+      ) : null}
+
+      {nivelDoMascote ? (
+        <Secao id="titulo-mascote" titulo="Seu parceiro de treino">
+          <CartaoDoMascote nivel={nivelDoMascote} />
+        </Secao>
       ) : null}
 
       <Secao id="titulo-adesao" titulo="Adesão">
