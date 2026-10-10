@@ -15,10 +15,10 @@ const ALCANCE_Y = 72; // px por unidade de copAP
 const paraTela = (ml: number, ap: number) => ({ x: CX - ml * ALCANCE_X, y: CY - ap * ALCANCE_Y });
 
 const COR_DO_PONTO: Record<EstadoDaExecucao, string> = {
-  ok: 'fill-primaria',
-  dica: 'fill-primaria',
-  atencao: 'fill-alerta-texto',
-  pare: 'fill-perigo',
+  ok: 'fill-estado-certo',
+  dica: 'fill-estado-certo',
+  atencao: 'fill-estado-atencao',
+  pare: 'fill-estado-pare',
 };
 
 export function MapaDePressao({ leitura, esperado, estado }: { leitura: Leitura; esperado: Esperado; estado: EstadoDaExecucao }) {
@@ -29,7 +29,7 @@ export function MapaDePressao({ leitura, esperado, estado }: { leitura: Leitura;
   const apoio = Math.round(leitura.maos * 100);
 
   return (
-    <section aria-labelledby="titulo-mapa" className="rounded-cartao border border-borda bg-superficie p-4">
+    <section aria-labelledby="titulo-mapa" className="rounded-cartao border border-borda bg-cartao-2 p-4">
       <h2 id="titulo-mapa" className="text-base font-semibold text-texto-suave">
         Vista de cima da plataforma
       </h2>
@@ -56,7 +56,7 @@ export function MapaDePressao({ leitura, esperado, estado }: { leitura: Leitura;
           cx={zona.x}
           cy={zona.y}
           r={esperado.alvo ? 20 : 26}
-          className={esperado.alvo ? 'fill-none stroke-primaria' : 'fill-primaria-suave stroke-primaria/30'}
+          className={esperado.alvo ? 'fill-none stroke-dado' : 'fill-dado-trilha stroke-dado/30'}
           strokeWidth={esperado.alvo ? 3 : 1.5}
           strokeDasharray={esperado.alvo ? '6 4' : undefined}
         />
@@ -72,7 +72,7 @@ export function MapaDePressao({ leitura, esperado, estado }: { leitura: Leitura;
       </div>
       <div className="mt-1 flex h-3 gap-1" aria-hidden="true">
         <div className="rounded-full bg-texto-suave transition-[flex-grow]" style={{ flexGrow: esquerda }} />
-        <div className="rounded-full bg-primaria transition-[flex-grow]" style={{ flexGrow: direita }} />
+        <div className="rounded-full bg-dado transition-[flex-grow]" style={{ flexGrow: direita }} />
       </div>
 
       <div className="mt-4 flex items-center justify-between text-base">
@@ -81,7 +81,7 @@ export function MapaDePressao({ leitura, esperado, estado }: { leitura: Leitura;
       </div>
       <div className="mt-1 h-3 rounded-full bg-fundo" aria-hidden="true">
         <div
-          className={`h-3 rounded-full transition-[width] ${apoio > 40 ? 'bg-perigo' : apoio > 20 ? 'bg-alerta-texto' : 'bg-primaria'}`}
+          className={`h-3 rounded-full transition-[width] ${apoio > 40 ? 'bg-estado-pare' : apoio > 20 ? 'bg-estado-atencao' : 'bg-estado-certo'}`}
           style={{ width: `${Math.min(100, apoio)}%` }}
         />
       </div>

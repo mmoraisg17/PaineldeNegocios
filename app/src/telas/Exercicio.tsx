@@ -12,6 +12,7 @@ import { useVoz } from '../hooks/useVoz';
 import { animacaoDe } from '../movimento/animacoes';
 import type { ModoBracos } from '../movimento/corpo';
 import type { Desvio } from '../sensores';
+import { Icone } from '../components/Icone';
 
 const VisualizadorExercicio = lazy(() => import('../cena3d/VisualizadorExercicio'));
 
@@ -107,14 +108,14 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
       <header className="flex flex-col gap-2">
-        <Link to="/praticante/hoje" className="flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-primaria">
-          <span aria-hidden="true">‹</span> Voltar
+        <Link to="/praticante/hoje" className="flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-marca">
+          <Icone nome="voltar" /> Voltar
         </Link>
         <h1 ref={tituloRef} tabIndex={-1} className="text-3xl font-bold text-texto outline-none">
           {exercicio.nome}
         </h1>
         <p className="flex flex-wrap items-center gap-2 text-base">
-          <span className="rounded-full bg-primaria-suave px-3 py-1 font-semibold text-primaria">Nível {nivel}</span>
+          <span className="rounded-full bg-primaria-suave px-3 py-1 font-semibold text-marca">Nível {nivel}</span>
           {indiceTreino !== null && treino && (
             <span className="rounded-full bg-superficie px-3 py-1 font-semibold">
               Exercício {indiceTreino + 1} de {treino.itens.length}
@@ -162,7 +163,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
       <AvisoDeCorrecao avaliacao={sim.avaliacao} />
       <MapaDePressao leitura={sim.leitura} esperado={sim.esperado} estado={sim.avaliacao.estado} />
 
-      <section aria-labelledby="titulo-como" className="rounded-cartao bg-superficie p-4">
+      <section aria-labelledby="titulo-como" className="rounded-cartao bg-cartao-3 p-4">
         <h2 id="titulo-como" className="text-lg font-bold">
           Como fazer
         </h2>

@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { Icone } from '../Icone';
 
 type Props = { rotulo: string; descricao?: string; ligado: boolean; aoMudar: (ligado: boolean) => void };
 
@@ -23,7 +24,10 @@ export function Interruptor({ rotulo, descricao, ligado, aoMudar }: Props) {
           aria-hidden="true"
           className={`rounded-full px-3 py-1 text-base font-bold ${ligado ? 'bg-primaria text-sobre-primaria' : 'bg-fundo text-texto-suave'}`}
         >
-          {ligado ? '✓ Ligado' : '○ Desligado'}
+          <span className="inline-flex items-center gap-1.5">
+            <Icone nome={ligado ? 'certo' : 'desmarcado'} className="size-4" />
+            {ligado ? 'Ligado' : 'Desligado'}
+          </span>
         </span>
       </button>
       {descricao ? (

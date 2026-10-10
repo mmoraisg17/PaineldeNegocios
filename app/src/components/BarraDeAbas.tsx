@@ -33,7 +33,7 @@ export const ABAS_PRATICANTE: Aba[] = [
    ícone, porque ícone sozinho é adivinhação para quem não usa apps todo dia. */
 export function BarraDeAbas({ abas }: { abas: Aba[] }) {
   return (
-    <nav aria-label="Navegação principal" className="shrink-0 border-t border-borda bg-superficie pb-[env(safe-area-inset-bottom)]">
+    <nav aria-label="Navegação principal" className="shrink-0 bg-barra pb-[env(safe-area-inset-bottom)]">
       {/* role="list" de propósito: o Safari tira a semântica de lista de <ul> sem marcadores. */}
       {/* oxlint-disable-next-line jsx-a11y/no-redundant-roles */}
       <ul role="list" className="grid grid-cols-4">
@@ -42,19 +42,23 @@ export function BarraDeAbas({ abas }: { abas: Aba[] }) {
             <NavLink
               to={aba.para}
               className={({ isActive }) =>
-                `flex min-h-14 flex-col items-center justify-center gap-0.5 py-2 text-sm ${
-                  isActive ? 'font-bold text-primaria' : 'font-semibold text-texto-suave'
+                `flex min-h-14 flex-col items-center justify-center gap-0.5 py-2 text-sm tracking-tight ${
+                  isActive ? 'font-bold text-sobre-barra' : 'font-semibold text-sobre-barra'
                 }`
               }
             >
-              {/* A aba ativa não depende só da cor (daltonismo, baixa visão):
-                  ganha uma pílula de fundo atrás do ícone e o rótulo em negrito. */}
+              {/* A aba ativa não depende só da cor nem do fundo (daltonismo, baixa
+                  visão, modo de cores forçadas do Windows, que apaga fundos): a
+                  pílula leva contorno claro (3:1 ou mais contra a barra) e o
+                  rótulo fica sublinhado, além do negrito. */}
               {({ isActive }) => (
                 <>
-                  <span className={`flex h-7 w-14 items-center justify-center rounded-full ${isActive ? 'bg-primaria-suave' : ''}`}>
+                  <span
+                    className={`flex h-7 w-14 items-center justify-center rounded-full ${isActive ? 'bg-barra-ativa outline-2 -outline-offset-2 outline-sobre-barra' : ''}`}
+                  >
                     <span className="size-6 fill-current">{aba.icone}</span>
                   </span>
-                  {aba.rotulo}
+                  <span className={isActive ? 'underline decoration-2 underline-offset-4' : ''}>{aba.rotulo}</span>
                 </>
               )}
             </NavLink>

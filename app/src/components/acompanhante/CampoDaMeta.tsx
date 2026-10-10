@@ -20,7 +20,7 @@ export function CampoDaMeta({ usar, valor, aoMudarUsar, aoMudarValor }: Props) {
           type="checkbox"
           checked={usar}
           onChange={(evento) => aoMudarUsar(evento.target.checked)}
-          className="size-6 shrink-0 accent-primaria"
+          className="size-6 shrink-0 accent-marca"
         />
         Usar meta de simetria
       </label>
@@ -38,7 +38,7 @@ export function CampoDaMeta({ usar, valor, aoMudarUsar, aoMudarValor }: Props) {
         aria-valuetext={descreverMeta(valor)}
         aria-describedby={idValor}
         onChange={(evento) => aoMudarValor(Number(evento.target.value))}
-        className="h-12 w-full accent-primaria disabled:opacity-50"
+        className="h-12 w-full accent-marca disabled:opacity-50"
       />
       <p id={idValor} className="text-lg font-semibold text-texto">
         {descreverMeta(valor)}

@@ -7,6 +7,7 @@ import { CONTAS_DA_DEMO, SENHA_DA_DEMO, consultarConvite, type EstadoApp, type T
 import { useAcompanhanteAtual, useApp } from '../../estado/ContextoApp';
 import { codigoDoTexto } from '../../estado/linkDoConvite';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
+import { Icone } from '../../components/Icone';
 
 const EMAIL_DA_DEMO = CONTAS_DA_DEMO.find((conta) => conta.pessoaId === 'lucia')?.email ?? '';
 
@@ -69,7 +70,7 @@ export function AdicionarAluno() {
     <div className={CORPO_DA_TELA}>
       <header className="flex flex-col gap-2">
         <Link to="/acompanhante/alunos" className={LINK_VOLTAR}>
-          <span aria-hidden="true">‹</span> Voltar
+          <Icone nome="voltar" /> Voltar
         </Link>
         <h1 ref={tituloRef} tabIndex={-1} className={TITULO_DA_TELA}>
           Adicionar aluno
@@ -85,7 +86,7 @@ export function AdicionarAluno() {
       />
 
       {pedidoEnviado ? (
-        <Link to="/acompanhante/alunos" className="flex min-h-12 w-fit items-center text-lg font-semibold text-primaria underline">
+        <Link to="/acompanhante/alunos" className="flex min-h-12 w-fit items-center text-lg font-semibold text-marca underline">
           Ver meus alunos
         </Link>
       ) : null}

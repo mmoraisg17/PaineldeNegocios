@@ -6,6 +6,7 @@ import { codigoDoTexto } from '../../estado/linkDoConvite';
 import { useAnuncio } from '../../hooks/useAnuncio';
 import { BOTAO_PRINCIPAL, BOTAO_SECUNDARIO, CAMPO } from './estilos';
 import { MENSAGEM_DE_ERRO_DO_CONVITE } from './mensagensDoConvite';
+import { Icone } from '../Icone';
 
 const DICA_DE_COLAR = 'Não deu para colar. Toque e segure no campo e escolha Colar.';
 const SEM_CODIGO_NA_AREA = 'Não achamos um código no que foi copiado. Copie o código ou o link de novo.';
@@ -177,7 +178,7 @@ export function VincularAluno({
         tabIndex={-1}
         className={aviso ? `${ESTILO_DO_SUCESSO} outline-none` : 'sr-only'}
       >
-        {aviso ? <span aria-hidden="true">✓ </span> : null}
+        {aviso ? <Icone nome="certo" className="mr-1 inline size-5 align-text-bottom" /> : null}
         {aviso}
       </p>
     </div>

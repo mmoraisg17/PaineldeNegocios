@@ -21,6 +21,7 @@ import {
   semanasSeguidas,
   type SemanaResumida,
 } from '../../components/evolucao/evolucao';
+import { Icone } from '../../components/Icone';
 
 /* Progresso (manual, seção 10): adesão, evolução semana a semana, nível de
    cada exercício e conquistas simples. */
@@ -134,7 +135,7 @@ function Adesao({ semanas, planejadas }: { semanas: readonly SemanaResumida[]; p
           const largura = planejadas > 0 ? Math.min(semana.treinos / planejadas, 1) * PORCENTAGEM : 0;
           const ehAtual = posicao === semanas.length - 1;
           return (
-            <li key={semana.fim.getTime()} className="rounded-botao bg-superficie px-4 py-3">
+            <li key={semana.fim.getTime()} className="rounded-botao bg-cartao-1 px-4 py-3">
               <p className="flex flex-wrap items-baseline justify-between gap-x-3 text-base">
                 <span className="font-semibold">{ehAtual ? 'Esta semana' : `Semana até ${formatarData(semana.fim.toISOString())}`}</span>
                 <span className="text-texto-suave">
@@ -143,8 +144,8 @@ function Adesao({ semanas, planejadas }: { semanas: readonly SemanaResumida[]; p
                 </span>
               </p>
               {/* Reforço visual: os números ao lado já dizem o mesmo. */}
-              <div aria-hidden="true" className="mt-2 h-3 overflow-hidden rounded-full bg-primaria-suave">
-                <div className="h-full rounded-full bg-primaria" style={{ width: `${Math.round(largura)}%` }} />
+              <div aria-hidden="true" className="mt-2 h-3 overflow-hidden rounded-full bg-dado-trilha">
+                <div className="h-full rounded-full bg-dado" style={{ width: `${Math.round(largura)}%` }} />
               </div>
             </li>
           );
@@ -161,6 +162,7 @@ function Graficos({ semanas, rotulos }: { semanas: readonly SemanaResumida[]; ro
   return (
     <>
       <GraficoSemanal
+        cartao={2}
         titulo="Simetria"
         valores={simetria}
         rotulos={rotulos}
@@ -169,6 +171,7 @@ function Graficos({ semanas, rotulos }: { semanas: readonly SemanaResumida[]; ro
         dica="Simetria é o quanto o peso se divide igual entre as pernas."
       />
       <GraficoSemanal
+        cartao={3}
         titulo="Estabilidade"
         valores={estabilidade}
         rotulos={rotulos}
@@ -177,6 +180,7 @@ function Graficos({ semanas, rotulos }: { semanas: readonly SemanaResumida[]; ro
         dica="Estabilidade é o quão pouco o corpo oscila."
       />
       <GraficoSemanal
+        cartao={4}
         titulo="Apoio nas barras"
         valores={apoio}
         rotulos={rotulos}
@@ -204,16 +208,16 @@ function NiveisDosExercicios({ niveis }: { niveis: readonly NivelDoExercicio[] }
   return (
     <ul className="flex flex-col gap-2">
       {niveis.map((item) => (
-        <li key={item.id} className="flex items-center justify-between gap-3 rounded-botao bg-superficie px-4 py-3">
+        <li key={item.id} className="flex items-center justify-between gap-3 rounded-botao bg-cartao-1 px-4 py-3">
           <span className="min-w-0 text-lg font-semibold">{item.nome}</span>
           <span className="flex shrink-0 items-center gap-2">
             {/* Três degraus; os preenchidos são o nível. O texto repete o número. */}
             <span aria-hidden="true" className="flex gap-1">
               {Array.from({ length: NIVEL_MAXIMO }, (_, degrau) => (
-                <span key={degrau} className={`h-5 w-3 rounded-sm ${degrau < item.nivel ? 'bg-primaria' : 'bg-primaria-suave'}`} />
+                <span key={degrau} className={`h-5 w-3 rounded-sm ${degrau < item.nivel ? 'bg-dado' : 'bg-dado-trilha'}`} />
               ))}
             </span>
-            <span className="text-base font-semibold text-primaria">
+            <span className="text-base font-semibold text-marca">
               Nível {item.nivel} de {NIVEL_MAXIMO}
             </span>
           </span>
@@ -242,9 +246,9 @@ function Conquistas({ semanas, planejadas, niveis, total }: PropsDasConquistas) 
   return (
     <ul className="flex flex-col gap-2">
       {conquistas.map((texto) => (
-        <li key={texto} className="flex items-center gap-3 rounded-botao bg-primaria-suave px-4 py-3 text-lg font-semibold text-primaria-escura">
+        <li key={texto} className="flex items-center gap-3 rounded-botao bg-cartao-4 px-4 py-3 text-lg font-semibold text-texto">
           <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primaria text-base text-sobre-primaria">
-            ★
+            <Icone nome="estrela" className="size-4" />
           </span>
           {texto}
         </li>

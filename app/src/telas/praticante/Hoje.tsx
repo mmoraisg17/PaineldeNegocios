@@ -5,6 +5,7 @@ import { marcarRecadosLidos, recadosPara } from '../../estado/acoes';
 import { useApp, usePraticanteAtual } from '../../estado/ContextoApp';
 import { ROTULO_DO_APOIO, formatarData, formatarDose } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
+import { Icone } from '../../components/Icone';
 
 /* Tela Hoje (manual, seção 5): recados, treino do dia e o botão que começa. */
 
@@ -14,7 +15,7 @@ type RefDoTitulo = RefObject<HTMLHeadingElement | null>;
 
 function IconeEnvelope() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-7 shrink-0 fill-none stroke-primaria" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-7 shrink-0 fill-none stroke-marca" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="m3.5 7 8.5 6 8.5-6" />
     </svg>
@@ -78,10 +79,10 @@ function TreinoDoDia({ praticante, tituloRef }: { praticante: DadosPraticante; t
           </h2>
           <ul className="flex flex-col gap-2">
             {recados.map((recado) => (
-              <li key={recado.id} className="flex gap-3 rounded-cartao bg-primaria-suave p-4">
+              <li key={recado.id} className="flex gap-3 rounded-cartao bg-cartao-2 p-4">
                 <IconeEnvelope />
                 <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-x-2 text-base font-bold text-primaria-escura">
+                  <p className="flex flex-wrap items-center gap-x-2 text-base font-bold text-marca">
                     {recado.autor}
                     {idsNovos.has(recado.id) ? <span className="rounded-full bg-primaria px-2 py-0.5 text-sm text-sobre-primaria">Novo</span> : null}
                   </p>
@@ -102,7 +103,7 @@ function TreinoDoDia({ praticante, tituloRef }: { praticante: DadosPraticante; t
             <button
               type="button"
               onClick={() => comecarTreino(rotina.itens)}
-              className="flex min-h-16 w-full items-center justify-center rounded-botao bg-primaria px-4 text-xl font-semibold text-sobre-primaria active:bg-primaria-escura"
+              className="flex min-h-16 w-full items-center justify-center rounded-botao bg-primaria px-4 text-xl font-semibold text-sobre-primaria active:bg-primaria-pressionada"
             >
               Começar treino
             </button>
@@ -119,7 +120,7 @@ function TreinoDoDia({ praticante, tituloRef }: { praticante: DadosPraticante; t
 
 function CartaoDoTreino({ rotina }: { rotina: Rotina }) {
   return (
-    <section aria-labelledby="titulo-treino" className="flex flex-col gap-3 rounded-cartao bg-superficie p-4">
+    <section aria-labelledby="titulo-treino" className="flex flex-col gap-3 rounded-cartao bg-cartao-1 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="titulo-treino" className="text-xl font-bold">
           Treino de hoje
@@ -145,7 +146,7 @@ function ItemDoTreino({ item }: { item: ItemRotina }) {
   return (
     <Link
       to={`/praticante/exercicio/${item.exercicioId}?nivel=${item.nivel}`}
-      className="flex min-h-16 items-center gap-3 rounded-botao border border-borda bg-fundo px-4 py-3 active:bg-primaria-suave"
+      className="flex min-h-16 items-center gap-3 rounded-botao border border-borda bg-superficie px-4 py-3 active:bg-primaria-suave"
     >
       <span className="min-w-0 flex-1">
         <span className="block text-lg font-semibold text-texto">{nome}</span>
@@ -154,10 +155,8 @@ function ItemDoTreino({ item }: { item: ItemRotina }) {
         </span>
         {item.fixadoPor ? <span className="block text-base font-medium text-alerta-texto">Nível fixado por {item.fixadoPor}</span> : null}
       </span>
-      <span className="shrink-0 rounded-full bg-primaria-suave px-3 py-1 text-base font-semibold text-primaria">Nível {item.nivel}</span>
-      <span aria-hidden="true" className="text-2xl text-texto-suave">
-        ›
-      </span>
+      <span className="shrink-0 rounded-full bg-primaria-suave px-3 py-1 text-base font-semibold text-marca">Nível {item.nivel}</span>
+      <Icone nome="avancar" className="size-6 text-texto-suave" />
     </Link>
   );
 }
@@ -166,13 +165,13 @@ function Semana({ praticante, rotina }: { praticante: DadosPraticante; rotina: R
   const { feitas, planejadas } = semanaDeTreino(praticante.sessoes, rotina.frequenciaSemanal, new Date());
   const proporcao = planejadas > 0 ? Math.min(feitas / planejadas, 1) : 0;
   return (
-    <section aria-label="Sua semana" className="rounded-cartao bg-superficie p-4">
+    <section aria-label="Sua semana" className="rounded-cartao bg-cartao-3 p-4">
       <p className="text-lg font-semibold">
         {feitas} de {planejadas} {planejadas === 1 ? 'treino' : 'treinos'} nesta semana
       </p>
       {/* Só reforço visual: o número acima já diz tudo. */}
-      <div aria-hidden="true" className="mt-2 h-3 overflow-hidden rounded-full bg-primaria-suave">
-        <div className="h-full rounded-full bg-primaria" style={{ width: `${Math.round(proporcao * 100)}%` }} />
+      <div aria-hidden="true" className="mt-2 h-3 overflow-hidden rounded-full bg-dado-trilha">
+        <div className="h-full rounded-full bg-dado" style={{ width: `${Math.round(proporcao * 100)}%` }} />
       </div>
     </section>
   );

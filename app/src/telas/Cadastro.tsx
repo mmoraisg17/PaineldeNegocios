@@ -26,6 +26,7 @@ import {
 import { useApp } from '../estado/ContextoApp';
 import { codigoDoTexto } from '../estado/linkDoConvite';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
+import { Icone } from '../components/Icone';
 
 type Campo = 'nome' | 'email' | 'senha';
 type Erros = Partial<Record<Campo, string>>;
@@ -144,7 +145,7 @@ function FormularioDeCadastro({ papel }: { papel: PapelDaConta }) {
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4">
       <header className="flex flex-col gap-2">
         <Link to={voltarAoInicio} className={LINK_VOLTAR}>
-          <span aria-hidden="true">‹</span> Voltar
+          <Icone nome="voltar" /> Voltar
         </Link>
         <h1 ref={tituloRef} tabIndex={-1} className="text-3xl font-bold text-texto outline-none">
           {titulo}
@@ -173,7 +174,7 @@ function FormularioDeCadastro({ papel }: { papel: PapelDaConta }) {
                     value={opcao.valor}
                     checked={tipo === opcao.valor}
                     onChange={() => setTipo(opcao.valor)}
-                    className="size-6 shrink-0 accent-primaria"
+                    className="size-6 shrink-0 accent-marca"
                   />
                   {opcao.rotulo}
                 </label>
@@ -224,7 +225,7 @@ function FormularioDeCadastro({ papel }: { papel: PapelDaConta }) {
 
       <p className="text-lg text-texto">
         Já tem conta?{' '}
-        <Link to={voltarAoInicio} className="inline-flex min-h-12 items-center font-semibold text-primaria underline">
+        <Link to={voltarAoInicio} className="inline-flex min-h-12 items-center font-semibold text-marca underline">
           Entrar
         </Link>
       </p>

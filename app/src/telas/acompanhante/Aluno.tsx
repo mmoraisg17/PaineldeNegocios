@@ -20,6 +20,7 @@ import { vinculoEntre } from '../../estado/acoes';
 import { useAcompanhanteAtual, useApp } from '../../estado/ContextoApp';
 import { ROTULO_DA_TRILHA, ROTULO_DO_OBJETIVO } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
+import { Icone } from '../../components/Icone';
 
 /* Relatório do aluno (manual 12.3 a 12.5). A porta de entrada é o vínculo
    autorizado: sem ele não se mostra nenhum dado, nem o nome. Quem abre o
@@ -47,7 +48,7 @@ function SemAcesso() {
       </h1>
       <p className="text-lg text-texto">Só vê os dados de treino quem foi autorizado pelo próprio aluno.</p>
       <Link to="/acompanhante/alunos" className={LINK_VOLTAR}>
-        <span aria-hidden="true">‹</span> Meus alunos
+        <Icone nome="voltar" /> Meus alunos
       </Link>
     </div>
   );
@@ -68,7 +69,7 @@ function Relatorio({ aluno, acompanhante, vinculo }: PropsDoRelatorio) {
     <div className={CORPO_DA_TELA}>
       <header className="flex flex-col gap-1">
         <Link to="/acompanhante/alunos" className={LINK_VOLTAR}>
-          <span aria-hidden="true">‹</span> Meus alunos
+          <Icone nome="voltar" /> Meus alunos
         </Link>
         <h1 ref={tituloRef} tabIndex={-1} className={TITULO_DA_TELA}>
           {aluno.perfil.nome}

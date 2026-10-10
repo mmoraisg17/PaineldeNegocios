@@ -1,5 +1,6 @@
 import type { Exercicio } from '../dominio';
 import { type Desvio, ROTULO_DO_DESVIO, desviosSimulaveis } from '../sensores';
+import { Icone } from './Icone';
 
 /* Painel do avaliador (manual, seção 17). A plataforma física ainda não
    existe, então é aqui que se "força" o que os sensores leriam. Fica logo
@@ -28,7 +29,7 @@ export function PainelDemonstracao({
   const desvios = desviosSimulaveis(exercicio);
   const botao = (ativo: boolean) =>
     `min-h-11 rounded-full border-2 px-3 text-sm font-semibold ${
-      ativo ? 'border-primaria bg-primaria text-sobre-primaria' : 'border-borda bg-superficie text-texto'
+      ativo ? 'border-marca bg-primaria text-sobre-primaria' : 'border-borda bg-superficie text-texto'
     }`;
 
   return (
@@ -38,7 +39,10 @@ export function PainelDemonstracao({
       </summary>
       <div className="mt-2 flex flex-wrap gap-2 pb-1">
         <button type="button" aria-pressed={automatico} onClick={() => aoAutomatico(!automatico)} className={botao(automatico)}>
-          {automatico ? '● ' : '○ '}Automático
+          <span className="inline-flex items-center gap-1.5">
+            <Icone nome={automatico ? 'marcado' : 'desmarcado'} className="size-4" />
+            Automático
+          </span>
         </button>
         <button type="button" aria-pressed={!automatico && desvioForcado === null} onClick={() => aoForcar(null)} className={botao(!automatico && desvioForcado === null)}>
           Execução certa
@@ -49,7 +53,10 @@ export function PainelDemonstracao({
           </button>
         ))}
         <button type="button" aria-pressed={voz} onClick={() => aoVoz(!voz)} className={botao(voz)}>
-          {voz ? '🔊 Voz ligada' : '🔈 Voz'}
+          <span className="inline-flex items-center gap-1.5">
+            <Icone nome={voz ? 'som' : 'som-baixo'} className="size-4" />
+            {voz ? 'Voz ligada' : 'Voz'}
+          </span>
         </button>
       </div>
       {vozIndisponivel && (

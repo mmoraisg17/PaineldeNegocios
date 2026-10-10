@@ -72,7 +72,7 @@ export function GraficoDeTreinos({ titulo, feitos, planejadas, rotulos, resumo }
                   width={larguraDaBarra}
                   height={posicaoY(0) - posicaoY(valor)}
                   rx={CANTO_DA_BARRA}
-                  className="fill-primaria"
+                  className="fill-dado"
                 />
               ) : null}
               <text x={centro} y={posicaoY(valor) - DISTANCIA_DO_VALOR} textAnchor="middle" className="valor fill-texto text-[12px] font-semibold">

@@ -5,6 +5,7 @@ import { criarPraticante, entrar, sair } from '../estado/acoes';
 import { useApp } from '../estado/ContextoApp';
 import { ROTULO_DA_FIRMEZA, ROTULO_DO_OBJETIVO } from '../estado/formatos';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
+import { Icone } from '../components/Icone';
 
 /* Primeiro uso do praticante (manual, seção 4.3), logo depois do cadastro:
    perfil em 2 perguntas → conectar a plataforma → calibração de 2 s → nível
@@ -34,7 +35,7 @@ function useFocoAoMontar<T extends HTMLElement>() {
 const TITULO_DO_PASSO = 'text-2xl font-bold outline-none';
 
 const opcao = (ativa: boolean) =>
-  `min-h-14 rounded-botao border-2 px-4 text-left text-lg font-semibold ${ativa ? 'border-primaria bg-primaria-suave text-primaria-escura' : 'border-borda bg-superficie'}`;
+  `min-h-14 rounded-botao border-2 px-4 text-left text-lg font-semibold ${ativa ? 'border-marca bg-primaria-suave text-primaria-escura' : 'border-borda bg-superficie'}`;
 
 /* A triagem só existe para quem acabou de criar a conta e ainda não tem dados.
    Quem já treina vai para o Hoje; quem não entrou volta para o início. A guarda
@@ -66,8 +67,8 @@ function Triagem() {
   return (
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 py-6">
       <header className="flex flex-col gap-2">
-        <button type="button" onClick={sairDaTriagem} className="flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-primaria">
-          <span aria-hidden="true">‹</span> Sair
+        <button type="button" onClick={sairDaTriagem} className="flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-marca">
+          <Icone nome="voltar" /> Sair
         </button>
         <h1 ref={tituloRef} tabIndex={-1} className="text-3xl font-bold outline-none">
           Primeiro uso
@@ -144,10 +145,22 @@ function Conectar({ aoConcluir }: { aoConcluir: () => void }) {
         Conectar a plataforma
       </h2>
       <p className="text-lg">Ligue a plataforma (luz azul piscando) e toque em conectar.</p>
-      <p ref={statusRef} tabIndex={-1} aria-live="polite" className="rounded-cartao bg-superficie p-4 text-lg font-semibold outline-none">
-        {estado === 'parado' && '🔵 Plataforma ligada, esperando o app'}
-        {estado === 'buscando' && '🔎 Procurando a plataforma…'}
-        {estado === 'conectada' && '✓ Conectada (luz azul fixa)'}
+      <p ref={statusRef} tabIndex={-1} aria-live="polite" className="flex items-center gap-2 rounded-cartao bg-superficie p-4 text-lg font-semibold outline-none">
+        {estado === 'parado' && (
+          <>
+            <Icone nome="ponto" className="size-5 text-marca" /> Plataforma ligada, esperando o app
+          </>
+        )}
+        {estado === 'buscando' && (
+          <>
+            <Icone nome="busca" className="size-5 text-marca" /> Procurando a plataforma…
+          </>
+        )}
+        {estado === 'conectada' && (
+          <>
+            <Icone nome="certo" className="size-5 text-certo" /> Conectada (luz azul fixa)
+          </>
+        )}
       </p>
       {estado !== 'conectada' ? (
         <button type="button" disabled={estado === 'buscando'} onClick={() => setEstado('buscando')} className="min-h-16 rounded-botao bg-primaria text-xl font-semibold text-sobre-primaria disabled:opacity-60">
@@ -187,7 +200,11 @@ function Medicao(props: { titulo: string; instrucao: string; segundos: number; r
       {/* role="timer" sem aria-live: anunciar cada segundo atrapalharia. Só o
           fim é anunciado, pela região de status logo abaixo. */}
       <p ref={contagemRef} role="timer" tabIndex={-1} className="flex min-h-24 items-center justify-center rounded-cartao bg-superficie text-3xl font-bold tabular outline-none">
-        {restante === null ? `${props.segundos} s` : terminou ? `✓ ${props.fim}` : `${restante} s`}
+        {restante === null ? `${props.segundos} s` : terminou ? (
+            <span className="flex items-center gap-2">
+              <Icone nome="certo" className="size-7 text-certo" /> {props.fim}
+            </span>
+          ) : `${restante} s`}
       </p>
       <p role="status" className="sr-only">
         {terminou ? props.fim : ''}
@@ -203,7 +220,7 @@ function Medicao(props: { titulo: string; instrucao: string; segundos: number; r
         </button>
       )}
       {!terminou && restante !== null && (
-        <button type="button" onClick={() => setRestante(0)} className="min-h-12 text-base font-semibold text-primaria underline">
+        <button type="button" onClick={() => setRestante(0)} className="min-h-12 text-base font-semibold text-marca underline">
           Pular (demonstração)
         </button>
       )}

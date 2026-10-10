@@ -87,7 +87,7 @@ test('treino aberto sem nenhum exercício medido: avisa em vez de perguntar', ()
   expect(screen.getByRole('link', { name: 'Voltar ao início' })).toHaveAttribute('href', '/praticante/hoje');
 });
 
-test('"Fácil" com duas notas boas seguidas: grava o treino e mostra "Sobe para o nível 2 🎉" com o motivo', async () => {
+test('"Fácil" com duas notas boas seguidas: grava o treino e mostra "Sobe para o nível 2" com o motivo', async () => {
   // Arrange
   abrirTela('/praticante/concluido', { estado: estadoComSessaoAnterior(1, 90) });
   treinarComResultados([resultado('sentar-e-levantar', 1, { nota: 90 })]);
@@ -98,7 +98,7 @@ test('"Fácil" com duas notas boas seguidas: grava o treino e mostra "Sobe para 
   // Assert
   const decisoes = screen.getByRole('region', { name: 'O que muda no próximo treino' });
   expect(within(decisoes).getByText('Sentar e levantar')).toBeInTheDocument();
-  expect(within(decisoes).getByText('Sobe para o nível 2 🎉')).toBeInTheDocument();
+  expect(within(decisoes).getByText('Sobe para o nível 2')).toBeInTheDocument();
   expect(within(decisoes).getByText('Nota 80 ou mais em 2 treinos seguidos: hora de ir para o nível 2.')).toBeInTheDocument();
   expect(lerApp().treino).toBeNull();
   expect(lerApp().estado.praticantes.lucia?.sessoes).toHaveLength(2);

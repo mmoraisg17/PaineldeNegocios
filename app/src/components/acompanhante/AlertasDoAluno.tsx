@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import type { Alerta } from '../../dominio';
 import { CARTAO } from './estilos';
+import { Icone } from '../Icone';
 
 /* Alertas do manual 12.2. São pontos para conversar com o aluno, e o texto
    diz isso: o app acompanha o treino, não faz diagnóstico. Cada alerta leva
@@ -14,7 +15,7 @@ export function AlertasDoAluno({ alertas }: { alertas: readonly Alerta[] }) {
       </h2>
       {alertas.length === 0 ? (
         <p className="flex items-center gap-2 rounded-botao bg-primaria-suave p-3 text-lg font-semibold text-primaria-escura">
-          <span aria-hidden="true">✓</span>
+          <Icone nome="certo" className="size-5" />
           <span>Nenhum alerta no momento.</span>
         </p>
       ) : (

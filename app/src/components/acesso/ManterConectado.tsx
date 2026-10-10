@@ -14,7 +14,7 @@ export function ManterConectado({ marcado, aoMudar }: { marcado: boolean; aoMuda
           checked={marcado}
           onChange={(evento) => aoMudar(evento.target.checked)}
           aria-describedby={idDaDica}
-          className="size-6 shrink-0 accent-primaria"
+          className="size-6 shrink-0 accent-marca"
         />
         Manter conectado
       </label>

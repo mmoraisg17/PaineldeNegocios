@@ -5,6 +5,7 @@ import type { DecisaoDoExercicio } from '../../estado/acoes';
 import { useApp } from '../../estado/ContextoApp';
 import { ROTULO_DA_PERCEPCAO } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
+import { Icone, type NomeDoIcone } from '../../components/Icone';
 
 /* Treino concluído (manual, 8.1): resume o que os sensores mediram e pergunta
    "Como foi para você?". A resposta, junto com as notas, decide o nível do
@@ -12,8 +13,10 @@ import { useTituloDaTela } from '../../hooks/useTituloDaTela';
 
 const ROLAGEM = 'flex flex-1 flex-col gap-5 overflow-y-auto px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]';
 const PERCEPCOES: readonly Percepcao[] = ['facil', 'ok', 'dificil'];
-// Emoji só enfeita (aria-hidden): o texto do botão é que diz a resposta.
-const ENFEITE_DA_PERCEPCAO: Record<Percepcao, string> = { facil: '🙂', ok: '😐', dificil: '😓' };
+// Um tom de cartão por medida (Zepp: cada categoria de dado tem a sua cor).
+const CARTAO_DA_MEDIDA = ['bg-cartao-1', 'bg-cartao-2', 'bg-cartao-3', 'bg-cartao-4'] as const;
+// O ícone só enfeita (aria-hidden): o texto do botão é que diz a resposta.
+const ICONE_DA_PERCEPCAO: Record<Percepcao, NomeDoIcone> = { facil: 'rosto-facil', ok: 'rosto-ok', dificil: 'rosto-dificil' };
 
 type RefDoTitulo = RefObject<HTMLHeadingElement | null>;
 
@@ -83,7 +86,7 @@ function BotaoDeVolta() {
   return (
     <Link
       to="/praticante/hoje"
-      className="flex min-h-16 items-center justify-center rounded-botao bg-primaria px-4 text-xl font-semibold text-sobre-primaria active:bg-primaria-escura"
+      className="flex min-h-16 items-center justify-center rounded-botao bg-primaria px-4 text-xl font-semibold text-sobre-primaria active:bg-primaria-pressionada"
     >
       Voltar ao início
     </Link>
@@ -100,10 +103,10 @@ function ResumoDosResultados({ resultados }: { resultados: readonly ResultadoExe
   return (
     <section aria-label="Resumo do treino">
       <dl className="grid grid-cols-2 gap-3">
-        {itens.map((item) => (
-          <div key={item.rotulo} className="rounded-cartao bg-superficie p-4">
+        {itens.map((item, posicao) => (
+          <div key={item.rotulo} className={`rounded-cartao p-4 ${CARTAO_DA_MEDIDA[posicao % CARTAO_DA_MEDIDA.length]}`}>
             <dt className="text-base text-texto-suave">{item.rotulo}</dt>
-            <dd className="mt-1 text-3xl font-bold text-primaria">
+            <dd className="mt-1 text-3xl font-bold text-marca">
               {item.valor}
               {item.complemento ? <span className="ml-1 text-base font-medium text-texto-suave">{item.complemento}</span> : null}
             </dd>
@@ -127,11 +130,9 @@ function PerguntaDePercepcao({ aoEscolher }: { aoEscolher: (percepcao: Percepcao
             key={percepcao}
             type="button"
             onClick={() => aoEscolher(percepcao)}
-            className="flex min-h-24 flex-col items-center justify-center gap-1 rounded-botao border-2 border-primaria bg-superficie px-1 text-xl font-bold text-primaria active:bg-primaria-suave"
+            className="flex min-h-24 flex-col items-center justify-center gap-1 rounded-botao border-2 border-marca bg-superficie px-1 text-xl font-bold text-marca active:bg-primaria-suave"
           >
-            <span aria-hidden="true" className="text-3xl">
-              {ENFEITE_DA_PERCEPCAO[percepcao]}
-            </span>
+            <Icone nome={ICONE_DA_PERCEPCAO[percepcao]} className="size-10" />
             {ROTULO_DA_PERCEPCAO[percepcao]}
           </button>
         ))}
@@ -141,14 +142,14 @@ function PerguntaDePercepcao({ aoEscolher }: { aoEscolher: (percepcao: Percepcao
 }
 
 const ESTILO_DA_DECISAO = {
-  sobe: { caixa: 'bg-primaria-suave text-primaria-escura', icone: '▲' },
-  mantem: { caixa: 'border border-borda bg-superficie text-texto', icone: '●' },
-  desce: { caixa: 'bg-alerta-fundo text-alerta-texto', icone: '▼' },
+  sobe: { caixa: 'bg-certo-suave text-certo-escuro', icone: 'sobe' },
+  mantem: { caixa: 'border border-borda bg-superficie text-texto', icone: 'mantem' },
+  desce: { caixa: 'bg-alerta-fundo text-alerta-texto', icone: 'desce' },
 } as const;
 
 function tituloDaDecisao({ decisao, nivelAnterior, recusada }: DecisaoDoExercicio): string {
   if (recusada) return `Você continua no nível ${nivelAnterior}`;
-  if (decisao.mudanca === 'sobe') return `Sobe para o nível ${decisao.nivel} 🎉`;
+  if (decisao.mudanca === 'sobe') return `Sobe para o nível ${decisao.nivel}`;
   if (decisao.mudanca === 'desce') return `Volta para o nível ${decisao.nivel}`;
   return 'Mantém o nível';
 }
@@ -171,9 +172,7 @@ function DecisoesDeNivel({ decisoes }: { decisoes: readonly DecisaoDoExercicio[]
             const podeRecusar = item.decisao.mudanca !== 'mantem' && !item.recusada;
             return (
               <li key={item.exercicioId} className={`flex gap-3 rounded-cartao p-4 ${estilo.caixa}`}>
-                <span aria-hidden="true" className="mt-1 text-xl">
-                  {estilo.icone}
-                </span>
+                <Icone nome={estilo.icone} className="mt-1 size-6" />
                 <div>
                   <p className="text-base font-semibold">{item.nome}</p>
                   <p className="text-xl font-bold">{tituloDaDecisao(item)}</p>

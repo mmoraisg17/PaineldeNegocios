@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { type DadosPraticante, trilhaDoObjetivo } from '../../dominio';
 import { formatarData, ROTULO_DA_TRILHA } from '../../estado/formatos';
 import type { ResumoDoAluno } from './resumoDoAluno';
+import { Icone } from '../Icone';
 
 /* Alerta dito em ícone E texto (nunca só cor), para quem não distingue cores
    e para o leitor de tela. */
@@ -11,7 +12,7 @@ function SeloDeAlertas({ quantidade }: { quantidade: number }) {
     <span
       className={`flex w-fit items-center gap-2 rounded-full px-3 py-1 text-base font-bold ${temAlerta ? 'bg-alerta-fundo text-alerta-texto' : 'bg-primaria-suave text-primaria-escura'}`}
     >
-      <span aria-hidden="true">{temAlerta ? '!' : '✓'}</span>
+      <Icone nome={temAlerta ? 'alerta' : 'certo'} className="size-4" />
       <span>{temAlerta ? `${quantidade} ${quantidade === 1 ? 'alerta' : 'alertas'}` : 'Sem alertas'}</span>
     </span>
   );
@@ -25,13 +26,11 @@ export function CartaoDoAluno({ praticante, resumo }: { praticante: DadosPratica
   return (
     <Link
       to={`/acompanhante/aluno/${praticante.id}`}
-      className="flex min-h-14 flex-col gap-1 rounded-cartao border-2 border-borda bg-superficie p-4 active:border-primaria"
+      className="flex min-h-14 flex-col gap-1 rounded-cartao border-2 border-borda bg-superficie p-4 active:border-marca"
     >
       <span className="flex items-center justify-between gap-2">
         <span className="text-xl font-bold text-texto">{praticante.perfil.nome}</span>
-        <span aria-hidden="true" className="text-2xl text-primaria">
-          ›
-        </span>
+        <Icone nome="avancar" className="size-6 text-marca" />
       </span>
       <span className="text-base text-texto-suave">{trilha}</span>
       <span className="text-base text-texto">{ultimoTreino ? `Último treino: ${ultimoTreino}` : 'Ainda sem treinos'}</span>

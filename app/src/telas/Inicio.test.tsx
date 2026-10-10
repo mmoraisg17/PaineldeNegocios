@@ -151,3 +151,13 @@ describe('aviso do convite', () => {
     expect(screen.getByText(/código ABC234/)).toBeInTheDocument();
   });
 });
+
+describe('mascote na tela de entrada', () => {
+  test('mostra o mascote com texto alternativo e sem pessoa na plataforma', () => {
+    renderizarApp('/', null);
+
+    const mascote = screen.getByRole('img', { name: 'Mascote do app: um kettlebell sorridente' });
+    expect(mascote).toHaveAttribute('src');
+    expect(screen.queryByRole('img', { name: /Pessoa em pé na plataforma/ })).not.toBeInTheDocument();
+  });
+});

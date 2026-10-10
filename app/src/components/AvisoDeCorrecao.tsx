@@ -1,10 +1,11 @@
 import type { Avaliacao } from '../sensores';
+import { Icone } from './Icone';
 
 const ESTILO = {
-  ok: { caixa: 'bg-primaria-suave text-primaria-escura', icone: '✓', titulo: 'Tudo certo' },
-  dica: { caixa: 'bg-primaria-suave text-primaria-escura', icone: '★', titulo: 'Muito bem' },
-  atencao: { caixa: 'bg-alerta-fundo text-alerta-texto', icone: '!', titulo: 'Ajuste' },
-  pare: { caixa: 'bg-perigo-fundo text-perigo', icone: '✋', titulo: 'Pare' },
+  ok: { caixa: 'bg-certo-suave text-certo-escuro', icone: 'certo', titulo: 'Tudo certo' },
+  dica: { caixa: 'bg-certo-suave text-certo-escuro', icone: 'estrela', titulo: 'Muito bem' },
+  atencao: { caixa: 'bg-alerta-fundo text-alerta-texto', icone: 'alerta', titulo: 'Ajuste' },
+  pare: { caixa: 'bg-perigo-fundo text-perigo', icone: 'pare', titulo: 'Pare' },
 } as const;
 
 export const MENSAGEM_OK = 'Muito bem, continue assim';
@@ -22,7 +23,7 @@ export function AvisoDeCorrecao({ avaliacao }: { avaliacao: Avaliacao }) {
       className={`flex items-center gap-3 rounded-cartao px-4 py-3 transition-colors ${estilo.caixa}`}
     >
       <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-superficie/70 text-xl font-black">
-        {estilo.icone}
+        <Icone nome={estilo.icone} className="size-6" />
       </span>
       <p className="text-lg leading-snug">
         <span className="block text-sm font-bold uppercase tracking-wide">{estilo.titulo}</span>

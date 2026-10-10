@@ -136,7 +136,7 @@ export function ConviteDoPerfil({ praticanteId }: { praticanteId: string }) {
         {OPCOES.map((opcao) => (
           <label
             key={opcao.valor}
-            className="flex min-h-14 items-center gap-3 rounded-botao border-2 border-borda px-3 py-2 has-checked:border-primaria has-checked:bg-primaria-suave"
+            className="flex min-h-14 items-center gap-3 rounded-botao border-2 border-borda px-3 py-2 has-checked:border-marca has-checked:bg-primaria-suave"
           >
             <input
               type="radio"
@@ -144,7 +144,7 @@ export function ConviteDoPerfil({ praticanteId }: { praticanteId: string }) {
               value={opcao.valor}
               checked={tipo === opcao.valor}
               onChange={() => setTipo(opcao.valor)}
-              className="size-6 shrink-0 accent-primaria"
+              className="size-6 shrink-0 accent-marca"
             />
             <span>
               <span className="block text-lg font-semibold text-texto">{opcao.rotulo}</span>

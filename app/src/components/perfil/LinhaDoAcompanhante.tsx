@@ -2,6 +2,7 @@ import { useId, useRef, useState } from 'react';
 import { type Acompanhante, type Permissoes, type Vinculo, permissoes } from '../../dominio';
 import { Confirmacao } from './Confirmacao';
 import { BOTAO_DE_PERIGO, BOTAO_PRINCIPAL } from './estilos';
+import { Icone } from '../Icone';
 
 const NOME_DO_ACOMPANHANTE_REMOVIDO = 'Acompanhante';
 
@@ -53,7 +54,7 @@ export function LinhaDoAcompanhante({ vinculo, acompanhante, aoAutorizar, aoRemo
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-base font-bold ${pendente ? 'bg-alerta-fundo text-alerta-texto' : 'bg-primaria-suave text-primaria-escura'}`}
         >
-          <span aria-hidden="true">{pendente ? '⏳ ' : '✓ '}</span>
+          <Icone nome={pendente ? 'ampulheta' : 'certo'} className="mr-1 inline size-4 align-text-bottom" />
           {pendente ? 'Pendente' : 'Autorizado'}
         </span>
       </div>
