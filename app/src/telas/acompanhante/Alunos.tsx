@@ -7,6 +7,7 @@ import { VincularAluno } from '../../components/acompanhante/VincularAluno';
 import { alunosDe, sair } from '../../estado/acoes';
 import { useAcompanhanteAtual, useApp } from '../../estado/ContextoApp';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
+import { Icone } from '../../components/Icone';
 
 /* Meus alunos (manual 12.2): só aparecem os que autorizaram este
    acompanhante, com o essencial de cada um para decidir quem olhar primeiro. */
@@ -73,7 +74,7 @@ export function Alunos() {
         <ul className="flex flex-col gap-1">
           {aguardando.map(({ id, nome }) => (
             <li key={id} className="text-base text-texto-suave">
-              <span aria-hidden="true">⏳ </span>
+              <Icone nome="ampulheta" className="mr-1 inline size-4 align-text-bottom" />
               Aguardando autorização: {nome}
             </li>
           ))}

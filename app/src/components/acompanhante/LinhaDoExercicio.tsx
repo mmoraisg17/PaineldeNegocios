@@ -23,7 +23,7 @@ export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Prop
           type="checkbox"
           checked={item.incluido}
           onChange={(evento) => aoMudar({ incluido: evento.target.checked })}
-          className="size-6 shrink-0 accent-primaria"
+          className="size-6 shrink-0 accent-marca"
         />
         {exercicio.nome}
       </label>
@@ -35,7 +35,7 @@ export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Prop
             {NIVEIS.map((nivel) => (
               <label
                 key={nivel}
-                className="flex min-h-16 flex-col items-center justify-center gap-1 whitespace-nowrap rounded-botao border-2 border-borda px-1 py-2 text-base font-semibold has-checked:border-primaria has-checked:bg-primaria-suave has-disabled:border-dashed has-disabled:text-texto-suave"
+                className="flex min-h-16 flex-col items-center justify-center gap-1 whitespace-nowrap rounded-botao border-2 border-borda px-1 py-2 text-base font-semibold has-checked:border-marca has-checked:bg-primaria-suave has-disabled:border-dashed has-disabled:text-texto-suave"
               >
                 <input
                   type="radio"
@@ -44,7 +44,7 @@ export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Prop
                   checked={item.nivel === nivel}
                   disabled={nivel > nivelMaximo}
                   onChange={() => aoMudar({ nivel })}
-                  className="size-5 shrink-0 accent-primaria"
+                  className="size-5 shrink-0 accent-marca"
                 />
                 Nível {nivel}
               </label>
@@ -58,7 +58,7 @@ export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Prop
               type="checkbox"
               checked={item.fixar}
               onChange={(evento) => aoMudar({ fixar: evento.target.checked })}
-              className="size-6 shrink-0 accent-primaria"
+              className="size-6 shrink-0 accent-marca"
             />
             Fixar nível (o app deixa de mudar sozinho)
           </label>

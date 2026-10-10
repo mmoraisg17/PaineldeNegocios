@@ -10,6 +10,7 @@ import { lerCoresDaCena } from './cores';
 import { Orbita } from './Orbita';
 import { RedesenhoSobDemanda } from './RedesenhoSobDemanda';
 import type { RelogioDaAnimacao } from './relogio';
+import { Icone } from '../components/Icone';
 
 /* Câmera em três-quartos, de frente e de lado: o "sentar e levantar" é um
    movimento do plano sagital (frente/trás), e uma vista só de frente
@@ -136,7 +137,7 @@ function VisualizadorExercicio({
             aria-label={pausado ? 'Continuar animação' : 'Pausar animação'}
             className="min-h-12 min-w-12 rounded-full bg-superficie/90 text-lg font-bold text-texto shadow"
           >
-            {pausado ? '▶' : '❚❚'}
+            <Icone nome={pausado ? 'play' : 'pausa'} className="mx-auto block size-6" />
           </button>
         </div>
       </div>
@@ -146,7 +147,7 @@ function VisualizadorExercicio({
           AvisoDeCorrecao. */}
       {/* Duas linhas reservadas: várias fases quebram linha no celular, e a
           tela abaixo não pode pular a cada troca de fase (CLS, fase 8). */}
-      <figcaption className="min-h-14 text-lg font-semibold text-primaria">
+      <figcaption className="min-h-14 text-lg font-semibold text-marca">
         {/* key: cada fase nova remonta o texto e refaz o esmaecimento. */}
         <span key={fase} className="block animate-aparecer">
           {fase}
@@ -168,9 +169,11 @@ function SeloDoEstado({ estado }: { estado: EstadoDaExecucao }) {
       className="pointer-events-none absolute right-2 top-2 flex animate-aparecer items-center gap-2 rounded-full bg-black/60 py-1 pl-1 pr-3 text-base font-bold text-white"
     >
       <span className="flex size-8 items-center justify-center rounded-full text-lg text-cena-fundo" style={{ backgroundColor: `var(--color-cena-${cor})` }}>
-        {simbolo}
+        <Icone nome={ICONE_DO_SELO[simbolo]} className="size-5" />
       </span>
       {texto}
     </div>
   );
 }
+
+const ICONE_DO_SELO = { '✓': 'certo', '!': 'alerta', '✕': 'x' } as const;

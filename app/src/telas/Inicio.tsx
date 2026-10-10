@@ -3,6 +3,7 @@ import { AbasDeAcesso } from '../components/acesso/AbasDeAcesso';
 import { contaConectadaValida } from '../components/acesso/contaConectada';
 import { papelDoTexto } from '../components/acesso/enderecos';
 import { PainelDeAcesso } from '../components/acesso/PainelDeAcesso';
+import mascote from '../assets/mascote.png';
 import { APP_NAME, APP_TAGLINE, AVISO_DE_DADOS, AVISO_EDUCACIONAL } from '../config/app';
 import type { PapelDaConta } from '../dominio';
 import { destinoDepoisDeEntrar } from '../estado/acoes';
@@ -10,18 +11,18 @@ import { useApp } from '../estado/ContextoApp';
 import { codigoDoTexto } from '../estado/linkDoConvite';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
 
-/* A ilustração repete a da tela A1 do Figma (pessoa na plataforma, segurando as
-   barras): é a primeira coisa que o avaliador vê, e ela já explica o produto. */
-function IlustracaoPlataforma() {
+/* O mascote (kettlebell, rodada 2 de 09/10/2026) abre a tela de entrada no
+   lugar da ilustração da pessoa na plataforma. A imagem já traz o próprio fundo
+   azul-céu, por isso só ganha cantos arredondados. */
+function Mascote() {
   return (
-    <svg viewBox="0 0 200 200" className="mx-auto w-32 shrink-0" role="img" aria-label="Pessoa em pé na plataforma, segurando as barras de apoio">
-      <circle cx="100" cy="100" r="96" className="fill-primaria-suave" />
-      <rect x="40" y="148" width="120" height="16" rx="8" className="fill-texto-suave/60" />
-      <path d="M52 148V90M148 148V90M46 90h12M142 90h12" className="stroke-texto-suave/60" strokeWidth="6" strokeLinecap="round" />
-      <circle cx="100" cy="62" r="13" className="fill-texto" />
-      <path d="M100 76v36M100 112l-12 28M100 112l12 28" className="stroke-texto" strokeWidth="7" strokeLinecap="round" fill="none" />
-      <path d="M56 90h88" className="stroke-primaria" strokeWidth="7" strokeLinecap="round" />
-    </svg>
+    <img
+      src={mascote}
+      alt="Mascote do app: um kettlebell sorridente"
+      width={128}
+      height={128}
+      className="mx-auto size-32 shrink-0 rounded-cartao"
+    />
   );
 }
 
@@ -55,8 +56,8 @@ export function Inicio() {
 
   return (
     <main className="flex flex-1 flex-col overflow-y-auto px-6 pb-8 pt-6">
-      <IlustracaoPlataforma />
-      <h1 ref={tituloRef} tabIndex={-1} className="mt-4 text-4xl font-bold text-primaria outline-none">{APP_NAME}</h1>
+      <Mascote />
+      <h1 ref={tituloRef} tabIndex={-1} className="mt-4 text-4xl font-bold text-marca outline-none">{APP_NAME}</h1>
       <p className="mt-2 text-xl text-texto">{APP_TAGLINE}</p>
 
       <div className="mt-6">

@@ -10,8 +10,8 @@ export type Aba = { id: string; rotulo: string; conteudo: ReactNode };
 type Props = { rotulo: string; abas: readonly Aba[] };
 
 const BASE_DA_ABA = 'flex min-h-12 flex-1 items-center justify-center rounded-botao border-2 px-2 text-center text-lg font-semibold';
-const ABA_ATIVA = `${BASE_DA_ABA} border-primaria bg-primaria text-sobre-primaria`;
-const ABA_INATIVA = `${BASE_DA_ABA} border-primaria bg-superficie text-primaria active:bg-primaria-suave`;
+const ABA_ATIVA = `${BASE_DA_ABA} border-marca bg-primaria text-sobre-primaria`;
+const ABA_INATIVA = `${BASE_DA_ABA} border-marca bg-superficie text-marca active:bg-primaria-suave`;
 
 /* Posição da aba que a tecla pede, ou nulo se a tecla não é de navegação. */
 function destinoDaTecla(tecla: string, atual: number, total: number): number | null {

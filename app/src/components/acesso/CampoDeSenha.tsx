@@ -60,7 +60,7 @@ export function CampoDeSenha({ id, rotulo, valor, aoMudar, autoComplete, dica, e
           onClick={() => setVisivel((atual) => !atual)}
           aria-label={visivel ? 'Ocultar senha' : 'Mostrar senha'}
           aria-controls={idDoCampo}
-          className="absolute inset-y-0 right-0 flex min-h-12 min-w-12 items-center justify-center rounded-botao text-primaria active:bg-primaria-suave"
+          className="absolute inset-y-0 right-0 flex min-h-12 min-w-12 items-center justify-center rounded-botao text-marca active:bg-primaria-suave"
         >
           <IconeDoOlho riscado={visivel} />
         </button>

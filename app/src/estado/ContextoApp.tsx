@@ -18,6 +18,7 @@ import {
   salvarEstado,
 } from '../dominio';
 import { type DecisaoDoExercicio, recusarMudancaDeNivel, registrarSessao } from './acoes';
+import { APARENCIA_PADRAO, aplicarAparencia, lerAparencia, marcarAparencia, type Aparencia } from './aparencia';
 
 /* Estado do app inteiro (contas, treinos, vínculos), salvo no aparelho a
    cada mudança. As regras ficam em acoes.ts; aqui só se guarda, salva e
@@ -27,6 +28,7 @@ export type Preferencias = {
   tamanhoTexto: 'normal' | 'grande' | 'muito-grande';
   altoContraste: boolean;
   voz: boolean;
+  aparencia: Aparencia;
 };
 
 export type TreinoEmAndamento = { itens: ItemRotina[]; resultados: ResultadoExercicio[] };
@@ -51,7 +53,7 @@ type ValorDoContexto = {
 const Contexto = createContext<ValorDoContexto | null>(null);
 
 const CHAVE_PREFERENCIAS = 'app-equilibrio:preferencias';
-const PREFERENCIAS_PADRAO: Preferencias = { tamanhoTexto: 'normal', altoContraste: false, voz: false };
+const PREFERENCIAS_PADRAO: Preferencias = { tamanhoTexto: 'normal', altoContraste: false, voz: false, aparencia: APARENCIA_PADRAO };
 /* Fonte base por tamanho (o padrão de 18 px já é maior que o comum: público 60+). */
 export const FONTE_BASE: Record<Preferencias['tamanhoTexto'], string> = { normal: '112.5%', grande: '125%', 'muito-grande': '140%' };
 
@@ -64,10 +66,28 @@ function lerPreferencias(): Preferencias {
       tamanhoTexto: typeof valor.tamanhoTexto === 'string' && Object.hasOwn(FONTE_BASE, valor.tamanhoTexto) ? valor.tamanhoTexto : 'normal',
       altoContraste: valor.altoContraste === true,
       voz: valor.voz === true,
+      aparencia: lerAparencia(valor.aparencia),
     };
   } catch {
     return PREFERENCIAS_PADRAO;
   }
+}
+
+/* Tamanho do texto e alto contraste vão para a página inteira (<html>). */
+function aplicarNaPagina(preferencias: Preferencias) {
+  const html = document.documentElement;
+  html.style.fontSize = FONTE_BASE[preferencias.tamanhoTexto];
+  html.classList.toggle('alto-contraste', preferencias.altoContraste);
+}
+
+/* Chamada pelo main.tsx antes de o React montar: sem isto, quem escolheu a
+   aparência escura, o alto contraste ou o texto grande veria a tela com o
+   visual padrão por um instante a cada abertura. A CSP proíbe script inline no
+   index.html, então este é o ponto mais cedo possível. */
+export function pintarComPreferenciasSalvas(): void {
+  const preferencias = lerPreferencias();
+  aplicarNaPagina(preferencias);
+  marcarAparencia(document.documentElement, preferencias.aparencia);
 }
 
 /* Primeira visita (ou dados apagados): o protótipo já nasce com as contas de
@@ -160,6 +180,9 @@ export function ProvedorDoApp({ children, estadoInicial }: { children: ReactNode
     html.style.fontSize = FONTE_BASE[preferencias.tamanhoTexto];
     html.classList.toggle('alto-contraste', preferencias.altoContraste);
   }, [preferencias]);
+
+  // Efeito à parte: no modo automático acompanha o aparelho, e só ele precisa parar ao trocar a escolha.
+  useEffect(() => aplicarAparencia(document.documentElement, preferencias.aparencia), [preferencias.aparencia]);
 
   const atualizar = useCallback((mudar: (e: EstadoApp) => EstadoApp) => setEstado(mudar), []);
   const mudarPreferencias = useCallback((m: Partial<Preferencias>) => setPreferencias((p) => ({ ...p, ...m })), []);

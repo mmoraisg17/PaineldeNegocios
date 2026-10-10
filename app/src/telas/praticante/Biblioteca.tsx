@@ -14,6 +14,7 @@ import { usePraticanteAtual, useApp } from '../../estado/ContextoApp';
 import { ROTULO_DA_TRILHA, ROTULO_DO_APOIO, formatarDose } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
 import { exerciciosAnimados } from '../../movimento/animacoes';
+import { Icone } from '../../components/Icone';
 
 /* Biblioteca (manual, seção 9): todos os exercícios, mesmo os que não estão na
    rotina de hoje. "Experimentar agora" abre o exercício fora do treino, então
@@ -88,7 +89,7 @@ export function Biblioteca() {
                 setNivel(null);
                 setAcessorio(null);
               }}
-              className="min-h-12 rounded-botao border-2 border-primaria px-5 text-lg font-semibold text-primaria active:bg-primaria-suave"
+              className="min-h-12 rounded-botao border-2 border-marca px-5 text-lg font-semibold text-marca active:bg-primaria-suave"
             >
               Limpar filtros
             </button>
@@ -152,7 +153,7 @@ function AbasDeTrilha({ ativa, aoEscolher }: { ativa: Trilha; aoEscolher: (trilh
             onClick={() => aoEscolher(trilha)}
             onKeyDown={aoTeclar}
             className={`min-h-12 rounded-botao px-2 text-lg ${
-              selecionada ? 'bg-superficie font-bold text-primaria shadow-sm' : 'font-semibold text-texto-suave'
+              selecionada ? 'bg-superficie font-bold text-marca shadow-sm' : 'font-semibold text-texto-suave'
             }`}
           >
             {ROTULO_DA_TRILHA[trilha]}
@@ -179,10 +180,10 @@ function Chip({ marcado, aoAlternar, children }: { marcado: boolean; aoAlternar:
       aria-pressed={marcado}
       onClick={aoAlternar}
       className={`flex min-h-12 items-center gap-1.5 rounded-full border-2 px-4 text-base font-semibold ${
-        marcado ? 'border-primaria bg-primaria text-sobre-primaria' : 'border-borda bg-superficie text-texto'
+        marcado ? 'border-marca bg-primaria text-sobre-primaria' : 'border-borda bg-superficie text-texto'
       }`}
     >
-      {marcado ? <span aria-hidden="true">✓</span> : null}
+      {marcado ? <Icone nome="certo" className="size-4" /> : null}
       {children}
     </button>
   );
@@ -232,7 +233,7 @@ function CartaoDoExercicio({ exercicio, itemDaRotina, nivelDoFiltro, nivelSalvo,
 
       <Link
         to={`/praticante/exercicio/${exercicio.id}?nivel=${nivelParaAbrir}`}
-        className="mt-1 flex min-h-14 items-center justify-center rounded-botao bg-primaria px-4 text-lg font-semibold text-sobre-primaria active:bg-primaria-escura"
+        className="mt-1 flex min-h-14 items-center justify-center rounded-botao bg-primaria px-4 text-lg font-semibold text-sobre-primaria active:bg-primaria-pressionada"
       >
         Experimentar agora<span className="sr-only">: {exercicio.nome}</span>
       </Link>

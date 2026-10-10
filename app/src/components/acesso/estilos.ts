@@ -3,12 +3,12 @@
    mão. */
 
 export const BOTAO_PRINCIPAL =
-  'flex min-h-14 w-full items-center justify-center rounded-botao bg-primaria px-6 text-center text-lg font-semibold text-sobre-primaria active:bg-primaria-escura disabled:opacity-70';
+  'flex min-h-14 w-full items-center justify-center rounded-botao bg-primaria px-6 text-center text-lg font-semibold text-sobre-primaria active:bg-primaria-pressionada disabled:opacity-70';
 
 export const LINK_SECUNDARIO =
-  'flex min-h-14 w-full items-center justify-center rounded-botao border-2 border-primaria bg-superficie px-6 text-center text-lg font-semibold text-primaria active:bg-primaria-suave';
+  'flex min-h-14 w-full items-center justify-center rounded-botao border-2 border-marca bg-superficie px-6 text-center text-lg font-semibold text-marca active:bg-primaria-suave';
 
-export const LINK_VOLTAR = 'flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-primaria';
+export const LINK_VOLTAR = 'flex min-h-12 w-fit items-center gap-1 text-lg font-semibold text-marca';
 
 /* Borda de campo com contraste de 3:1 ou mais (WCAG 1.4.11) e placeholder na
    cor suave, porque o cinza padrão do navegador some para quem enxerga pouco. */

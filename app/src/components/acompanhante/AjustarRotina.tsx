@@ -18,6 +18,7 @@ import {
 import { CampoDaMeta } from './CampoDaMeta';
 import { BOTAO_PRINCIPAL, CAMPO, CARTAO } from './estilos';
 import { LinhaDoExercicio } from './LinhaDoExercicio';
+import { Icone } from '../Icone';
 
 type Retorno = { tipo: 'ok' | 'erro'; texto: string };
 
@@ -124,7 +125,7 @@ export function AjustarRotina({ aluno, acompanhante }: { aluno: DadosPraticante;
           role={retorno.tipo === 'ok' ? 'status' : 'alert'}
           className={`rounded-botao p-3 text-lg font-semibold ${retorno.tipo === 'ok' ? 'bg-primaria-suave text-primaria-escura' : 'bg-perigo-fundo text-perigo'}`}
         >
-          <span aria-hidden="true">{retorno.tipo === 'ok' ? '✓ ' : '! '}</span>
+          <Icone nome={retorno.tipo === 'ok' ? 'certo' : 'alerta'} className="mr-1 inline size-5 align-text-bottom" />
           {retorno.texto}
         </p>
       ) : null}

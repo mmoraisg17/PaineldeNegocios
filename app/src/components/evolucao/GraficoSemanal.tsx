@@ -4,7 +4,11 @@
    quem vê, o valor fica escrito em cada ponto, então nada depende só da cor
    ou da posição da linha. */
 
+/* Fundo do cartão por categoria (Zepp: cada dado tem o seu tom). */
+const FUNDO_DO_CARTAO = { 1: 'bg-cartao-1', 2: 'bg-cartao-2', 3: 'bg-cartao-3', 4: 'bg-cartao-4' } as const;
+
 type Props = {
+  cartao?: keyof typeof FUNDO_DO_CARTAO;
   titulo: string;
   /* Um valor de 0 a 100 por semana, da mais antiga para a mais recente.
      Nulo é semana sem treino. */
@@ -50,13 +54,13 @@ function descricaoDosValores(valores: readonly (number | null)[], rotulos: reado
     .join('; ');
 }
 
-export function GraficoSemanal({ titulo, valores, rotulos, unidade, resumo, dica }: Props) {
+export function GraficoSemanal({ cartao = 1, titulo, valores, rotulos, unidade, resumo, dica }: Props) {
   const pontos = valores.map((valor, indice) => (valor === null ? null : { x: posicaoX(indice, valores.length), y: posicaoY(valor), valor }));
   const trechos = trechosContinuos(pontos).filter((trecho) => trecho.length >= 2);
   const nomeDaImagem = `${titulo}. ${resumo} Valores: ${descricaoDosValores(valores, rotulos, unidade)}.`;
 
   return (
-    <figure className="rounded-cartao border border-borda bg-superficie p-4">
+    <figure className={`rounded-cartao border border-borda p-4 ${FUNDO_DO_CARTAO[cartao]}`}>
       <figcaption>
         <h3 className="text-lg font-bold text-texto">{titulo}</h3>
         <p className="mt-1 text-base text-texto">{resumo}</p>
@@ -77,7 +81,7 @@ export function GraficoSemanal({ titulo, valores, rotulos, unidade, resumo, dica
             key={`${trecho[0]?.x}`}
             points={trecho.map((ponto) => `${ponto.x},${ponto.y}`).join(' ')}
             fill="none"
-            className="stroke-primaria"
+            className="stroke-dado"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -86,7 +90,7 @@ export function GraficoSemanal({ titulo, valores, rotulos, unidade, resumo, dica
         {pontos.map((ponto, indice) =>
           ponto ? (
             <g key={indice}>
-              <circle cx={ponto.x} cy={ponto.y} r={RAIO_DO_PONTO} className="fill-primaria stroke-superficie" strokeWidth="2" />
+              <circle cx={ponto.x} cy={ponto.y} r={RAIO_DO_PONTO} className="fill-dado" />
               <text x={ponto.x} y={ponto.y - DISTANCIA_DO_VALOR} textAnchor="middle" className="fill-texto text-[11px] font-semibold">
                 {ponto.valor}
               </text>

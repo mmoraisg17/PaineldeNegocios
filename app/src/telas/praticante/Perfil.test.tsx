@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { type EstadoApp } from '../../dominio';
 import { gerarConviteDe, usarCodigo } from '../../estado/acoes';
+import { pintarComPreferenciasSalvas } from '../../estado/ContextoApp';
 import { AGORA_DA_DEMO, renderizarApp, usarAmbienteDeTeste } from '../../test/renderizarApp';
 
 usarAmbienteDeTeste();
@@ -410,6 +411,73 @@ describe('ajustes', () => {
     // Act: desligar de novo
     await usuario.click(alternancia);
     expect(app.preferencias().altoContraste).toBe(false);
+  });
+
+  test('a aparência começa clara e a escolha escura vale para a página inteira e fica salva', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+    expect(screen.getByRole('radio', { name: 'Clara' })).toBeChecked();
+    expect(document.documentElement).toHaveAttribute('data-aparencia', 'clara');
+
+    // Act
+    await usuario.click(screen.getByRole('radio', { name: 'Escura' }));
+
+    // Assert
+    expect(app.preferencias().aparencia).toBe('escura');
+    expect(document.documentElement).toHaveAttribute('data-aparencia', 'escura');
+    expect(screen.getByRole('radio', { name: 'Escura' })).toBeChecked();
+    expect(JSON.parse(localStorage.getItem('app-equilibrio:preferencias') ?? '{}')).toMatchObject({ aparencia: 'escura' });
+  });
+
+  test('a aparência salva no aparelho vale ao abrir o app', () => {
+    // Arrange
+    localStorage.setItem('app-equilibrio:preferencias', JSON.stringify({ aparencia: 'escura' }));
+
+    // Act
+    entrarComo('lucia');
+
+    // Assert
+    expect(screen.getByRole('radio', { name: 'Escura' })).toBeChecked();
+    expect(document.documentElement).toHaveAttribute('data-aparencia', 'escura');
+  });
+
+  test('um valor de aparência inválido no armazenamento volta para a clara', () => {
+    // Arrange
+    localStorage.setItem('app-equilibrio:preferencias', JSON.stringify({ aparencia: 'roxa' }));
+
+    // Act
+    entrarComo('lucia');
+
+    // Assert
+    expect(screen.getByRole('radio', { name: 'Clara' })).toBeChecked();
+    expect(document.documentElement).toHaveAttribute('data-aparencia', 'clara');
+  });
+
+  test('antes de o React montar, as preferências salvas já pintam a página (aparência, alto contraste e texto)', () => {
+    // Arrange
+    localStorage.setItem('app-equilibrio:preferencias', JSON.stringify({ aparencia: 'escura', altoContraste: true, tamanhoTexto: 'grande' }));
+
+    // Act
+    pintarComPreferenciasSalvas();
+
+    // Assert
+    expect(document.documentElement).toHaveAttribute('data-aparencia', 'escura');
+    expect(document.documentElement).toHaveClass('alto-contraste');
+    expect(document.documentElement.style.fontSize).toBe('125%');
+  });
+
+  test('a aparência automática segue o aparelho', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    entrarComo('lucia');
+
+    // Act
+    await usuario.click(screen.getByRole('radio', { name: /Automática/ }));
+
+    // Assert: sem modo escuro no aparelho de teste, a automática fica clara
+    expect(document.documentElement).toHaveAttribute('data-aparencia', 'clara');
+    expect(screen.getByRole('radio', { name: /Automática/ })).toBeChecked();
   });
 
   test('os avisos por voz ligam com a nota sobre a voz em português do Brasil', async () => {

@@ -20,7 +20,7 @@ export function ContasDaDemo({ papel, aoUsar }: { papel: PapelDaConta; aoUsar: (
 
   return (
     <details className="rounded-cartao border-2 border-borda bg-superficie px-4">
-      <summary className="flex min-h-14 cursor-pointer items-center text-lg font-semibold text-primaria">
+      <summary className="flex min-h-14 cursor-pointer items-center text-lg font-semibold text-marca">
         Contas de demonstração
       </summary>
       <div className="flex flex-col gap-3 pb-4">
@@ -37,7 +37,7 @@ export function ContasDaDemo({ papel, aoUsar }: { papel: PapelDaConta; aoUsar: (
                   type="button"
                   aria-label={`Usar conta de ${nome}`}
                   onClick={() => aoUsar(conta.email, SENHA_DA_DEMO)}
-                  className="min-h-12 shrink-0 rounded-botao border-2 border-primaria px-4 text-base font-semibold text-primaria active:bg-primaria-suave"
+                  className="min-h-12 shrink-0 rounded-botao border-2 border-marca px-4 text-base font-semibold text-marca active:bg-primaria-suave"
                 >
                   Usar
                 </button>

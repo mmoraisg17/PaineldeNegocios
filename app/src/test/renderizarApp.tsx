@@ -63,6 +63,8 @@ export function usarAmbienteDeTeste() {
     localStorage.clear();
     document.documentElement.style.fontSize = '';
     document.documentElement.classList.remove('alto-contraste');
+    document.documentElement.removeAttribute('data-aparencia');
+    document.documentElement.style.colorScheme = '';
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(AGORA_DA_DEMO);
   });

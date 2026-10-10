@@ -3,34 +3,52 @@
 /* ---------------------------------------------------------------------------
    Tokens do app.
 
-   Os valores vêm do protótipo no Figma (variáveis cor/*), para o app e as 32
-   telas exportadas falarem a mesma língua visual. O grupo avisou que paleta e
-   formatação ainda podem mudar: por isso toda cor do app sai daqui, e nenhum
-   componente escreve hexadecimal. Trocar a identidade é trocar este bloco.
+   Toda cor do app sai daqui, e nenhum componente escreve hexadecimal. Trocar a
+   identidade é trocar estes blocos.
 
-   Contraste conferido para texto sobre fundo (#1B1F24 em #F7F5F0 ≈ 15:1) e
-   sobre a primária (branco em #0F6E5C ≈ 6:1): os dois passam em AA com folga,
-   o que importa para quem tem 60 anos ou mais.
+   Identidade visual (10/10/2026): o padrão de coloração é o do site do Fitbod
+   (fitbod.me), nas duas aparências: azul-tinta (#191923) + rosa-avermelhado
+   (#F2305A) + salmão (#FFB9B4). A cor da marca ocupa o FUNDO, não só os
+   botões: alto da tela com brilho rosa e um tom de cartão por categoria de
+   dado (estrutura vista no app da Zepp). CLARA = valores abaixo em @theme;
+   ESCURA = bloco html[data-aparencia='escura'] (a do Fitbod); as duas escolhidas em
+   Perfil → Ajustes. O alto contraste vale para as duas. O rosa do botão é um
+   pouco mais fundo que o #F2305A do site: branco sobre #F2305A dá 4,2:1, e o
+   app exige 4,5:1 (texto) por causa do público 60+. Cada par de cores foi
+   conferido contra WCAG AA (texto 4,5:1; dados e componentes 3:1). O rosa da marca
+   e o vermelho de "parada" ficam separados por ícone e texto, nunca só por cor.
+
+   Papéis separados (um mesmo valor serviria a vários, mas o contraste exigido
+   difere): marca = texto, link, borda, traço e foco; primária = fundo de botão;
+   dado = barras, linhas e pontos de gráfico; certo = estado de acerto.
    --------------------------------------------------------------------------- */
 @theme {
-  --color-fundo: #f7f5f0;
+  --color-estado-certo: #17753f;
+  --color-estado-atencao: #a85a00;
+  --color-estado-pare: #b3261e;
+  --color-mesa: #e5e5e5;
+  --color-moldura: #0b0f14;
+  --color-dado: #d81b49;
+  --color-dado-trilha: #e6d7e3;
+  --color-fundo: #ececf4;
   --color-superficie: #ffffff;
-  --color-texto: #1b1f24;
-  --color-texto-suave: #4a5360;
-  --color-primaria: #0f6e5c;
-  --color-primaria-escura: #0a4a3e;
-  --color-primaria-suave: #ddefea;
+  --color-texto: #191923;
+  --color-texto-suave: #454659;
+  --color-primaria: #e0214f;
+  --color-primaria-escura: #8f0c4c;
+  --color-primaria-suave: #ffe3e9;
+  --color-primaria-pressionada: #b8143d;
   --color-sobre-primaria: #ffffff;
+  --color-marca: #a8105a;
   --color-alerta-fundo: #fff1dc;
   --color-alerta-texto: #7a4100;
-  --color-perigo: #b3261e;
+  --color-perigo: #7d120b;
   --color-perigo-fundo: #fde8e6;
-  --color-borda: #c9ced6;
-  /* Borda de campo de texto: componente de interface precisa de 3:1 contra o
-     fundo (WCAG 1.4.11); `--color-borda` (1,6:1) fica só para divisórias. */
-  --color-borda-campo: #6b7480;
-  --color-moldura: #0b0f14;
-  --color-mesa: #e5e5e5;
+  --color-borda: #d2d2e0;
+  --color-borda-campo: #6b6c85;
+  --color-certo: #17753f;
+  --color-certo-escuro: #0f4d29;
+  --color-certo-suave: #ddf1e3;
 
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -48,15 +66,29 @@
   }
 }
 
+/* Fundo e cartões com identidade. `fundo-topo` é a cor do alto da tela, que se
+   dissolve em `fundo`; `cartao-1..4` são os fundos de cartão, um tom por
+   categoria de dado; `barra*` é a barra de abas. `static` porque o CSS da
+   tela (.tela) e as aparências leem as variáveis direto. */
+@theme static {
+  --color-fundo-topo: #ffcfd9;
+  --color-cartao-1: #ffffff;
+  --color-cartao-2: #ebe8ff;
+  --color-cartao-3: #ffe3e9;
+  --color-cartao-4: #e3ebf8;
+  --color-barra: #191923;
+  --color-sobre-barra: #ffffff;
+  --color-barra-ativa: #3a2a44;
+}
+
 /* Cores da cena 3D (boneco, plataforma, cadeira). `static` porque são lidas
    pelo JavaScript (cena3d/cores.ts) e não por classes: sem isso o Tailwind
-   descartaria as variáveis que nenhuma classe usa. Mesma regra das outras
-   cores: mudar aqui muda a cena. */
+   descartaria as variáveis que nenhuma classe usa. A cena é lida ao abrir o
+   exercício, então vale a aparência escolhida naquele momento. */
 @theme static {
   /* Manequim claro com borda de luz (auditoria visual, V3). */
   --color-cena-corpo: #d9dde2;
   --color-cena-borda: #ffffff;
-  --color-cena-musculo: #2ec5ff; /* músculo trabalhado (V4) */
   /* Marcações de correção (V5–V7): sempre com forma ou texto junto, nunca
      só a cor, para quem tem daltonismo. */
   --color-cena-certo: #3ddc84;
@@ -64,31 +96,144 @@
   --color-cena-erro: #ff4d4f;
   --color-cena-elastico: #ff8a3d; /* faixa elástica (abdução) */
   --color-cena-sapato: #1b1f24;
-  /* Estúdio escuro (auditoria visual, V1): o corpo claro e as marcações de
-     correção se destacam sobre ele, como na referência enviada. */
-  --color-cena-fundo: #0e1217;
-  --color-cena-base: #4a5462;
-  --color-cena-sensores: #ddefea;
   --color-cena-metal: #9aa4b1;
   --color-cena-madeira: #b7835a;
-  --color-cena-chao: #1a2027;
-  --color-cena-luz-chao: #252e38; /* disco mais claro sob a plataforma */
-  --color-cena-destaque: #e8735a;
+  /* Estúdio escuro (auditoria visual, V1): o corpo claro e as marcações de
+     correção se destacam sobre ele. As cores do estúdio acompanham a marca. */
+  --color-cena-fundo: #14141e;
+  --color-cena-chao: #1c1c2a;
+  --color-cena-luz-chao: #2a2a3e;
+  --color-cena-base: #4a4b60;
+  --color-cena-sensores: #ffb9b4;
+  --color-cena-destaque: #f2305a;
+  --color-cena-musculo: #4db3ff;
+}
+
+/* Aparência escura (Perfil → Ajustes). Mesmas variáveis, valores escuros. O
+   seletor com atributo vence o @theme (que mora em @layer theme: regra sem camada ganha de regra em camada), então nenhuma tela precisa
+   saber que a aparência existe. Marcado por estado/aparencia.ts. */
+html[data-aparencia='escura'] {
+  --color-estado-certo: #6fdca0;
+  --color-estado-atencao: #ffc247;
+  --color-estado-pare: #ff7b5c;
+  --color-mesa: #0d0d14;
+  --color-moldura: #2e2e42;
+  --color-dado: #ff5c7f;
+  --color-dado-trilha: #343542;
+  --color-fundo: #191923;
+  --color-superficie: #222230;
+  --color-texto: #ffffff;
+  --color-texto-suave: #b2b3c0;
+  --color-primaria: #e0214f;
+  --color-primaria-escura: #ffb9b4;
+  --color-primaria-suave: #3d1f2e;
+  --color-primaria-pressionada: #b8143d;
+  --color-sobre-primaria: #ffffff;
+  --color-marca: #ff6b8a;
+  --color-alerta-fundo: #4d3510;
+  --color-alerta-texto: #ffd27a;
+  --color-perigo: #ffe0d6;
+  --color-perigo-fundo: #4f1c24;
+  --color-borda: #343542;
+  --color-borda-campo: #8a8ba0;
+  --color-certo: #6fdca0;
+  --color-certo-escuro: #bdf2d2;
+  --color-certo-suave: #15301f;
+  --color-fundo-topo: #34223f;
+  --color-cartao-1: #222230;
+  --color-cartao-2: #2b2740;
+  --color-cartao-3: #3a2234;
+  --color-cartao-4: #263146;
+  --color-barra: #101018;
+  --color-sobre-barra: #ffffff;
+  --color-barra-ativa: #3a2a44;
+  --color-cena-fundo: #14141e;
+  --color-cena-chao: #1c1c2a;
+  --color-cena-luz-chao: #2a2a3e;
+  --color-cena-base: #4a4b60;
+  --color-cena-sensores: #ffb9b4;
+  --color-cena-destaque: #f2305a;
+  --color-cena-musculo: #4db3ff;
 }
 
 /* Alto contraste (Perfil → Ajustes, manual 13.1): mesmas variáveis, valores
-   mais fortes. O seletor com classe vence o :root do @theme, então nenhuma
-   tela precisa saber que o modo existe. */
+   mais fortes. O último bloco (escura + alto contraste) tem peso maior (dois
+   seletores) e redefine as mesmas variáveis, então não herda o branco do claro. */
 html.alto-contraste {
+  --color-estado-certo: #0f5a2d;
+  --color-estado-atencao: #7a4100;
+  --color-estado-pare: #8c1d17;
+  --color-mesa: #e5e5e5;
+  --color-moldura: #0b0f14;
+  --color-dado: #8c0b2f;
+  --color-dado-trilha: #e0e0e0;
   --color-fundo: #ffffff;
+  --color-fundo-topo: #ffffff;
+  --color-cartao-1: #f2f2f2;
+  --color-cartao-2: #f2f2f2;
+  --color-cartao-3: #f2f2f2;
+  --color-cartao-4: #f2f2f2;
+  --color-barra: #000000;
+  --color-barra-ativa: #333333;
   --color-texto: #000000;
-  --color-texto-suave: #1b1f24;
-  --color-borda: #4a5360;
-  --color-borda-campo: #1b1f24;
-  --color-primaria: #08503f;
-  --color-primaria-escura: #053a2e;
-  --color-alerta-texto: #5a2f00;
-  --color-perigo: #8c1d17;
+  --color-texto-suave: #1a1a1a;
+  --color-primaria: #a30f38;
+  --color-primaria-escura: #6b0a24;
+  --color-primaria-pressionada: #7a0b2a;
+  --color-marca: #8c0b2f;
+  --color-alerta-texto: #4a2600;
+  --color-perigo: #6b0f09;
+  --color-borda: #3a3a3a;
+  --color-borda-campo: #000000;
+  --color-superficie: #ffffff;
+  --color-primaria-suave: #ffe3e9;
+}
+
+html.alto-contraste[data-aparencia='escura'] {
+  --color-estado-certo: #6fdca0;
+  --color-estado-atencao: #ffc247;
+  --color-estado-pare: #ff7b5c;
+  --color-mesa: #000000;
+  --color-moldura: #3a3a3a;
+  --color-dado: #ffa3b8;
+  --color-dado-trilha: #3a3a3a;
+  --color-fundo: #000000;
+  --color-fundo-topo: #000000;
+  --color-cartao-1: #141414;
+  --color-cartao-2: #141414;
+  --color-cartao-3: #141414;
+  --color-cartao-4: #141414;
+  --color-barra: #000000;
+  --color-barra-ativa: #3a3a3a;
+  --color-texto: #ffffff;
+  --color-texto-suave: #f0f0f0;
+  --color-primaria: #c8143f;
+  --color-primaria-escura: #ffd0da;
+  --color-primaria-pressionada: #9e0f31;
+  --color-marca: #ffa3b8;
+  --color-alerta-texto: #ffe3a6;
+  --color-perigo: #fff0ea;
+  --color-borda: #bdbdbd;
+  --color-borda-campo: #ffffff;
+  --color-superficie: #0d0d0d;
+  --color-primaria-suave: #3a0d1d;
+}
+
+/* Barras de rolagem e campos nativos acompanham a aparência já no CSS (o
+   JavaScript repete o valor em estado/aparencia.ts, para o modo automático). */
+html {
+  color-scheme: light;
+}
+html[data-aparencia='escura'] {
+  color-scheme: dark;
+}
+
+/* A barra de abas é escura nas duas aparências: o anel de foco da marca (escura
+   na clara) não passa de 3:1 sobre ela. Dentro da barra o anel é claro e fica
+   por dentro da aba, onde o .tela (overflow: hidden) não o corta. */
+nav[aria-label='Navegação principal'] :focus-visible {
+  outline-color: var(--color-sobre-barra);
+  outline-offset: -5px;
 }
 
 @layer base {
@@ -108,7 +253,7 @@ html.alto-contraste {
   /* Foco sempre visível e grosso: navegação por teclado no desktop e leitores
      de tela no celular dependem disso. */
   :focus-visible {
-    outline: 3px solid var(--color-primaria);
+    outline: 3px solid var(--color-marca);
     outline-offset: 3px;
   }
   .tabular {
@@ -152,7 +297,7 @@ html.alto-contraste {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: var(--color-fundo);
+    background: linear-gradient(to bottom, var(--color-fundo-topo), var(--color-fundo) 18rem) var(--color-fundo);
     padding-top: env(safe-area-inset-top);
   }
 
