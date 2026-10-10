@@ -1,9 +1,9 @@
 import { Navigate, useSearchParams } from 'react-router';
+import { Mascote as DesenhoDoMascote } from '../components/mascote/Mascote';
 import { AbasDeAcesso } from '../components/acesso/AbasDeAcesso';
 import { contaConectadaValida } from '../components/acesso/contaConectada';
 import { papelDoTexto } from '../components/acesso/enderecos';
 import { PainelDeAcesso } from '../components/acesso/PainelDeAcesso';
-import mascote from '../assets/mascote.png';
 import { APP_NAME, APP_TAGLINE, AVISO_DE_DADOS, AVISO_EDUCACIONAL } from '../config/app';
 import type { PapelDaConta } from '../dominio';
 import { destinoDepoisDeEntrar } from '../estado/acoes';
@@ -11,18 +11,13 @@ import { useApp } from '../estado/ContextoApp';
 import { codigoDoTexto } from '../estado/linkDoConvite';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
 
-/* O mascote (kettlebell, rodada 2 de 09/10/2026) abre a tela de entrada no
-   lugar da ilustração da pessoa na plataforma. A imagem já traz o próprio fundo
-   azul-céu, por isso só ganha cantos arredondados. */
+/* O mascote (kettlebell) abre a tela de entrada sozinho, sem fundo, e acena.
+   Ninguém entrou ainda, então ele fica no nível 3 (em forma). */
 function Mascote() {
   return (
-    <img
-      src={mascote}
-      alt="Mascote do app: um kettlebell sorridente"
-      width={128}
-      height={128}
-      className="mx-auto size-32 shrink-0 rounded-cartao"
-    />
+    <div className="mx-auto w-fit">
+      <DesenhoDoMascote nivel={3} pose="acenar" tamanho={128} descricao="Mascote do app: um kettlebell sorridente" />
+    </div>
   );
 }
 

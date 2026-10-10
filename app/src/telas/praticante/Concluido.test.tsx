@@ -208,3 +208,18 @@ test('"Mantém o nível" não oferece recusa', async () => {
   // Assert
   expect(screen.queryByRole('button', { name: /Prefiro continuar/ })).not.toBeInTheDocument();
 });
+
+test('depois de responder, o mascote comemora e diz como está', async () => {
+  // Arrange
+  abrirTela('/praticante/concluido', { estado: estadoComSessaoAnterior(1, 90) });
+  treinarComResultados([resultado('sentar-e-levantar', 1)]);
+  expect(screen.queryByRole('img', { name: /Mascote do app/ })).not.toBeInTheDocument();
+
+  // Act
+  await userEvent.click(screen.getByRole('button', { name: 'Ok' }));
+
+  // Assert
+  const mascote = screen.getByRole('img', { name: /Mascote do app/ });
+  expect(mascote).toHaveAttribute('data-pose', 'comemorar');
+  expect(mascote).toHaveAccessibleName(/Hoje ele está (em forma|forte|campeão)/);
+});

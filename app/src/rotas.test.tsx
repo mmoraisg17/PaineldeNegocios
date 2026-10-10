@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { cleanup, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { APP_NAME } from './config/app';
@@ -330,5 +330,51 @@ describe('endereços inexistentes', () => {
 
     expect(screen.getByRole('heading', { name: 'Tela não encontrada' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Voltar ao início' })).toHaveAttribute('href', '/');
+  });
+});
+
+describe('mascote na barra de abas', () => {
+  test.each(['hoje', 'biblioteca', 'progresso', 'perfil'])('aparece na aba %s do praticante', (aba) => {
+    renderizarApp('/praticante/' + aba, { papel: 'praticante', id: 'lucia' });
+
+    expect(screen.getByRole('button', { name: /^Mascote, / })).toBeInTheDocument();
+  });
+
+  test('não aparece na entrada, no cadastro, no exercício nem para o acompanhante', () => {
+    const casos: Array<[string, { papel: 'praticante' | 'acompanhante'; id: string } | null]> = [
+      ['/', null],
+      ['/cadastro/praticante', null],
+      ['/praticante/exercicio/sentar-e-levantar', { papel: 'praticante', id: 'lucia' }],
+      ['/acompanhante/alunos', { papel: 'acompanhante', id: 'carlos' }],
+    ];
+    for (const [caminho, conta] of casos) {
+      renderizarApp(caminho, conta);
+      expect(screen.queryByRole('button', { name: /^Mascote, / })).not.toBeInTheDocument();
+      cleanup();
+    }
+  });
+
+  test('fica no centro da barra, entre Biblioteca e Progresso', () => {
+    renderizarApp('/praticante/hoje', { papel: 'praticante', id: 'lucia' });
+
+    const barra = screen.getByRole('navigation', { name: 'Navegação principal' });
+    const itens = within(barra).getAllByRole('listitem');
+    expect(itens).toHaveLength(5);
+    expect(itens[1]).toHaveTextContent('Biblioteca');
+    expect(within(itens[2] as HTMLElement).getByRole('button', { name: /^Mascote, / })).toBeInTheDocument();
+    expect(itens[3]).toHaveTextContent('Progresso');
+  });
+
+  test('fica parado: não existe faixa de passeio', () => {
+    renderizarApp('/praticante/hoje', { papel: 'praticante', id: 'lucia' });
+
+    expect(document.querySelector('.faixa-mascote, .faixa-trilha, .faixa-passeio')).toBeNull();
+    expect(screen.getByRole('button', { name: /^Mascote, / }).querySelector('svg')).toHaveAttribute('data-pose', 'parado');
+  });
+
+  test('a demonstração da Lúcia (treinos em dia) mostra um mascote forte ou campeão', () => {
+    renderizarApp('/praticante/hoje', { papel: 'praticante', id: 'lucia' });
+
+    expect(screen.getByRole('button', { name: /^Mascote, (forte|campeão)/ })).toBeInTheDocument();
   });
 });

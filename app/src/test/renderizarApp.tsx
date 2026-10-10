@@ -64,6 +64,7 @@ export function usarAmbienteDeTeste() {
     document.documentElement.style.fontSize = '';
     document.documentElement.classList.remove('alto-contraste');
     document.documentElement.removeAttribute('data-aparencia');
+    document.documentElement.removeAttribute('data-mascote');
     document.documentElement.style.colorScheme = '';
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(AGORA_DA_DEMO);

@@ -467,6 +467,45 @@ describe('ajustes', () => {
     expect(document.documentElement.style.fontSize).toBe('125%');
   });
 
+  test('a animação do mascote começa ligada e o interruptor a desliga, e a escolha fica salva', async () => {
+    // Arrange
+    const usuario = userEvent.setup();
+    const app = entrarComo('lucia');
+    const interruptor = screen.getByRole('switch', { name: /Animação do mascote/ });
+    expect(interruptor).toBeChecked();
+    expect(document.documentElement).toHaveAttribute('data-mascote', 'animado');
+
+    // Act
+    await usuario.click(interruptor);
+
+    // Assert
+    expect(app.preferencias().mascoteAnimado).toBe(false);
+    expect(document.documentElement).toHaveAttribute('data-mascote', 'parado');
+    expect(JSON.parse(localStorage.getItem('app-equilibrio:preferencias') ?? '{}')).toMatchObject({ mascoteAnimado: false });
+  });
+
+  test('preferências antigas, sem o campo do mascote, seguem com ele caminhando', () => {
+    // Arrange
+    localStorage.setItem('app-equilibrio:preferencias', JSON.stringify({ aparencia: 'escura' }));
+
+    // Act
+    entrarComo('lucia');
+
+    // Assert
+    expect(screen.getByRole('switch', { name: /Animação do mascote/ })).toBeChecked();
+  });
+
+  test('o mascote parado salvo no aparelho já vale antes de o React montar', () => {
+    // Arrange
+    localStorage.setItem('app-equilibrio:preferencias', JSON.stringify({ mascoteAnimado: false }));
+
+    // Act
+    pintarComPreferenciasSalvas();
+
+    // Assert
+    expect(document.documentElement).toHaveAttribute('data-mascote', 'parado');
+  });
+
   test('a aparência automática segue o aparelho', async () => {
     // Arrange
     const usuario = userEvent.setup();

@@ -121,7 +121,9 @@ test('sem treinos ainda: convida a treinar, sem gráficos, e mantém os níveis'
 
   // Assert
   expect(screen.getByText(/Quando você fizer os primeiros treinos/)).toBeInTheDocument();
-  expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  // Só o mascote é imagem aqui: nenhum gráfico.
+  expect(screen.getAllByRole('img')).toHaveLength(1);
+  expect(screen.getByRole('img', { name: /Mascote do app/ })).toBeInTheDocument();
   expect(screen.getByText('0 de 18 treinos nas últimas 6 semanas (0%)')).toBeInTheDocument();
   expect(within(screen.getByRole('region', { name: 'Nível de cada exercício' })).getAllByRole('listitem')).toHaveLength(4);
   expect(screen.getByText(/aparecem aqui conforme você treina/)).toBeInTheDocument();
@@ -134,4 +136,24 @@ test('praticante inexistente: mensagem amigável', () => {
   // Assert
   expect(screen.getByRole('heading', { level: 1, name: 'Progresso' })).toBeInTheDocument();
   expect(screen.getByText(/Não encontramos os seus dados/)).toBeInTheDocument();
+});
+
+test('mostra o parceiro de treino com o estado em texto e a dica', () => {
+  // Arrange / Act
+  abrirTela('/praticante/progresso');
+
+  // Assert: a Lúcia treina em dia, então o mascote está forte ou campeão
+  const secao = screen.getByRole('region', { name: 'Seu parceiro de treino' });
+  expect(within(secao).getByText(/^(Forte|Campeão)$/)).toBeInTheDocument();
+  expect(within(secao).getByRole('img', { name: /Mascote do app/ })).toBeInTheDocument();
+});
+
+test('quem ainda não treinou vê o mascote devagar, sem culpa, e a dica de como animá-lo', () => {
+  // Arrange / Act
+  abrirTela('/praticante/progresso', { estado: estadoSemTreinos() });
+
+  // Assert
+  const secao = screen.getByRole('region', { name: 'Seu parceiro de treino' });
+  expect(within(secao).getByText('Devagar')).toBeInTheDocument();
+  expect(within(secao).getByText(/Faça um treino nesta semana/)).toBeInTheDocument();
 });

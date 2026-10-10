@@ -29,6 +29,8 @@ export type Preferencias = {
   altoContraste: boolean;
   voz: boolean;
   aparencia: Aparencia;
+  /* Desligado, o mascote fica parado (quem tem tontura ou se distrai com movimento). */
+  mascoteAnimado: boolean;
 };
 
 export type TreinoEmAndamento = { itens: ItemRotina[]; resultados: ResultadoExercicio[] };
@@ -53,7 +55,13 @@ type ValorDoContexto = {
 const Contexto = createContext<ValorDoContexto | null>(null);
 
 const CHAVE_PREFERENCIAS = 'app-equilibrio:preferencias';
-const PREFERENCIAS_PADRAO: Preferencias = { tamanhoTexto: 'normal', altoContraste: false, voz: false, aparencia: APARENCIA_PADRAO };
+const PREFERENCIAS_PADRAO: Preferencias = {
+  tamanhoTexto: 'normal',
+  altoContraste: false,
+  voz: false,
+  aparencia: APARENCIA_PADRAO,
+  mascoteAnimado: true,
+};
 /* Fonte base por tamanho (o padrão de 18 px já é maior que o comum: público 60+). */
 export const FONTE_BASE: Record<Preferencias['tamanhoTexto'], string> = { normal: '112.5%', grande: '125%', 'muito-grande': '140%' };
 
@@ -67,6 +75,8 @@ function lerPreferencias(): Preferencias {
       altoContraste: valor.altoContraste === true,
       voz: valor.voz === true,
       aparencia: lerAparencia(valor.aparencia),
+      // Só `false` explícito desliga: preferências antigas (sem o campo) seguem animadas.
+      mascoteAnimado: valor.mascoteAnimado !== false,
     };
   } catch {
     return PREFERENCIAS_PADRAO;
@@ -78,6 +88,7 @@ function aplicarNaPagina(preferencias: Preferencias) {
   const html = document.documentElement;
   html.style.fontSize = FONTE_BASE[preferencias.tamanhoTexto];
   html.classList.toggle('alto-contraste', preferencias.altoContraste);
+  html.dataset.mascote = preferencias.mascoteAnimado ? 'animado' : 'parado';
 }
 
 /* Chamada pelo main.tsx antes de o React montar: sem isto, quem escolheu a
@@ -176,9 +187,7 @@ export function ProvedorDoApp({ children, estadoInicial }: { children: ReactNode
     } catch {
       /* armazenamento indisponível (aba anônima): vale só nesta visita */
     }
-    const html = document.documentElement;
-    html.style.fontSize = FONTE_BASE[preferencias.tamanhoTexto];
-    html.classList.toggle('alto-contraste', preferencias.altoContraste);
+    aplicarNaPagina(preferencias);
   }, [preferencias]);
 
   // Efeito à parte: no modo automático acompanha o aparelho, e só ele precisa parar ao trocar a escolha.
