@@ -13,6 +13,7 @@ import { animacaoDe } from '../movimento/animacoes';
 import type { ModoBracos } from '../movimento/corpo';
 import type { Desvio } from '../sensores';
 import { Icone } from '../components/Icone';
+import { MedidorDeNivel } from '../components/marca/Bolha';
 
 const VisualizadorExercicio = lazy(() => import('../cena3d/VisualizadorExercicio'));
 
@@ -115,7 +116,10 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
           {exercicio.nome}
         </h1>
         <p className="flex flex-wrap items-center gap-2 text-base">
-          <span className="rounded-full bg-primaria-suave px-3 py-1 font-semibold text-marca">Nível {nivel}</span>
+          <span className="flex items-center gap-2 rounded-full bg-primaria-suave px-3 py-1 font-semibold text-marca">
+            <MedidorDeNivel nivel={nivel} />
+            Nível {nivel}
+          </span>
           {indiceTreino !== null && treino && (
             <span className="rounded-full bg-superficie px-3 py-1 font-semibold">
               Exercício {indiceTreino + 1} de {treino.itens.length}

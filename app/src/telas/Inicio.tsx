@@ -1,4 +1,5 @@
 import { Navigate, useSearchParams } from 'react-router';
+import { LogoNivela } from '../components/marca/LogoNivela';
 import { Mascote as DesenhoDoMascote } from '../components/mascote/Mascote';
 import { AbasDeAcesso } from '../components/acesso/AbasDeAcesso';
 import { contaConectadaValida } from '../components/acesso/contaConectada';
@@ -52,7 +53,10 @@ export function Inicio() {
   return (
     <main className="flex flex-1 flex-col overflow-y-auto px-6 pb-8 pt-6">
       <Mascote />
-      <h1 ref={tituloRef} tabIndex={-1} className="mt-4 text-4xl font-bold text-marca outline-none">{APP_NAME}</h1>
+      {/* A logo é a palavra do nome: o <h1> continua sendo o título da tela (o nome acessível sai do aria-label da logo). */}
+      <h1 ref={tituloRef} tabIndex={-1} className="mt-4 text-texto outline-none">
+        <LogoNivela className="h-14" />
+      </h1>
       <p className="mt-2 text-xl text-texto">{APP_TAGLINE}</p>
 
       <div className="mt-6">

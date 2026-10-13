@@ -22,6 +22,7 @@ import {
   type SemanaResumida,
 } from '../../components/evolucao/evolucao';
 import { Icone } from '../../components/Icone';
+import { BarraComBolha, MedidorDeNivel } from '../../components/marca/Bolha';
 import { CartaoDoMascote } from '../../components/mascote/CartaoDoMascote';
 import { useNivelDoMascote } from '../../hooks/useNivelDoMascote';
 
@@ -153,9 +154,7 @@ function Adesao({ semanas, planejadas }: { semanas: readonly SemanaResumida[]; p
                 </span>
               </p>
               {/* Reforço visual: os números ao lado já dizem o mesmo. */}
-              <div aria-hidden="true" className="mt-2 h-3 overflow-hidden rounded-full bg-dado-trilha">
-                <div className="h-full rounded-full bg-dado" style={{ width: `${Math.round(largura)}%` }} />
-              </div>
+              <BarraComBolha valor={largura / PORCENTAGEM} />
             </li>
           );
         })}
@@ -220,12 +219,8 @@ function NiveisDosExercicios({ niveis }: { niveis: readonly NivelDoExercicio[] }
         <li key={item.id} className="flex items-center justify-between gap-3 rounded-botao bg-cartao-1 px-4 py-3">
           <span className="min-w-0 text-lg font-semibold">{item.nome}</span>
           <span className="flex shrink-0 items-center gap-2">
-            {/* Três degraus; os preenchidos são o nível. O texto repete o número. */}
-            <span aria-hidden="true" className="flex gap-1">
-              {Array.from({ length: NIVEL_MAXIMO }, (_, degrau) => (
-                <span key={degrau} className={`h-5 w-3 rounded-sm ${degrau < item.nivel ? 'bg-dado' : 'bg-dado-trilha'}`} />
-              ))}
-            </span>
+            {/* Uma bolha por degrau; as cheias são o nível. O texto repete o número. */}
+            <MedidorDeNivel nivel={item.nivel} maximo={NIVEL_MAXIMO} />
             <span className="text-base font-semibold text-marca">
               Nível {item.nivel} de {NIVEL_MAXIMO}
             </span>
