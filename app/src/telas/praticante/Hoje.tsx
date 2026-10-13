@@ -5,6 +5,7 @@ import { marcarRecadosLidos, recadosPara } from '../../estado/acoes';
 import { useApp, usePraticanteAtual } from '../../estado/ContextoApp';
 import { ROTULO_DO_APOIO, formatarData, formatarDose } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
+import { MedidorDeNivel } from '../../components/marca/Bolha';
 import { Icone } from '../../components/Icone';
 
 /* Tela Hoje (manual, seção 5): recados, treino do dia e o botão que começa. */
@@ -155,7 +156,10 @@ function ItemDoTreino({ item }: { item: ItemRotina }) {
         </span>
         {item.fixadoPor ? <span className="block text-base font-medium text-alerta-texto">Nível fixado por {item.fixadoPor}</span> : null}
       </span>
-      <span className="shrink-0 rounded-full bg-primaria-suave px-3 py-1 text-base font-semibold text-marca">Nível {item.nivel}</span>
+      <span className="flex shrink-0 items-center gap-2 rounded-full bg-primaria-suave px-3 py-1 text-base font-semibold text-marca">
+        <MedidorDeNivel nivel={item.nivel} />
+        Nível {item.nivel}
+      </span>
       <Icone nome="avancar" className="size-6 text-texto-suave" />
     </Link>
   );
