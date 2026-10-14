@@ -125,7 +125,13 @@ function perna(lado: Lado, centroQuadril: Vec3, ajuste: PoseDoPe | undefined, in
   const elevacao = ajuste?.elevacao ?? 0;
   const naBase = Math.abs(x) <= PLATAFORMA.largura / 2;
   const angulo = radianos((ajuste?.calcanhar ?? 0) - (naBase ? inclinacao : 0));
-  const ponta = vec(x, alturaDaSuperficie(x, zPonta, inclinacao) + elevacao, zPonta);
+  /* Pé no ar além da borda: a elevação é medida a partir da tampa, não do chão.
+     A base ficou com a largura real do desenho (0,60 m): uma perna aberta para
+     o lado passa da borda sem o pé "cair" 13 cm. Pé na altura do chão fora da
+     base (elevação ~0) continua pisando no chão. */
+  const noArForaDaBase = !naBase && elevacao > 0.005;
+  const superficie = noArForaDaBase ? alturaDaSuperficie(0, zPonta, inclinacao) : alturaDaSuperficie(x, zPonta, inclinacao);
+  const ponta = vec(x, superficie + elevacao, zPonta);
   const comprimento = CORPO.peFrente + CORPO.peTras;
   const calcanhar = soma(ponta, vec(0, comprimento * Math.sin(angulo), -comprimento * Math.cos(angulo)));
   const tornozelo = soma(

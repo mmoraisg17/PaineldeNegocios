@@ -63,6 +63,6 @@ export function equilibrioComInclinacao(bracos: ModoBracos, nivelDoSeletor: numb
     musculos: ['panturrilhas', 'abdutores'],
     prumo: 'apoio',
     // De lado: a rampa da base e o tornozelo de apoio à vista.
-    camera: { posicao: [3.15, 1.88, 1.15], alvo: [0, 1.13, 0] },
+    camera: { posicao: [3.3, 1.85, 1.2], alvo: [0, 1.03, 0] },
   };
 }
