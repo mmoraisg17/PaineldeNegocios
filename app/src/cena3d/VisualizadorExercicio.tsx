@@ -5,7 +5,8 @@ import { iconeDoEstado } from '../movimento/setas';
 import { RAMPA_DE_PAUSA } from '../movimento/transicoes';
 import type { EstadoDaExecucao } from '../sensores/tipos';
 import { Boneco } from './Boneco';
-import { Cadeira, Chao, Plataforma } from './Cenario';
+import { Banquinho } from './Banquinho';
+import { Chao, Plataforma } from './Cenario';
 import { lerCoresDaCena } from './cores';
 import { Orbita } from './Orbita';
 import { RedesenhoSobDemanda } from './RedesenhoSobDemanda';
@@ -109,7 +110,7 @@ function VisualizadorExercicio({
           <directionalLight position={[3, 2.5, -4]} intensity={1.8} color="#bfe9ff" />
           <Chao cores={cores} />
           <Plataforma cores={cores} inclinacao={animacao.inclinacaoDaBase ?? 0} />
-          {animacao.cadeira && <Cadeira cadeira={animacao.cadeira} cores={cores} />}
+          {animacao.cadeira && <Banquinho cadeira={animacao.cadeira} cores={cores} />}
           <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} />
           <Orbita alvo={alvoDaCamera} relogio={relogio} />
           <RedesenhoSobDemanda relogio={relogio} />
