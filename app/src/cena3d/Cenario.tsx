@@ -2,29 +2,16 @@ import type { Cadeira as CadeiraDaAnimacao } from '../movimento/animacao';
 import { PLATAFORMA } from '../movimento/cenario';
 import type { CoresDaCena } from './cores';
 
-/* Plataforma modelada a partir do desenho da base de 06/10/2026: caixa com
-   tampa (área dos sensores em destaque), abas laterais com dois furos onde
-   entram os postes das barras, e quatro pés. Medidas em movimento/cenario.ts. */
-export function Plataforma({ cores, inclinacao = 0 }: { cores: CoresDaCena; inclinacao?: number }) {
-  const { largura, profundidade, altura, alturaPes, margemTampa, barraX, pegadaAltura, pegadaZ } = PLATAFORMA;
-  /* Tampa inclinável (fase 6): gira na borda de trás, frente para cima, como
-     o seletor da plataforma. As barras ficam na base e continuam verticais.
-     A superfície bate com alturaDaSuperficie (movimento/corpo.ts). */
+/* Tampa inclinável (fase 6): gira na borda de trás, frente para cima, como o
+   seletor da plataforma. As barras ficam na base e continuam verticais. A
+   superfície bate com alturaDaSuperficie (movimento/corpo.ts). Com a base
+   plana, é só a área dos sensores em destaque sobre o topo. */
+export function Tampa({ cores, inclinacao }: { cores: CoresDaCena; inclinacao: number }) {
+  const { largura, profundidade, altura, margemTampa } = PLATAFORMA;
   const angulo = (inclinacao * Math.PI) / 180;
   const subidaNaFrente = profundidade * Math.tan(angulo);
-  const corpoAltura = altura - alturaPes;
-  const alturaPoste = pegadaAltura + altura - 0.06;
-  const xPes = largura / 2 - 0.06;
-  const zPes = profundidade / 2 - 0.06;
-
   return (
-    <group>
-      {/* Caixa da base */}
-      <mesh position={[0, alturaPes + corpoAltura / 2, 0]}>
-        <boxGeometry args={[largura, corpoAltura, profundidade]} />
-        <meshStandardMaterial color={cores.base} roughness={0.6} />
-      </mesh>
-      {/* Tampa (inclinável) com a área dos sensores */}
+    <>
       <group position={[0, altura, -profundidade / 2]} rotation={[-angulo, 0, 0]}>
         {inclinacao > 0 && (
           <mesh position={[0, -0.008, profundidade / 2]}>
@@ -44,34 +31,49 @@ export function Plataforma({ cores, inclinacao = 0 }: { cores: CoresDaCena; incl
           <meshStandardMaterial color={cores.base} roughness={0.6} />
         </mesh>
       )}
-      {/* Pés antiderrapantes */}
-      {[-1, 1].flatMap((sx) =>
-        [-1, 1].map((sz) => (
-          <mesh key={`pe${sx}${sz}`} position={[sx * xPes, alturaPes / 2, sz * zPes]}>
-            <cylinderGeometry args={[0.03, 0.035, alturaPes, 16]} />
-            <meshStandardMaterial color={cores.sapato} />
-          </mesh>
-        )),
-      )}
-      {/* Abas laterais + barras (dois postes por lado, como os dois furos da aba) */}
+    </>
+  );
+}
+
+/* Barras: um poste sobre cada pino da lateral (no desenho, a 0,66 m um do
+   outro) e a barra horizontal que liga os dois, na altura da pegada. */
+export function Barras({ cores }: { cores: CoresDaCena }) {
+  const { altura, barraX, pegadaAltura, postesZ } = PLATAFORMA;
+  const baseDoPoste = altura - 0.01; // topo dos pinos
+  const alturaPoste = altura + pegadaAltura - baseDoPoste;
+  const comprimentoBarra = postesZ.ate - postesZ.de + 0.04;
+  return (
+    <>
       {[-1, 1].map((sx) => (
         <group key={`barra${sx}`}>
-          <mesh position={[sx * (largura / 2 + 0.045), altura - 0.04, (pegadaZ.de + pegadaZ.ate) / 2]}>
-            <boxGeometry args={[0.09, 0.03, pegadaZ.ate - pegadaZ.de + 0.08]} />
-            <meshStandardMaterial color={cores.base} roughness={0.6} />
-          </mesh>
-          {[pegadaZ.de, pegadaZ.ate].map((z) => (
-            <mesh key={z} position={[sx * barraX, altura - 0.06 + alturaPoste / 2, z]}>
+          {[postesZ.de, postesZ.ate].map((z) => (
+            <mesh key={z} position={[sx * barraX, baseDoPoste + alturaPoste / 2, z]}>
               <cylinderGeometry args={[0.018, 0.018, alturaPoste, 14]} />
               <meshStandardMaterial color={cores.metal} metalness={0.5} roughness={0.35} />
             </mesh>
           ))}
-          <mesh position={[sx * barraX, altura + pegadaAltura, (pegadaZ.de + pegadaZ.ate) / 2]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.022, 0.022, pegadaZ.ate - pegadaZ.de + 0.04, 14]} />
+          <mesh position={[sx * barraX, altura + pegadaAltura, (postesZ.de + postesZ.ate) / 2]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.022, 0.022, comprimentoBarra, 14]} />
             <meshStandardMaterial color={cores.metal} metalness={0.5} roughness={0.35} />
           </mesh>
         </group>
       ))}
+    </>
+  );
+}
+
+/* Plataforma em caixas: a reserva enquanto o modelo do desenho carrega (ou se
+   ele falhar). Mesmas medidas da bandeja do desenho (movimento/cenario.ts). */
+export function PlataformaSimples({ cores, inclinacao = 0 }: { cores: CoresDaCena; inclinacao?: number }) {
+  const { largura, profundidade, altura } = PLATAFORMA;
+  return (
+    <group>
+      <mesh position={[0, altura / 2, 0]}>
+        <boxGeometry args={[largura, altura, profundidade]} />
+        <meshStandardMaterial color={cores.base} roughness={0.6} />
+      </mesh>
+      <Tampa cores={cores} inclinacao={inclinacao} />
+      <Barras cores={cores} />
     </group>
   );
 }

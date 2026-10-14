@@ -15,18 +15,23 @@ Prova da escala: com 14 aros, o assento fica a ~0,53 m, que é a altura que a
 animação de sentar e levantar já usava, e o Ø 0,45 m cabe nos 0,42 m de fundo
 da cadeira da animação. Sem a escala 1:10 nada disso bate.
 
-## Plataforma (ainda não ligada nas animações; precisa de decisão)
+## Plataforma (já está nas animações)
 
 | Peça | No desenho (x × y × z) | Real (×10) |
 |---|---|---|
-| Tampa / placa `peças laterais` | 70 × 100 × 10 mm | 0,70 × 1,00 × 0,10 m |
-| Bandeja `parte principal` | 60 × 100 × 13 mm | 0,60 × 1,00 × 0,13 m |
-| Pinos laterais (4) | 6 × 6 × 7 mm, a 66 mm entre si em x, 66 em y | 0,06 m, a 0,66 m |
+| Bandeja `parte principal` | 60 × 100 × 13 mm, topo plano | 0,60 × 1,00 × 0,13 m |
+| Pinos laterais (4) | 6 × 6 × 8 mm, a 66 mm entre si em x e em y | 0,06 m, a 0,66 m |
 | Alças em C (2) | octógonos de 24 mm | 0,24 m |
+| Tampa `peças laterais` | 70 × 100 × 10 mm, com rebaixos por baixo | 0,70 × 1,00 × 0,10 m (não usada) |
 
-Hoje `movimento/cenario.ts` usa 0,70 × **0,50** × 0,12 m (valores de projeto,
-como o próprio comentário diz). A **largura** bate com o desenho (0,70 m); a
-**profundidade do desenho é 1,00 m**, o dobro, e a altura fica entre 0,10 e
-0,13 m conforme a montagem. Mudar a profundidade para 1,00 m move a origem da
-inclinação (borda de trás) e a cadeira, então muda os centímetros de
-elevação do calcanhar em cada nível. Por isso não foi alterado sem confirmação.
+`movimento/cenario.ts` passou de 0,70 × 0,50 × 0,12 m (valores de projeto) para
+0,60 × 1,00 × 0,13 m. Os postes das barras ficam sobre os pinos (x = ±0,34 m,
+z = ±0,33 m). O banquinho pousa em cima da plataforma, na parte de trás: com a
+profundidade de 1,00 m ele cabe inteiro sobre a bandeja, o que reforça a medida.
+
+**Suposições a confirmar com a mecânica:**
+- A altura da montagem é a da bandeja (0,13 m, a mesma do desenho de simulação).
+  A tampa de 70 × 100 × 10 mm, se for montada em cima, soma 0,10 m.
+- O topo da bandeja é plano e é a superfície onde o pé pisa.
+- Com a bandeja de 0,60 m, a perna aberta na abdução passa da borda; o pé no ar
+  continua medido a partir do topo da base (`movimento/corpo.ts`).

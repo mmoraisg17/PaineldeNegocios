@@ -3,7 +3,8 @@
    escala 1:10: o aro de baixo tem 43,4 no desenho e o assento 45, ou seja,
    0,434 m e 0,45 m de verdade. A escala foi conferida contra o app: o assento
    fica a ~0,53 m do chão e a cadeira da animação tem 0,42 m de fundo, o que
-   bate com o assento de 0,45 m e com 14 dos 17 aros empilhados. */
+   bate com o assento de 0,45 m. O banquinho fica em cima da plataforma, então
+   os aros contam a partir do topo dela (10 dos 17 aros). */
 export const ESCALA_DO_DESENHO = 10;
 
 export const BANQUINHO = {
@@ -27,20 +28,21 @@ export type PilhaDoBanquinho = {
   readonly alturaDoAssento: number;
 };
 
-/* O banquinho é retrátil: o número de aros define a altura. Aqui ele estica
-   até o assento ficar na altura que a animação pede (`assentoY`, topo do
+/* O banquinho é retrátil: o número de aros define a altura. `apoioY` é onde
+   ele pousa (topo da plataforma). Aqui ele estica até o assento ficar na altura que a animação pede (`assentoY`, topo do
    assento). Com a quantidade inteira de aros mais próxima, o passo entre eles
    se ajusta (cerca de 1 mm), então o assento fica exatamente onde o quadril do
    boneco espera e nenhum aro se separa do outro. */
-export function pilhaDoBanquinho(assentoY: number): PilhaDoBanquinho {
+export function pilhaDoBanquinho(assentoY: number, apoioY = 0): PilhaDoBanquinho {
   const { aneis, alturaDoAnel, alturaDoPrimeiroAnel, passoDoAnel, alturaDoAssento } = BANQUINHO;
   const topoDoUltimoAnel = assentoY - alturaDoAssento;
-  const ideal = (topoDoUltimoAnel - alturaDoAnel - alturaDoPrimeiroAnel) / passoDoAnel + 1;
+  const baseDoPrimeiro = apoioY + alturaDoPrimeiroAnel;
+  const ideal = (topoDoUltimoAnel - alturaDoAnel - baseDoPrimeiro) / passoDoAnel + 1;
   const quantos = Math.min(aneis, Math.max(2, Math.round(ideal)));
-  const passo = (topoDoUltimoAnel - alturaDoAnel - alturaDoPrimeiroAnel) / (quantos - 1);
+  const passo = (topoDoUltimoAnel - alturaDoAnel - baseDoPrimeiro) / (quantos - 1);
   return {
     aneis: quantos,
-    alturaDosAneis: Array.from({ length: quantos }, (_, k) => alturaDoPrimeiroAnel + k * passo),
+    alturaDosAneis: Array.from({ length: quantos }, (_, k) => baseDoPrimeiro + k * passo),
     alturaDoAssento: topoDoUltimoAnel,
   };
 }

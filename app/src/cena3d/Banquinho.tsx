@@ -1,10 +1,12 @@
 import { useLoader } from '@react-three/fiber';
-import { Component, type ReactNode, Suspense, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { BufferGeometry, Mesh, Object3D } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import urlDoBanquinho from '../assets/modelos/banquinho.glb?url';
 import type { Cadeira as CadeiraDaAnimacao } from '../movimento/animacao';
+import { TOPO_BASE } from '../movimento/cenario';
 import { Cadeira } from './Cenario';
+import { ModeloComReserva } from './ModeloComReserva';
 import type { CoresDaCena } from './cores';
 import { pilhaDoBanquinho } from './banquinho';
 
@@ -27,9 +29,10 @@ export function geometriasDoModelo(raiz: Object3D): Map<string, BufferGeometry> 
 function BanquinhoCarregado({ cadeira, cores }: { cadeira: CadeiraDaAnimacao; cores: CoresDaCena }) {
   const gltf = useLoader(GLTFLoader, urlDoBanquinho);
   const geometrias = useMemo(() => geometriasDoModelo(gltf.scene), [gltf]);
-  const pilha = useMemo(() => pilhaDoBanquinho(cadeira.assentoY), [cadeira.assentoY]);
+  const pilha = useMemo(() => pilhaDoBanquinho(cadeira.assentoY, TOPO_BASE), [cadeira.assentoY]);
   const zMeio = (cadeira.frenteZ + cadeira.fundoZ) / 2;
   const assento = geometrias.get('assento');
+  // O banquinho fica em cima da plataforma, na parte de trás (pilha começa em TOPO_BASE).
 
   return (
     <group position={[0, 0, zMeio]}>
@@ -52,26 +55,17 @@ function BanquinhoCarregado({ cadeira, cores }: { cadeira: CadeiraDaAnimacao; co
   );
 }
 
-/* Se o arquivo não carregar (rede, cache), a cena continua com a cadeira
-   simples em vez de quebrar a animação inteira. */
-class SemModelo extends Component<{ reserva: ReactNode; children: ReactNode }, { falhou: boolean }> {
-  state = { falhou: false };
-  static getDerivedStateFromError() {
-    return { falhou: true };
-  }
-  render() {
-    return this.state.falhou ? this.props.reserva : this.props.children;
-  }
-}
-
 export function Banquinho({ cadeira, cores }: { cadeira: CadeiraDaAnimacao; cores: CoresDaCena }) {
-  const reserva = <Cadeira cadeira={cadeira} cores={cores} />;
+  /* Reserva: a cadeira simples, também em cima da plataforma. */
+  const reserva = (
+    <group position={[0, TOPO_BASE, 0]}>
+      <Cadeira cadeira={{ ...cadeira, assentoY: cadeira.assentoY - TOPO_BASE }} cores={cores} />
+    </group>
+  );
   return (
-    <SemModelo reserva={reserva}>
-      <Suspense fallback={reserva}>
-        <BanquinhoCarregado cadeira={cadeira} cores={cores} />
-      </Suspense>
-    </SemModelo>
+    <ModeloComReserva reserva={reserva}>
+      <BanquinhoCarregado cadeira={cadeira} cores={cores} />
+    </ModeloComReserva>
   );
 }
 

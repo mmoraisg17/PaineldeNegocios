@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { Box3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CADEIRA_SENTAR } from '../movimento/animacoes/sentarELevantar';
+import { PLATAFORMA, TOPO_BASE } from '../movimento/cenario';
 import { geometriasDoModelo } from './Banquinho';
 import { BANQUINHO, pilhaDoBanquinho } from './banquinho';
 
@@ -17,8 +18,19 @@ describe('pilhaDoBanquinho', () => {
     expect(ultimo + BANQUINHO.alturaDoAnel).toBeCloseTo(pilha.alturaDoAssento, 6);
   });
 
-  it('usa 14 aros para a cadeira da animação (assento a ~0,53 m)', () => {
+  it('usa 14 aros do chão e 10 aros quando pousa em cima da plataforma', () => {
     expect(pilhaDoBanquinho(CADEIRA_SENTAR.assentoY).aneis).toBe(14);
+    const naPlataforma = pilhaDoBanquinho(CADEIRA_SENTAR.assentoY, TOPO_BASE);
+    expect(naPlataforma.aneis).toBe(10);
+    expect(naPlataforma.alturaDosAneis[0]).toBeCloseTo(TOPO_BASE + BANQUINHO.alturaDoPrimeiroAnel, 6);
+    expect(naPlataforma.alturaDoAssento + BANQUINHO.alturaDoAssento).toBeCloseTo(CADEIRA_SENTAR.assentoY, 6);
+  });
+
+  it('o banquinho cabe inteiro em cima da plataforma, sem passar da borda de trás', () => {
+    const raio = BANQUINHO.diametroDoAssento / 2;
+    const centro = (CADEIRA_SENTAR.frenteZ + CADEIRA_SENTAR.fundoZ) / 2;
+    expect(centro - raio).toBeGreaterThanOrEqual(-PLATAFORMA.profundidade / 2 - 0.02);
+    expect(centro + raio).toBeLessThanOrEqual(PLATAFORMA.profundidade / 2);
   });
 
   it('mantém os aros sobrepostos, sem abrir vão entre eles', () => {
@@ -67,3 +79,28 @@ describe('banquinho.glb', () => {
   });
 });
 
+describe('plataforma.glb', () => {
+  const arquivo = readFileSync(resolve(process.cwd(), 'src/assets/modelos/plataforma.glb'));
+  const buffer = arquivo.buffer.slice(arquivo.byteOffset, arquivo.byteOffset + arquivo.byteLength);
+
+  it('tem a bandeja, os 4 pinos e as 2 alças, nas medidas de PLATAFORMA', async () => {
+    const geometrias = await new Promise<ReturnType<typeof geometriasDoModelo>>((ok, erro) => {
+      new GLTFLoader().parse(buffer, '', (gltf) => ok(geometriasDoModelo(gltf.scene)), erro);
+    });
+    for (const nome of ['bandeja', 'pino_0', 'pino_1', 'pino_2', 'pino_3', 'alca_0', 'alca_1']) expect(geometrias.has(nome)).toBe(true);
+    const bandeja = geometrias.get('bandeja')!;
+    bandeja.computeBoundingBox();
+    const tamanho = bandeja.boundingBox!.getSize(new Box3().min.clone());
+    expect(tamanho.x).toBeCloseTo(PLATAFORMA.largura, 3);
+    expect(tamanho.y).toBeCloseTo(PLATAFORMA.altura, 3);
+    expect(tamanho.z).toBeCloseTo(PLATAFORMA.profundidade, 3);
+    // Os pinos ficam sobre o eixo das barras.
+    for (const nome of ['pino_0', 'pino_1', 'pino_2', 'pino_3']) {
+      const g = geometrias.get(nome)!;
+      g.computeBoundingBox();
+      const centro = g.boundingBox!.getCenter(new Box3().min.clone());
+      expect(Math.abs(centro.x)).toBeCloseTo(0.33, 2);
+      expect(Math.abs(centro.z)).toBeCloseTo(PLATAFORMA.postesZ.ate, 1);
+    }
+  });
+});

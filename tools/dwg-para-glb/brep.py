@@ -3,6 +3,9 @@ import math, numpy as np, mapbox_earcut as earcut
 from sabraw import records
 
 TAU = 2*math.pi
+# Resolução da malha (rad): passo máximo ao amostrar arcos e ao subdividir faces curvas.
+PASSO_ARESTA = math.pi/32
+PASSO_REFINO = math.pi/10
 def V(x): return np.array(x, float)
 def unit(v):
     n = np.linalg.norm(v); return v/n if n > 1e-12 else v
@@ -42,7 +45,7 @@ class Brep:
             if cn == 'ellipse-curve':
                 C = V(c[4].value); N = unit(V(c[5].value)); A = V(c[6].value); ratio = c[7].value
                 B = np.cross(N, A)*ratio
-                n = max(2, int(math.ceil(abs(t1-t0)/(math.pi/32))))
+                n = max(2, int(math.ceil(abs(t1-t0)/PASSO_ARESTA)))
                 ts = np.linspace(t0, t1, n+1)
                 pts = [C + A*math.cos(t) + B*math.sin(t) for t in ts]
                 if np.linalg.norm(pts[0]-p0) > np.linalg.norm(pts[0]-p1) + 1e-6 and np.linalg.norm(pts[-1]-p1) > 1e-6:
@@ -273,7 +276,7 @@ class Brep:
                 pa, pb, pc = np.array(V_[a]), np.array(V_[b]), np.array(V_[c])
                 lens = [abs(pa[0]-pb[0]), abs(pb[0]-pc[0]), abs(pc[0]-pa[0])]
                 lensv = [abs(pa[1]-pb[1]), abs(pb[1]-pc[1]), abs(pc[1]-pa[1])]
-                if max(lens) > math.pi/10 or (periodic[1] and max(lensv) > math.pi/10):
+                if max(lens) > PASSO_REFINO or (periodic[1] and max(lensv) > PASSO_REFINO):
                     ab, bc, ca = mid(a, b), mid(b, c), mid(c, a)
                     nt += [(a, ab, ca), (ab, b, bc), (ca, bc, c), (ab, bc, ca)]; changed = True
                 else: nt.append((a, b, c))

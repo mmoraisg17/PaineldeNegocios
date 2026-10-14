@@ -27,8 +27,8 @@ const QUADRIL_EM_PE_Z = -0.02;
 
 export const CADEIRA_SENTAR = {
   assentoY: QUADRIL_SENTADO.y - QUADRIL_ACIMA_DO_ASSENTO,
-  frenteZ: -0.26,
-  fundoZ: -0.68,
+  frenteZ: -0.073,
+  fundoZ: -0.493,
 } as const;
 
 /* Onde as mãos seguram a barra: um pouco à frente do quadril em pé. Sentada,

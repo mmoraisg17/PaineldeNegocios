@@ -6,7 +6,8 @@ import { RAMPA_DE_PAUSA } from '../movimento/transicoes';
 import type { EstadoDaExecucao } from '../sensores/tipos';
 import { Boneco } from './Boneco';
 import { Banquinho } from './Banquinho';
-import { Chao, Plataforma } from './Cenario';
+import { Plataforma } from './Plataforma';
+import { Chao } from './Cenario';
 import { lerCoresDaCena } from './cores';
 import { Orbita } from './Orbita';
 import { RedesenhoSobDemanda } from './RedesenhoSobDemanda';
@@ -19,9 +20,9 @@ import { Icone } from '../components/Icone';
    Enquadra da cadeira até a cabeça em pé (~1,8 m acima do chão). */
 // 15% mais perto que antes: com o cartão de 360 px o boneco ocupa a cena
 // (mesma direção de antes, [2.45, 1.6, 2.95] → alvo).
-const CAMERA_POSICAO: [number, number, number] = [2.08, 1.58, 2.49];
+const CAMERA_POSICAO: [number, number, number] = [2.35, 1.68, 2.8];
 // Mira um pouco acima do quadril: a cabeça fica abaixo do selo ✓/✕ do canto.
-const ALVO_CAMERA: [number, number, number] = [0, 0.98, -0.12];
+const ALVO_CAMERA: [number, number, number] = [0, 0.92, 0];
 
 /* Carregado sob demanda (React.lazy) pela tela do exercício: o three.js é a
    maior dependência do app, e quem só abre o início não deveria baixá-lo.
