@@ -5,9 +5,8 @@ import { type Esqueleto, montarEsqueleto } from '../corpo';
 import { alinhamentoLateral } from '../alinhamento';
 import { flexaoDoJoelho } from '../musculos';
 import { distancia } from '../vetor';
-import { alvoDaTransferencia } from '../../sensores/esperado';
 import { quadrilParaFlexao } from './comum';
-import { animacaoDe, exerciciosAnimados } from './index';
+import { animacaoDe, exerciciosAnimados, type OpcoesDaAnimacao } from './index';
 import { PE_DA_FRENTE_DZ, temposDoBulgaro } from './agachamentoBulgaroExplosivo';
 import { CADEIRA_SENTAR } from './sentarELevantar';
 
@@ -73,6 +72,25 @@ describe.each(variacoes)('$id, nível $nivel: fatos gerais', ({ animacao }) => {
 
   test('declara os músculos que trabalha', () => {
     expect(animacao.musculos?.length ?? 0).toBeGreaterThan(0);
+  });
+});
+
+/* Regressão: a inclinação da plataforma foi descartada. Mesmo quem ainda
+   passar a opção antiga (de um link ou código velho) recebe a base plana: a
+   animação não carrega inclinação e o pé apoiado pisa na altura do topo. */
+describe.each(exerciciosAnimados())('%s: base plana', (id) => {
+  test.each(NIVEIS)('nível %i: nenhuma inclinação na animação nem no esqueleto', (nivel) => {
+    const opcoesAntigas = { nivel, inclinacao: 2 } as Partial<OpcoesDaAnimacao>;
+    const animacao = animacaoDe(id, opcoesAntigas)!;
+
+    expect(animacao).not.toHaveProperty('inclinacaoDaBase');
+    for (const { amostra, esqueleto: e, t } of quadrosDe(animacao)) {
+      expect(amostra.pose, `t=${t.toFixed(2)}`).not.toHaveProperty('inclinacaoDaBase');
+      expect(e).not.toHaveProperty('inclinacaoDaBase');
+      for (const l of [e.lados.esquerdo, e.lados.direito].filter((p) => p.apoiado && p.calcanhar.y > TOPO_BASE / 2)) {
+        expect(l.ponta.y - l.calcanhar.y, `pé reto na tampa t=${t.toFixed(2)}`).toBeLessThan(0.03);
+      }
+    }
   });
 });
 
@@ -282,96 +300,6 @@ describe('abdução com elástico', () => {
   });
 });
 
-/* ---- 7. Equilíbrio num pé só com inclinação (pesquisa, seção 7) ---- */
-describe('equilíbrio num pé só com inclinação', () => {
-  const opcoesDoNivel = { 1: { nivel: 1, inclinacao: 0 }, 2: { nivel: 2, inclinacao: 1 }, 3: { nivel: 3, inclinacao: 2 } } as const;
-  const quadros = (nivel: 1 | 2 | 3) => quadrosDe(animacaoDe('equilibrio-com-inclinacao', opcoesDoNivel[nivel])!);
-  const parado = (nivel: 1 | 2 | 3) => quadros(nivel).filter((q) => q.t >= 2.8 && q.t <= 8.8);
-
-  test('parado, só o pé esquerdo apoia; o direito fica no ar', () => {
-    for (const { esqueleto: e, t } of parado(2)) {
-      expect(e.lados.esquerdo.apoiado, `t=${t.toFixed(2)}`).toBe(true);
-      expect(e.lados.direito.apoiado, `t=${t.toFixed(2)}`).toBe(false);
-    }
-  });
-
-  test('joelho de apoio levemente dobrado (18–30°) em todos os níveis, mesmo na rampa', () => {
-    for (const nivel of NIVEIS) {
-      for (const { esqueleto: e, t } of parado(nivel)) {
-        const flexao = flexaoDoJoelho(e);
-        expect(flexao, `nível ${nivel} t=${t.toFixed(2)}`).toBeGreaterThan(18);
-        expect(flexao, `nível ${nivel} t=${t.toFixed(2)}`).toBeLessThan(30);
-      }
-    }
-  });
-
-  test('micro-oscilações sutis: o quadril se move de 3 a 12 mm para os lados', () => {
-    const xs = parado(1).map((q) => q.esqueleto.pelve.x);
-    const amplitude = Math.max(...xs) - Math.min(...xs);
-    expect(amplitude).toBeGreaterThan(0.003);
-    expect(amplitude).toBeLessThan(0.012);
-  });
-
-  test('a base inclina conforme o nível: 0°, 5° e 10°; o pé acompanha a rampa', () => {
-    expect(animacaoDe('equilibrio-com-inclinacao', opcoesDoNivel[1])!.inclinacaoDaBase ?? 0).toBe(0);
-    expect(animacaoDe('equilibrio-com-inclinacao', opcoesDoNivel[2])!.inclinacaoDaBase).toBe(5);
-    const e = parado(3)[0]!.esqueleto;
-    expect(e.inclinacaoDaBase).toBe(10);
-    expect(e.lados.esquerdo.ponta.y).toBeGreaterThan(e.lados.esquerdo.calcanhar.y + 0.03);
-  });
-});
-
-/* ---- 8. Transferência de peso com alvos (pesquisa, seção 8) ---- */
-describe('transferência de peso', () => {
-  const animacao = (nivel: 1 | 2 | 3) => animacaoDe('transferencia-de-peso', { nivel })!;
-  const quadros = (nivel: 1 | 2 | 3) => quadrosDe(animacao(nivel));
-  const centro = (nivel: 1 | 2 | 3) => montarEsqueleto(amostrar(animacao(nivel), 0).pose).pelve;
-  const noMeioDoAlvo = (nivel: 1 | 2 | 3, k: number) => montarEsqueleto(amostrar(animacao(nivel), 4 * k + 2).pose).pelve;
-
-  test('os pés não saem do lugar o ciclo inteiro (catálogo: não tire os pés da base)', () => {
-    const qs = quadros(2);
-    const inicio = qs[0]!.esqueleto.lados;
-    for (const { esqueleto: e, t } of qs) {
-      for (const lado of ['esquerdo', 'direito'] as const) {
-        expect(e.lados[lado].apoiado, `t=${t.toFixed(2)}`).toBe(true);
-        expect(distancia(e.lados[lado].ponta, inicio[lado].ponta), `t=${t.toFixed(2)}`).toBeLessThan(MM);
-      }
-    }
-  });
-
-  test('vai aos alvos na mesma ordem e no mesmo ritmo dos sensores: frente, direita, trás, esquerda', () => {
-    const c = centro(2);
-    expect(noMeioDoAlvo(2, 0).z).toBeGreaterThan(c.z + 0.03); // frente
-    expect(noMeioDoAlvo(2, 1).x).toBeLessThan(c.x - 0.03); // direita (−X)
-    expect(noMeioDoAlvo(2, 2).z).toBeLessThan(c.z - 0.03); // trás
-    expect(noMeioDoAlvo(2, 3).x).toBeGreaterThan(c.x + 0.03); // esquerda (+X)
-  });
-
-  test('no meio de cada alvo, a carga da animação é o alvo dos sensores', () => {
-    for (const nivel of NIVEIS) {
-      for (let k = 0; k < 4; k += 1) {
-        const t = 4 * k + 2;
-        const alvo = alvoDaTransferencia(nivel, t);
-        const { carga } = amostrar(animacao(nivel), t);
-        expect(carga.copAP, `nível ${nivel} alvo ${k}`).toBeCloseTo(alvo.ap, 6);
-        expect(carga.copML, `nível ${nivel} alvo ${k}`).toBeCloseTo(alvo.ml, 6);
-      }
-    }
-  });
-
-  test('alvos mais longe nos níveis mais altos', () => {
-    expect(centro(3).x - noMeioDoAlvo(3, 1).x).toBeGreaterThan(centro(1).x - noMeioDoAlvo(1, 1).x);
-  });
-
-  // 2° de postura + até 5° do corpo todo inclinado como pêndulo (alvo mais longe: ~4,1°).
-  test('estratégia do tornozelo: o corpo inclina inteiro, sem dobrar o quadril (tronco ≤ 7°)', () => {
-    for (const { amostra, t } of quadros(3)) {
-      expect(amostra.pose.tronco, `t=${t.toFixed(2)}`).toBeLessThanOrEqual(7);
-      expect(Math.abs(amostra.pose.inclinacaoLateral), `t=${t.toFixed(2)}`).toBeLessThanOrEqual(5);
-    }
-  });
-});
-
 /* ---- 9. Agachamento búlgaro explosivo (pesquisa 10) ---- */
 describe('agachamento búlgaro explosivo', () => {
   const animacaoDoBulgaro = (nivel: 1 | 2 | 3, bracos: 'barras' | 'uma-mao' | 'cruzados' = 'cruzados') =>
@@ -451,9 +379,5 @@ describe('agachamento búlgaro explosivo', () => {
   test('nível 1 e 2: as mãos que seguram a barra alcançam a barra o ciclo inteiro', () => {
     for (const { esqueleto, t } of quadrosDe(animacaoDoBulgaro(1, 'barras'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
     for (const { esqueleto, t } of quadrosDe(animacaoDoBulgaro(2, 'uma-mao'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
-  });
-
-  test('sem inclinação: a base fica plana', () => {
-    expect(animacaoDe('agachamento-bulgaro-explosivo', { nivel: 3 })?.inclinacaoDaBase).toBeUndefined();
   });
 });

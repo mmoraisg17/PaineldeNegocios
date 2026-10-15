@@ -3,7 +3,6 @@ import { TOLERANCIA_DA_META_EM_PONTOS, alertasDoAluno, podeVer, permissoes, revo
 import { CONTAS_DA_DEMO, SENHA_DA_DEMO, criarEstadoDemo, criarGeradorPseudoaleatorio, IDS_DEMO } from './demo';
 import { ITERACOES_DA_SENHA, buscarCredencial, conferirSenha } from './credenciais';
 import { carregarEstado, salvarEstado, type Armazenamento } from './persistencia';
-import { buscarExercicio } from './catalogo';
 import { ajusteVigente, rotinaDoPraticante } from './estado';
 import { montarRotina } from './rotina';
 import { notaDeExecucao } from './progressao';
@@ -84,13 +83,14 @@ describe('estado de demonstração: contas', () => {
     expect(porId[IDS_DEMO.carlos]).toMatchObject({ nome: 'Carlos', tipo: 'profissional', funcao: 'Personal' });
     expect(porId[IDS_DEMO.ana]).toMatchObject({ nome: 'Ana', tipo: 'profissional', funcao: 'Fisioterapeuta' });
     expect(porId[IDS_DEMO.marta]).toMatchObject({ nome: 'Marta', tipo: 'familiar', funcao: 'Filha' });
-    expect(demo.acompanhantes).toHaveLength(3);
+    expect(porId[IDS_DEMO.renata]).toMatchObject({ nome: 'Renata', tipo: 'profissional', funcao: 'Preparadora física' });
+    expect(demo.acompanhantes).toHaveLength(4);
   });
 
-  test('Carlos e Marta acompanham a Lúcia; Ana acompanha o Rafael; todos autorizados', () => {
+  test('Carlos e Marta acompanham a Lúcia; Ana, o Rafael; Renata, o Diego; todos autorizados', () => {
     const pares = demo.vinculos.map((vinculo) => `${vinculo.acompanhanteId}->${vinculo.alunoId}`).sort();
 
-    expect(pares).toEqual(['ana->rafael', 'carlos->lucia', 'marta->lucia']);
+    expect(pares).toEqual(['ana->rafael', 'carlos->lucia', 'marta->lucia', 'renata->diego']);
     expect(demo.vinculos.every(podeVer)).toBe(true);
   });
 
@@ -297,8 +297,10 @@ describe('estado de demonstração: alertas e recados', () => {
     expect(alertasDoAluno(lucia!.sessoes, semana, lucia!.ajuste?.metas)).toEqual([]);
   });
 
-  test('há 1 recado do Carlos para a Lúcia, ainda não lido', () => {
-    expect(demo.recados).toHaveLength(1);
+  test('há 2 recados, ainda não lidos: o do Carlos para a Lúcia e o da Renata para o Diego', () => {
+    expect(demo.recados).toHaveLength(2);
+    expect(demo.recados.map((recado) => `${recado.deId}->${recado.paraId}`)).toEqual(['carlos->lucia', 'renata->diego']);
+    expect(demo.recados.every((recado) => !recado.lido)).toBe(true);
     expect(demo.recados[0]).toMatchObject({
       deId: IDS_DEMO.carlos,
       paraId: IDS_DEMO.lucia,
@@ -315,7 +317,7 @@ describe('estado de demonstração: alertas e recados', () => {
   });
 });
 
-describe('estado de demonstração: vínculos, ajuste vigente e inclinação', () => {
+describe('estado de demonstração: vínculos e ajuste vigente', () => {
   test('cada vínculo tem um id único que não deriva de aluno e acompanhante', () => {
     const ids = demo.vinculos.map((vinculo) => vinculo.id);
 
@@ -338,21 +340,6 @@ describe('estado de demonstração: vínculos, ajuste vigente e inclinação', (
 
     expect(ajusteVigente(semAna, IDS_DEMO.rafael)).toBeUndefined();
     expect(rotinaDoPraticante(semAna, IDS_DEMO.rafael)?.ajustadoPor).toBeUndefined();
-  });
-
-  test('os níveis gravados e treinados nunca exigem mais inclinação do que a plataforma da pessoa tem', () => {
-    for (const dados of [lucia, rafael]) {
-      const maxima = dados?.perfil.inclinacaoMaxima ?? 0;
-      const niveis = Object.entries(dados?.niveis ?? {});
-
-      expect(niveis.length).toBeGreaterThan(0);
-      for (const [id, nivel] of niveis) {
-        expect(buscarExercicio(id)?.niveis[nivel].inclinacao).toBeLessThanOrEqual(maxima);
-      }
-      for (const exercicio of exerciciosDe(dados?.sessoes ?? [])) {
-        expect(buscarExercicio(exercicio.id)?.niveis[exercicio.nivel].inclinacao).toBeLessThanOrEqual(maxima);
-      }
-    }
   });
 });
 
@@ -393,14 +380,16 @@ describe('estado de demonstração: contas com senha', () => {
     expect(SENHA_DA_DEMO).toBe('demo1234');
   });
 
-  test('lista as 6 contas na ordem lucia, rafael, lucas, carlos, ana, marta', () => {
+  test('lista as 8 contas na ordem lucia, rafael, lucas, diego, carlos, ana, marta, renata', () => {
     expect(CONTAS_DA_DEMO).toEqual([
       { papel: 'praticante', pessoaId: 'lucia', email: 'lucia@demo.test' },
       { papel: 'praticante', pessoaId: 'rafael', email: 'rafael@demo.test' },
       { papel: 'praticante', pessoaId: 'lucas', email: 'lucas@demo.test' },
+      { papel: 'praticante', pessoaId: 'diego', email: 'diego@demo.test' },
       { papel: 'acompanhante', pessoaId: 'carlos', email: 'carlos@demo.test' },
       { papel: 'acompanhante', pessoaId: 'ana', email: 'ana@demo.test' },
       { papel: 'acompanhante', pessoaId: 'marta', email: 'marta@demo.test' },
+      { papel: 'acompanhante', pessoaId: 'renata', email: 'renata@demo.test' },
     ]);
   });
 
@@ -454,8 +443,8 @@ describe('estado de demonstração: contas com senha', () => {
   test(
     'as outras três contas também aceitam demo1234',
     async () => {
-      for (const email of ['rafael@demo.test', 'lucas@demo.test', 'carlos@demo.test', 'marta@demo.test']) {
-        const papel = email.startsWith('rafael') || email.startsWith('lucas') ? 'praticante' : 'acompanhante';
+      for (const email of ['rafael@demo.test', 'lucas@demo.test', 'diego@demo.test', 'carlos@demo.test', 'marta@demo.test', 'renata@demo.test']) {
+        const papel = ['rafael', 'lucas', 'diego'].some((nome) => email.startsWith(nome)) ? 'praticante' : 'acompanhante';
         const credencial = buscarCredencial(demo.credenciais, email, papel);
         expect(credencial && (await conferirSenha(credencial, SENHA_DA_DEMO))).toBe(true);
       }
@@ -464,9 +453,9 @@ describe('estado de demonstração: contas com senha', () => {
   );
 
   test('a rotina e o histórico das contas de demonstração seguem o mesmo sem a pergunta "o que há em casa"', () => {
-    // Lúcia fica com a trilha inteira (4 exercícios); Rafael também (4, da trilha de fisio).
-    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(4);
-    expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(4);
+    // Lúcia fica com a trilha inteira (3 exercícios); Rafael também (3, da trilha de fisio).
+    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(3);
+    expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(3);
     expect(lucia?.sessoes).toHaveLength(16);
     expect(rafael?.sessoes).toHaveLength(17);
   });
@@ -479,7 +468,7 @@ describe('conta modelo do Lucas (atleta de futevôlei, força e explosão)', () 
     expect(lucas).toMatchObject({
       id: 'lucas',
       idade: 24,
-      perfil: { nome: 'Lucas', objetivo: 'potencia', firmeza: 'firme', inclinacaoMaxima: 3 },
+      perfil: { nome: 'Lucas', objetivo: 'potencia', firmeza: 'firme' },
     });
   });
 
@@ -516,5 +505,55 @@ describe('conta modelo do Lucas (atleta de futevôlei, força e explosão)', () 
 
   test('a conta é reproduzível: a mesma data gera o mesmo histórico', () => {
     expect(criarEstadoDemo(AGORA).praticantes[IDS_DEMO.lucas]).toEqual(lucas);
+  });
+});
+
+describe('conta modelo do Diego (atleta profissional mais experiente) e da Renata (preparadora física)', () => {
+  const diego = demo.praticantes[IDS_DEMO.diego];
+
+  test('é um atleta de 30 anos com objetivo de fortalecimento e explosão', () => {
+    expect(diego).toMatchObject({
+      id: 'diego',
+      idade: 30,
+      perfil: { nome: 'Diego', objetivo: 'potencia', firmeza: 'firme' },
+    });
+  });
+
+  test('a Renata fixa o búlgaro no nível 3 e pede 4 treinos por semana', () => {
+    expect(diego?.ajuste).toMatchObject({ autor: 'Renata', autorId: IDS_DEMO.renata, frequenciaSemanal: 4 });
+    expect(diego?.ajuste?.niveisFixados).toEqual({ 'agachamento-bulgaro-explosivo': 3 });
+    const rotina = rotinaDoPraticante(demo, IDS_DEMO.diego);
+    expect(rotina?.ajustadoPor).toBe('Renata');
+    expect(rotina?.frequenciaSemanal).toBe(4);
+    expect(rotina?.itens[0]).toMatchObject({ exercicioId: 'agachamento-bulgaro-explosivo', nivel: 3, fixadoPor: 'Renata' });
+  });
+
+  test('treina 4 vezes por semana, como a Renata pediu, e não falta a nenhum: 24 de 24 sessões, todas no nível 3', () => {
+    expect(diego?.sessoes).toHaveLength(SEMANAS * 4);
+    expect(semanaDeTreino(diego?.sessoes ?? [], 4, AGORA)).toEqual({ planejadas: 4, feitas: 4 });
+    expect(exerciciosDe(diego?.sessoes ?? []).every((exercicio) => exercicio.nivel === 3)).toBe(true);
+  });
+
+  test('é mais estável e simétrico que o Lucas desde as primeiras sessões', () => {
+    const { primeiras } = primeirasEUltimas(diego?.sessoes ?? [], 3);
+    const { primeiras: doLucas } = primeirasEUltimas(demo.praticantes[IDS_DEMO.lucas]?.sessoes ?? [], 3);
+    expect(media(primeiras.map((e) => e.estabilidade))).toBeGreaterThan(media(doLucas.map((e) => e.estabilidade)));
+    expect(media(primeiras.map((e) => e.simetria))).toBeGreaterThan(media(doLucas.map((e) => e.simetria)));
+  });
+
+  test('a Renata (profissional) vê e ajusta só o Diego, com o vínculo autorizado', () => {
+    const vinculos = demo.vinculos.filter((vinculo) => vinculo.acompanhanteId === IDS_DEMO.renata);
+    expect(vinculos.map((vinculo) => vinculo.alunoId)).toEqual([IDS_DEMO.diego]);
+    expect(vinculos.every(podeVer)).toBe(true);
+    expect(permissoes(vinculos[0]?.tipo ?? 'familiar').ajustarRotina).toBe(true);
+  });
+
+  test('se o vínculo da Renata é revogado, o ajuste dela deixa de valer', () => {
+    const semRenata = {
+      ...demo,
+      vinculos: demo.vinculos.map((vinculo) => (vinculo.acompanhanteId === IDS_DEMO.renata ? revogar(vinculo, AGORA) : vinculo)),
+    };
+    expect(ajusteVigente(semRenata, IDS_DEMO.diego)).toBeUndefined();
+    expect(rotinaDoPraticante(semRenata, IDS_DEMO.diego)?.ajustadoPor).toBeUndefined();
   });
 });

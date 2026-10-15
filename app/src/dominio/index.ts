@@ -18,7 +18,6 @@ export {
 } from './perfil';
 export {
   FREQUENCIA_SEMANAL_PADRAO,
-  nivelMaximoCompativel,
   montarRotina,
   segundosDaDose,
   type AjusteProfissional,

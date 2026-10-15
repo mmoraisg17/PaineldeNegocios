@@ -1,5 +1,4 @@
 import { autorizar, criarVinculoPendente, type Vinculo } from './acompanhamento';
-import { buscarExercicio } from './catalogo';
 import { ITERACOES_DA_SENHA, type Credencial } from './credenciais';
 import {
   estadoInicial,
@@ -13,7 +12,7 @@ import { copiarProfundo } from './imutavel';
 import { limitar } from './numeros';
 import { nivelInicial, type Perfil } from './perfil';
 import { decidirNivel, notaDeExecucao } from './progressao';
-import { montarRotina, nivelMaximoCompativel, type AjusteProfissional, type ItemRotina, type NiveisAtuais } from './rotina';
+import { montarRotina, type AjusteProfissional, type ItemRotina, type NiveisAtuais } from './rotina';
 import { notaMediaDaSessao, notasRecentesDoExercicio, type ResultadoExercicio, type Sessao } from './sessao';
 import type { Percepcao } from './tipos';
 
@@ -28,6 +27,8 @@ export const IDS_DEMO = {
   ana: 'ana',
   marta: 'marta',
   lucas: 'lucas',
+  diego: 'diego',
+  renata: 'renata',
 } as const;
 
 /* Gerador pseudoaleatório "mulberry32": minúsculo, rápido e reproduzível a
@@ -50,6 +51,11 @@ const DIAS_DE_HISTORICO = SEMANAS_DE_HISTORICO * DIAS_POR_SEMANA;
 /* Segunda, quarta e sexta em relação ao início de cada semana: dias alternados
    (manual, seção 5). */
 const DIAS_DOS_TREINOS = [0, 2, 4] as const;
+/* Com 4 treinos por semana (rotina ajustada por um profissional), o 4º entra no
+   sábado e os dois primeiros ficam em dias seguidos: segunda, terça, quinta, sábado. */
+const DIAS_COM_QUATRO_TREINOS = [0, 1, 3, 5] as const;
+const diasDosTreinos = (frequenciaSemanal: number): readonly number[] =>
+  frequenciaSemanal === DIAS_COM_QUATRO_TREINOS.length ? DIAS_COM_QUATRO_TREINOS : DIAS_DOS_TREINOS;
 const NOTA_QUE_VIRA_DIFICIL = 62;
 const NOTA_QUE_VIRA_FACIL = 80;
 
@@ -64,7 +70,7 @@ type PlanoDeEvolucao = {
   apoio: Curva;
   /* Só para exercícios com meta de simetria: % do peso na perna esquerda. */
   cargaEsquerda?: Curva;
-  /* Posições (0 a 17) dos treinos planejados que a pessoa não fez. */
+  /* Posições (0 a 17, ou 0 a 23 com 4 treinos por semana) dos treinos planejados que a pessoa não fez. */
   faltas: readonly number[];
 };
 
@@ -106,18 +112,26 @@ const PLANO_DO_LUCAS: PlanoDeEvolucao = {
   faltas: [7],
 };
 
+/* Atleta profissional mais experiente: parte do alto, quase sem apoio, evolui
+   pouco em pontos e não falta a nenhum treino. */
+const PLANO_DO_DIEGO: PlanoDeEvolucao = {
+  semente: 30101527,
+  simetria: [86, 96],
+  estabilidade: [90, 97],
+  apoio: [0.02, 0],
+  faltas: [],
+};
+
 const PERFIL_DA_LUCIA: Perfil = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
   firmeza: 'as-vezes',
-  inclinacaoMaxima: 2,
 };
 
 const PERFIL_DO_RAFAEL: Perfil = {
   nome: 'Rafael',
   objetivo: 'joelho',
   firmeza: 'as-vezes',
-  inclinacaoMaxima: 3,
 };
 
 /* Jogador de futevôlei de 24 anos: quer força e explosão nas pernas. */
@@ -125,7 +139,22 @@ const PERFIL_DO_LUCAS: Perfil = {
   nome: 'Lucas',
   objetivo: 'potencia',
   firmeza: 'firme',
-  inclinacaoMaxima: 3,
+};
+
+/* Jogador profissional de vôlei de praia de 30 anos, acompanhado pela preparadora
+   física: mesma meta de potência do Lucas, com mais treinos por semana. */
+const PERFIL_DO_DIEGO: Perfil = {
+  nome: 'Diego',
+  objetivo: 'potencia',
+  firmeza: 'firme',
+};
+
+/* A preparadora física fixa o búlgaro no nível 3 e pede 4 treinos por semana. */
+const AJUSTE_DA_RENATA: AjusteProfissional = {
+  autor: 'Renata',
+  autorId: IDS_DEMO.renata,
+  niveisFixados: { 'agachamento-bulgaro-explosivo': 3 },
+  frequenciaSemanal: 4,
 };
 
 /* A fisioterapeuta fixa o miniagachamento no nível 2 e quer 50/50. */
@@ -141,6 +170,7 @@ const ACOMPANHANTES: Acompanhante[] = [
   { id: IDS_DEMO.carlos, nome: 'Carlos', tipo: 'profissional', funcao: 'Personal' },
   { id: IDS_DEMO.ana, nome: 'Ana', tipo: 'profissional', funcao: 'Fisioterapeuta' },
   { id: IDS_DEMO.marta, nome: 'Marta', tipo: 'familiar', funcao: 'Filha' },
+  { id: IDS_DEMO.renata, nome: 'Renata', tipo: 'profissional', funcao: 'Preparadora física' },
 ];
 
 const naCurva = (curva: Curva, progresso: number): number => curva[0] + (curva[1] - curva[0]) * progresso;
@@ -195,24 +225,21 @@ function reavaliarNiveis(
   itens: readonly ItemRotina[],
   historico: readonly Sessao[],
   percepcao: Percepcao,
-  perfil: Perfil,
 ): NiveisAtuais {
   return itens.reduce<NiveisAtuais>((atuais, item) => {
-    const exercicio = buscarExercicio(item.exercicioId);
     const decisao = decidirNivel({
       nivelAtual: item.nivel,
       notasRecentes: notasRecentesDoExercicio(historico, item.exercicioId, item.nivel),
       percepcao,
       fixado: item.fixadoPor !== undefined,
-      ...(exercicio ? { nivelMaximo: nivelMaximoCompativel(exercicio, perfil.inclinacaoMaxima) } : {}),
     });
     return { ...atuais, [item.exercicioId]: decisao.nivel };
   }, niveis);
 }
 
-function dataDoTreino(agora: Date, posicao: number): string {
-  const semana = Math.floor(posicao / DIAS_DOS_TREINOS.length);
-  const diaDaSemana = DIAS_DOS_TREINOS[posicao % DIAS_DOS_TREINOS.length] ?? 0;
+function dataDoTreino(agora: Date, posicao: number, dias: readonly number[]): string {
+  const semana = Math.floor(posicao / dias.length);
+  const diaDaSemana = dias[posicao % dias.length] ?? 0;
   const diasAtras = DIAS_DE_HISTORICO - 1 - (semana * DIAS_POR_SEMANA + diaDaSemana);
   return new Date(agora.getTime() - diasAtras * MS_POR_DIA).toISOString();
 }
@@ -227,7 +254,8 @@ function simularHistorico(
   agora: Date,
 ): Historico {
   const aleatorio = criarGeradorPseudoaleatorio(plano.semente);
-  const planejados = SEMANAS_DE_HISTORICO * DIAS_DOS_TREINOS.length;
+  const dias = diasDosTreinos(ajuste?.frequenciaSemanal ?? DIAS_DOS_TREINOS.length);
+  const planejados = SEMANAS_DE_HISTORICO * dias.length;
   let historico: Historico = { sessoes: [], niveis: niveisIniciais };
 
   for (let posicao = 0; posicao < planejados; posicao += 1) {
@@ -236,11 +264,11 @@ function simularHistorico(
     const exercicios = itens.map((item, indice) =>
       medirExercicio(plano, posicao / (planejados - 1), aleatorio, indice, item),
     );
-    const sessaoSemPercepcao = { data: dataDoTreino(agora, posicao), exercicios, percepcao: 'ok' as Percepcao };
+    const sessaoSemPercepcao = { data: dataDoTreino(agora, posicao, dias), exercicios, percepcao: 'ok' as Percepcao };
     const percepcao = percepcaoDaNota(notaMediaDaSessao(sessaoSemPercepcao));
     const sessao: Sessao = { ...sessaoSemPercepcao, percepcao };
     const sessoes = [...historico.sessoes, sessao];
-    historico = { sessoes, niveis: reavaliarNiveis(historico.niveis, itens, sessoes, percepcao, perfil) };
+    historico = { sessoes, niveis: reavaliarNiveis(historico.niveis, itens, sessoes, percepcao) };
   }
   return historico;
 }
@@ -279,6 +307,7 @@ function criarVinculosAutorizados(agora: Date): Vinculo[] {
     [IDS_DEMO.lucia, IDS_DEMO.carlos, 'profissional'],
     [IDS_DEMO.lucia, IDS_DEMO.marta, 'familiar'],
     [IDS_DEMO.rafael, IDS_DEMO.ana, 'profissional'],
+    [IDS_DEMO.diego, IDS_DEMO.renata, 'profissional'],
   ] as const;
   /* Ids fixos (e não aleatórios) para a demo ser reproduzível. */
   return pares.map(([alunoId, acompanhanteId, tipo], posicao) =>
@@ -286,18 +315,22 @@ function criarVinculosAutorizados(agora: Date): Vinculo[] {
   );
 }
 
-function criarRecadoDoCarlos(agora: Date): Recado {
-  return {
-    id: 'recado-demo-1',
-    deId: IDS_DEMO.carlos,
-    paraId: IDS_DEMO.lucia,
-    texto: 'Muito bem nesta semana, Dona Lúcia!',
-    enviadoEm: new Date(agora.getTime() - MS_POR_DIA).toISOString(),
-    lido: false,
-  };
+function criarRecados(agora: Date): Recado[] {
+  const ha = (dias: number) => new Date(agora.getTime() - dias * MS_POR_DIA).toISOString();
+  return [
+    { id: 'recado-demo-1', deId: IDS_DEMO.carlos, paraId: IDS_DEMO.lucia, texto: 'Muito bem nesta semana, Dona Lúcia!', enviadoEm: ha(1), lido: false },
+    {
+      id: 'recado-demo-2',
+      deId: IDS_DEMO.renata,
+      paraId: IDS_DEMO.diego,
+      texto: 'A subida está mais rápida a cada semana, Diego. Mantenha a descida em 3 segundos.',
+      enviadoEm: ha(2),
+      lido: false,
+    },
+  ];
 }
 
-/* SENHA PÚBLICA: é a mesma das 6 contas e aparece impressa na tela de login,
+/* SENHA PÚBLICA: é a mesma das 8 contas e aparece impressa na tela de login,
    para o avaliador entrar sem cadastro. Não é um segredo e nunca deve ser a
    senha de uma conta de verdade. */
 export const SENHA_DA_DEMO = 'demo1234';
@@ -306,14 +339,16 @@ export const CONTAS_DA_DEMO: readonly { papel: PapelDaConta; pessoaId: string; e
   { papel: 'praticante', pessoaId: IDS_DEMO.lucia, email: 'lucia@demo.test' },
   { papel: 'praticante', pessoaId: IDS_DEMO.rafael, email: 'rafael@demo.test' },
   { papel: 'praticante', pessoaId: IDS_DEMO.lucas, email: 'lucas@demo.test' },
+  { papel: 'praticante', pessoaId: IDS_DEMO.diego, email: 'diego@demo.test' },
   { papel: 'acompanhante', pessoaId: IDS_DEMO.carlos, email: 'carlos@demo.test' },
   { papel: 'acompanhante', pessoaId: IDS_DEMO.ana, email: 'ana@demo.test' },
   { papel: 'acompanhante', pessoaId: IDS_DEMO.marta, email: 'marta@demo.test' },
+  { papel: 'acompanhante', pessoaId: IDS_DEMO.renata, email: 'renata@demo.test' },
 ];
 
 /* Sal e hash de SENHA_DA_DEMO por conta, calculados UMA vez (PBKDF2-HMAC-SHA-256,
    ITERACOES_DA_SENHA iterações, 256 bits) e gravados aqui. Assim `criarEstadoDemo`
-   continua síncrono e determinístico (derivar 6 hashes custaria ~2 s a cada
+   continua síncrono e determinístico (derivar 8 hashes custaria ~2 s a cada
    chamada). O sal é fixo e legível de propósito: a senha é pública. Se
    ITERACOES_DA_SENHA mudar, estes hashes precisam ser recalculados (o teste
    "a senha demo1234 abre ..." acusa). */
@@ -329,6 +364,14 @@ const SAL_E_HASH_DA_DEMO: Record<string, { sal: string; hash: string }> = {
   [IDS_DEMO.lucas]: {
     sal: '64656d6f2d6c756361735f5f5f5f5f5f',
     hash: '647509c26c81933270e7435318d821adc648e1f70bc3281d1ab63835262180d5',
+  },
+  [IDS_DEMO.diego]: {
+    sal: '64656d6f2d646965676f5f5f5f5f5f5f',
+    hash: 'a7434c87603fcbb24747b911a9c0dd70a453069d212f82436599d6b0b7916d2e',
+  },
+  [IDS_DEMO.renata]: {
+    sal: '64656d6f2d72656e6174615f5f5f5f5f',
+    hash: 'd3af6ac708556162b9d43f4100310a793fa5c120302bd40bd09080ecfa2bb3ba',
   },
   [IDS_DEMO.carlos]: {
     sal: '64656d6f2d6361726c6f735f5f5f5f5f',
@@ -364,12 +407,15 @@ export function criarEstadoDemo(agora: Date): EstadoApp {
   const lucas = criarPraticante(
     IDS_DEMO.lucas, 24, PERFIL_DO_LUCAS, { oscilacao: 0.12, apoioNasBarras: 0.02 }, PLANO_DO_LUCAS, agora,
   );
+  const diego = criarPraticante(
+    IDS_DEMO.diego, 30, PERFIL_DO_DIEGO, { oscilacao: 0.08, apoioNasBarras: 0.01 }, PLANO_DO_DIEGO, agora, AJUSTE_DA_RENATA,
+  );
   return {
     ...estadoInicial(),
-    praticantes: { [IDS_DEMO.lucia]: lucia, [IDS_DEMO.rafael]: rafael, [IDS_DEMO.lucas]: lucas },
+    praticantes: { [IDS_DEMO.lucia]: lucia, [IDS_DEMO.rafael]: rafael, [IDS_DEMO.lucas]: lucas, [IDS_DEMO.diego]: diego },
     acompanhantes: copiarProfundo(ACOMPANHANTES),
     vinculos: criarVinculosAutorizados(agora),
-    recados: [criarRecadoDoCarlos(agora)],
+    recados: criarRecados(agora),
     credenciais: criarCredenciaisDaDemo(agora),
   };
 }

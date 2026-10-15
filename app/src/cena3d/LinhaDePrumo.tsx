@@ -53,13 +53,12 @@ export function atualizarPrumo(
   if (!linha || !ponta || !alvo) return;
   const { pelve } = esqueleto;
   const meio = meioDosPes(esqueleto);
-  const chao = alturaDaSuperficie(pelve.x, pelve.z, esqueleto.inclinacaoDaBase) + 0.005;
+  const chao = alturaDaSuperficie(pelve.x) + 0.005;
   const altura = Math.max(pelve.y - chao, 0.01);
   linha.position.set(pelve.x, chao + altura / 2, pelve.z);
   linha.scale.set(1, altura, 1);
   ponta.position.set(pelve.x, chao, pelve.z);
   alvo.position.set(meio.x, meio.y + 0.005, meio.z);
-  alvo.rotation.x = -Math.PI / 2 - (esqueleto.inclinacaoDaBase * Math.PI) / 180;
 
   const { alinhado } = alinhamentoLateral(esqueleto, modo);
   // Fora do meio sem o app ter acusado ainda: âmbar (atenção).

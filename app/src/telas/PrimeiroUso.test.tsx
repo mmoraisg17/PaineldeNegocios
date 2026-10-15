@@ -149,7 +149,7 @@ test('fluxo completo: cria o praticante com o id da conta, o nome digitado e o n
   const { estado } = lerApp();
   const criado = estado.praticantes[ID_NOVO];
   expect(criado).toBeDefined();
-  expect(criado?.perfil).toEqual({ nome: 'Dona Maria', objetivo: 'equilibrio', firmeza: 'firme', inclinacaoMaxima: 3 });
+  expect(criado?.perfil).toEqual({ nome: 'Dona Maria', objetivo: 'equilibrio', firmeza: 'firme' });
   expect(Object.values(criado?.niveis ?? {}).every((nivel) => nivel === 1)).toBe(true);
   expect(estado.contaAtual).toEqual({ papel: 'praticante', id: ID_NOVO, manterConectado: false });
 });

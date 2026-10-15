@@ -71,14 +71,13 @@ export function atualizarAneis(
     const raio = carga ? raioDoAnel(carga[lado]) : 0;
     // Só sob pé apoiado na base: no ar ou no chão (degrau), os sensores não medem.
     const visivel = carga !== null && pe.apoiado;
-    const y = alturaDaSuperficie(x, z, esqueleto.inclinacaoDaBase) + FOLGA;
-    const inclinacao = (esqueleto.inclinacaoDaBase * Math.PI) / 180;
+    const y = alturaDaSuperficie(x) + FOLGA;
     [malhas[i * 2], malhas[i * 2 + 1]].forEach((malha, k) => {
       if (!malha) return;
       malha.visible = visivel;
       if (!visivel || !carga) return;
       malha.position.set(x, y - k * 0.001, z);
-      malha.rotation.x = -Math.PI / 2 - inclinacao;
+      malha.rotation.x = -Math.PI / 2;
       const atual = malha.scale.x;
       const novo = atual + (raio - atual) * fator;
       malha.scale.set(novo, novo, 1);

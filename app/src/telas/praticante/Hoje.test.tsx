@@ -38,13 +38,15 @@ test('mostra o recado do acompanhante com o autor e o texto', () => {
 
 test('ao exibir os recados, marca todos como lidos', () => {
   // Arrange
-  expect(estadoDeTeste().recados.every((r) => !r.lido)).toBe(true);
+  const daLucia = (r: { paraId: string }) => r.paraId === 'lucia';
+  expect(estadoDeTeste().recados.filter(daLucia).every((r) => !r.lido)).toBe(true);
 
   // Act
   abrirTela('/praticante/hoje');
 
-  // Assert
-  expect(lerApp().estado.recados.every((r) => r.lido)).toBe(true);
+  // Assert: os recados dela são lidos; o do Diego, que não abriu o app, continua novo.
+  expect(lerApp().estado.recados.filter(daLucia).every((r) => r.lido)).toBe(true);
+  expect(lerApp().estado.recados.filter((r) => !daLucia(r)).every((r) => !r.lido)).toBe(true);
 });
 
 test('o recado novo continua marcado como "Novo" durante esta visita', () => {

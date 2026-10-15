@@ -18,10 +18,6 @@ export type EntradaDaDecisao = {
   percepcao: Percepcao;
   /* Verdadeiro quando o profissional fixou o nível deste exercício. */
   fixado: boolean;
-  /* Maior nível que a plataforma da pessoa consegue executar (ver
-     `nivelMaximoCompativel`: depende da inclinação máxima do seletor). Sem
-     isso, o app proporia um nível que a rotina depois recusaria. */
-  nivelMaximo?: Nivel;
 };
 
 export type DecisaoDeNivel = {
@@ -64,15 +60,9 @@ function manter(nivel: Nivel, motivo: string): DecisaoDeNivel {
   return { nivel, mudanca: 'mantem', motivo };
 }
 
-function subir(nivelAtual: Nivel, nivelMaximo: Nivel): DecisaoDeNivel {
+function subir(nivelAtual: Nivel): DecisaoDeNivel {
   if (nivelAtual >= NIVEL_MAXIMO) {
     return manter(nivelAtual, 'Você já está no nível máximo (3) deste exercício. Continue assim.');
-  }
-  if (nivelAtual >= nivelMaximo) {
-    return manter(
-      nivelAtual,
-      'O próximo nível pede mais inclinação do que a sua plataforma oferece. Você já está no nível mais alto possível nela.',
-    );
   }
   const nivel = (nivelAtual + 1) as Nivel;
   return {
@@ -102,7 +92,7 @@ function descer(nivelAtual: Nivel): DecisaoDeNivel {
    4. Nota >= 80 nas 2 últimas E percepção fácil/ok: sobe.
    5. Qualquer outro caso (inclusive "difícil" com notas altas): mantém. */
 export function decidirNivel(entrada: EntradaDaDecisao): DecisaoDeNivel {
-  const { nivelAtual, notasRecentes, percepcao, fixado, nivelMaximo = NIVEL_MAXIMO } = entrada;
+  const { nivelAtual, notasRecentes, percepcao, fixado } = entrada;
   if (fixado) {
     return manter(nivelAtual, 'O profissional fixou o nível deste exercício, então o app não o altera sozinho.');
   }
@@ -113,7 +103,7 @@ export function decidirNivel(entrada: EntradaDaDecisao): DecisaoDeNivel {
   const ultimas = notasRecentes.slice(-SESSOES_CONSIDERADAS);
   if (ultimas.every((nota) => nota < NOTA_ABAIXO_DA_QUAL_DESCE)) return descer(nivelAtual);
   if (ultimas.every((nota) => nota >= NOTA_PARA_SUBIR) && percepcao !== 'dificil') {
-    return subir(nivelAtual, nivelMaximo);
+    return subir(nivelAtual);
   }
   return manter(nivelAtual, 'Suas últimas notas pedem mais prática neste nível.');
 }

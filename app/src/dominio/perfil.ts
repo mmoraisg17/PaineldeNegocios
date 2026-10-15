@@ -1,5 +1,5 @@
 import { limitar } from './numeros';
-import type { Inclinacao, Nivel, Trilha } from './tipos';
+import type { Nivel, Trilha } from './tipos';
 
 /* 'potencia' é "Fortalecimento e explosão": atleta jovem saudável que treina força
    e potência de pernas (a conta modelo do Lucas, jogador de futevôlei). */
@@ -12,8 +12,6 @@ export type Perfil = {
   nome: string;
   objetivo: Objetivo;
   firmeza: Firmeza;
-  /* Até que nível o seletor da plataforma da pessoa chega (manual, 13.1). */
-  inclinacaoMaxima: Inclinacao;
 };
 
 /* O que a avaliação de 10 segundos mede (manual, seção 4.3, passo 4). */

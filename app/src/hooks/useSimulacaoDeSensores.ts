@@ -64,7 +64,7 @@ export function useSimulacaoDeSensores(opcoes: Opcoes): SimulacaoDeSensores {
     const passo = () => {
       const o = ref.current;
       const parede = (performance.now() - inicio) / 1000;
-      const esperado = esperadoAgora(o, parede);
+      const esperado = esperadoAgora(o);
       const desvios = desviosSimulaveis(o.exercicio).map((d) => d.desvio);
       const desvio = o.desvioForcado ?? (o.automatico ? desvioDoModoAutomatico(desvios, parede) : null);
       if (desvio !== desvioAnterior) {
@@ -91,9 +91,9 @@ export function useSimulacaoDeSensores(opcoes: Opcoes): SimulacaoDeSensores {
   return estado;
 }
 
-function esperadoAgora(o: Opcoes, parede: number): Esperado {
+function esperadoAgora(o: Opcoes): Esperado {
   const carga = o.animacao ? amostrar(o.animacao, o.relogio.current.tempo).carga : cargaSemAnimacao(o.exercicio, o.nivel);
-  return esperadoDoExercicio(o.exercicio, o.nivel, carga, parede, o.cargaEsquerdaMeta);
+  return esperadoDoExercicio(o.exercicio, carga, o.cargaEsquerdaMeta);
 }
 
 /* Sem animação, a "pessoa" está parada no exercício; quem não usa as mãos
@@ -115,7 +115,7 @@ function medias(s: Omit<MediasDaExecucao, never>): MediasDaExecucao {
 }
 
 function calcularInicial(o: Opcoes): SimulacaoDeSensores {
-  const esperado = esperadoAgora(o, 0);
+  const esperado = esperadoAgora(o);
   const leitura = simularLeitura(esperado, null, 0);
   return { leitura, esperado, avaliacao: avaliar(o.exercicio, leitura, esperado), desvioAtivo: null, medias: { simetria: 0, estabilidade: 0, apoioNasBarras: 0, cargaEsquerda: 50, amostras: 0 } };
 }

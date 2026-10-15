@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { CATALOGO, type Exercicio, type Nivel } from '../dominio';
 import { amostrar, duracao } from '../movimento/animacao';
 import { animacaoDe } from '../movimento/animacoes';
-import { alvoDaTransferencia, esperadoDoExercicio } from './esperado';
+import { esperadoDoExercicio } from './esperado';
 import { ESPERA_PROBLEMA, atualizarFeedback, desvioDoModoAutomatico, iniciarFeedback } from './feedback';
 import { avaliar, desviosSimulaveis, detectar, metricas } from './regras';
 import { CARGA_EM_PE, simularLeitura } from './simulador';
@@ -11,15 +11,17 @@ import type { Desvio, Leitura } from './tipos';
 const PASSO = 0.1; // a tela amostra os sensores a 10 Hz
 
 /* Roda a simulação como a tela roda: leitura a cada 0,1 s, avaliação e
-   filtro de feedback. Devolve o que apareceu na tela a cada instante. */
+   filtro de feedback. Devolve o que apareceu na tela a cada instante. O
+   nível muda a animação (profundidade, ritmo, um pé ou dois) e, com ela, a
+   carga esperada. */
 function simular(exercicio: Exercicio, nivel: Nivel, segundos: number, desvio: (t: number) => Desvio | null) {
-  const animacao = animacaoDe(exercicio.id);
+  const animacao = animacaoDe(exercicio.id, { nivel });
   let anterior: Leitura | undefined;
   let feedback;
   const exibidos: { t: number; id: string | null; estado: string }[] = [];
   for (let t = 0; t <= segundos + 1e-9; t += PASSO) {
     const carga = animacao ? amostrar(animacao, t).carga : CARGA_EM_PE;
-    const esperado = esperadoDoExercicio(exercicio, nivel, carga, t);
+    const esperado = esperadoDoExercicio(exercicio, carga);
     const leitura = simularLeitura(esperado, desvio(t), t, anterior);
     anterior = leitura;
     const avaliacao = avaliar(exercicio, leitura, esperado);
@@ -31,7 +33,7 @@ function simular(exercicio: Exercicio, nivel: Nivel, segundos: number, desvio: (
 
 describe.each(CATALOGO.map((e) => [e.id, e] as const))('%s', (_id, exercicio) => {
   test.each([1, 2, 3] as const)('execução certa no nível %i nunca mostra aviso de problema', (nivel) => {
-    const segundos = Math.max(12, duracao(animacaoDe(exercicio.id) ?? { id: '', quadros: [] }) * 2);
+    const segundos = Math.max(12, duracao(animacaoDe(exercicio.id, { nivel }) ?? { id: '', quadros: [] }) * 2);
     const problemas = simular(exercicio, nivel, segundos, () => null).filter((x) => x.estado === 'atencao' || x.estado === 'pare');
     expect(problemas).toEqual([]);
   });
@@ -50,10 +52,10 @@ describe.each(CATALOGO.map((e) => [e.id, e] as const))('%s', (_id, exercicio) =>
 
 describe('regras', () => {
   const exercicio = CATALOGO.find((e) => e.id === 'miniagachamento-simetrico')!;
-  const esperado = esperadoDoExercicio(exercicio, 1, CARGA_EM_PE, 0);
+  const esperado = esperadoDoExercicio(exercicio, CARGA_EM_PE);
 
   test('respeita a meta de simetria definida pelo profissional', () => {
-    const comMeta = esperadoDoExercicio(exercicio, 1, CARGA_EM_PE, 0, 0.6);
+    const comMeta = esperadoDoExercicio(exercicio, CARGA_EM_PE, 0.6);
     const leitura = simularLeitura(comMeta, null, 0);
     // Simétrica (50/50) é desvio quando a meta é 60/40…
     expect(detectar('assimetria', { ...leitura, cargaEsquerda: 0.5 }, comMeta)).toBe(false);
@@ -76,7 +78,7 @@ describe('regras', () => {
 
   test('elogia quem está firme sem apoio no tandem', () => {
     const tandem = CATALOGO.find((e) => e.id === 'pes-em-linha')!;
-    const esp = esperadoDoExercicio(tandem, 3, { ...CARGA_EM_PE, maos: 0 }, 0);
+    const esp = esperadoDoExercicio(tandem, { ...CARGA_EM_PE, maos: 0 });
     const leitura = simularLeitura(esp, 'firme-sem-apoio', 0);
     expect(avaliar(tandem, leitura, esp)).toMatchObject({ estado: 'dica', correcao: { id: 'pronto-para-soltar' } });
   });
@@ -113,7 +115,7 @@ describe('feedback', () => {
   });
 });
 
-describe('modo automático e alvos', () => {
+describe('modo automático', () => {
   test('alterna execução certa e os dois primeiros erros num ciclo de 24 s', () => {
     const desvios: Desvio[] = ['assimetria', 'apoio-excessivo'];
     expect(desvioDoModoAutomatico(desvios, 2)).toBeNull();
@@ -122,13 +124,5 @@ describe('modo automático e alvos', () => {
     expect(desvioDoModoAutomatico(desvios, 19)).toBe('apoio-excessivo');
     expect(desvioDoModoAutomatico(desvios, 24 + 9)).toBe('assimetria');
     expect(desvioDoModoAutomatico([], 9)).toBeNull();
-  });
-
-  test('o alvo da transferência de peso percorre frente, direita, trás e esquerda', () => {
-    expect(alvoDaTransferencia(2, 0)).toEqual({ ap: 0.5, ml: 0 });
-    expect(alvoDaTransferencia(2, 4)).toEqual({ ap: 0, ml: -0.5 });
-    expect(alvoDaTransferencia(2, 8)).toEqual({ ap: -0.5, ml: 0 });
-    expect(alvoDaTransferencia(2, 12)).toEqual({ ap: 0, ml: 0.5 });
-    expect(alvoDaTransferencia(1, 0).ap).toBeLessThan(alvoDaTransferencia(3, 0).ap);
   });
 });

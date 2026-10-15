@@ -28,8 +28,6 @@ type Perturbacao = Partial<{
   amplitude: number;
   oscilacao: number;
   variacao: number;
-  inclinacao: number;
-  distanciaDoAlvo: number;
 }>;
 
 /* Como cada desvio aparece nos sensores. Valores bem acima dos limiares de
@@ -43,9 +41,6 @@ const PERTURBACAO: Readonly<Record<Desvio, Perturbacao>> = {
   oscilacao: { amplitude: 5, oscilacao: 0.22 },
   'perda-de-equilibrio': { amplitude: 9, oscilacao: 0.45, maos: 0.3, pes: -0.3 },
   brusco: { variacao: 2 },
-  'fora-do-alvo': { distanciaDoAlvo: 0.6 },
-  'fora-da-base': { copML: 0.98 },
-  'inclinacao-diferente': { inclinacao: 1 },
   'firme-sem-apoio': { oscilacao: -0.03 },
 };
 
@@ -59,7 +54,6 @@ export function simularLeitura(esperado: Esperado, desvio: Desvio | null, tempo:
   const pes = Math.max(0, esperado.pes + (p.pes ?? 0));
   const dt = anterior ? tempo - anterior.tempo : 0;
   const variacao = dt > 0 && anterior ? (pes - anterior.pes) / dt : 0;
-  const alvo = esperado.alvo;
 
   return {
     tempo,
@@ -70,8 +64,6 @@ export function simularLeitura(esperado: Esperado, desvio: Desvio | null, tempo:
     cargaEsquerda: (1 + copML) / 2,
     oscilacao: Math.max(0, OSCILACAO_NATURAL + (p.oscilacao ?? 0)),
     variacaoPorSegundo: variacao + (p.variacao ?? 0),
-    inclinacao: esperado.inclinacao + (p.inclinacao ?? 0),
-    distanciaDoAlvo: alvo ? Math.min(1, Math.hypot(copAP - alvo.ap, copML - alvo.ml) + (p.distanciaDoAlvo ?? 0)) : 0,
   };
 }
 
