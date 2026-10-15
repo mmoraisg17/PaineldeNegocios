@@ -4,8 +4,8 @@ import type { Pose } from './corpo';
 /* Como cada desvio aparece no corpo do boneco, para o avaliador VER o que o
    mapa de pressão está acusando. São deslocamentos pequenos sobre a pose
    certa (o quadril continua alcançável e os pés plantados; há teste para
-   isso). Desvios que não têm leitura visual clara (movimento rápido, alvo,
-   inclinação da base) não mexem no corpo. */
+   isso). Desvios que não têm leitura visual clara (movimento rápido) não
+   mexem no corpo. */
 
 export type RegiaoDoCorpo = 'pernas' | 'tronco' | 'bracos';
 

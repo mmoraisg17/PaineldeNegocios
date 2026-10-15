@@ -110,7 +110,7 @@ function VisualizadorExercicio({
           <directionalLight position={[-3, 3, -4]} intensity={2.6} />
           <directionalLight position={[3, 2.5, -4]} intensity={1.8} color="#bfe9ff" />
           <Chao cores={cores} />
-          <Plataforma cores={cores} inclinacao={animacao.inclinacaoDaBase ?? 0} />
+          <Plataforma cores={cores} />
           {animacao.cadeira && <Banquinho cadeira={animacao.cadeira} cores={cores} />}
           <Boneco animacao={animacao} cores={cores} relogio={relogio} aoAmostrar={aoAmostrar} />
           <Orbita alvo={alvoDaCamera} relogio={relogio} />

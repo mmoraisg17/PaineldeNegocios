@@ -6,7 +6,7 @@ import { alinhamentoLateral } from '../alinhamento';
 import { flexaoDoJoelho } from '../musculos';
 import { distancia } from '../vetor';
 import { quadrilParaFlexao } from './comum';
-import { animacaoDe, exerciciosAnimados } from './index';
+import { animacaoDe, exerciciosAnimados, type OpcoesDaAnimacao } from './index';
 import { PE_DA_FRENTE_DZ, temposDoBulgaro } from './agachamentoBulgaroExplosivo';
 import { CADEIRA_SENTAR } from './sentarELevantar';
 
@@ -72,6 +72,25 @@ describe.each(variacoes)('$id, nível $nivel: fatos gerais', ({ animacao }) => {
 
   test('declara os músculos que trabalha', () => {
     expect(animacao.musculos?.length ?? 0).toBeGreaterThan(0);
+  });
+});
+
+/* Regressão: a inclinação da plataforma foi descartada. Mesmo quem ainda
+   passar a opção antiga (de um link ou código velho) recebe a base plana: a
+   animação não carrega inclinação e o pé apoiado pisa na altura do topo. */
+describe.each(exerciciosAnimados())('%s: base plana', (id) => {
+  test.each(NIVEIS)('nível %i: nenhuma inclinação na animação nem no esqueleto', (nivel) => {
+    const opcoesAntigas = { nivel, inclinacao: 2 } as Partial<OpcoesDaAnimacao>;
+    const animacao = animacaoDe(id, opcoesAntigas)!;
+
+    expect(animacao).not.toHaveProperty('inclinacaoDaBase');
+    for (const { amostra, esqueleto: e, t } of quadrosDe(animacao)) {
+      expect(amostra.pose, `t=${t.toFixed(2)}`).not.toHaveProperty('inclinacaoDaBase');
+      expect(e).not.toHaveProperty('inclinacaoDaBase');
+      for (const l of [e.lados.esquerdo, e.lados.direito].filter((p) => p.apoiado && p.calcanhar.y > TOPO_BASE / 2)) {
+        expect(l.ponta.y - l.calcanhar.y, `pé reto na tampa t=${t.toFixed(2)}`).toBeLessThan(0.03);
+      }
+    }
   });
 });
 
