@@ -77,6 +77,18 @@ describe('mediasRecentes', () => {
     expect(medias?.apoio).toBeCloseTo((0.2 + 0.2 + 0.1 + 0.3) / 4);
   });
 
+  test('treino sem exercício medido (dado antigo saneado) não vira nota zero', () => {
+    // Arrange: o treino mais recente perdeu todos os exercícios na sanitização
+    const sessoes = [sessao('2026-10-01T12:00:00Z', [80]), sessao('2026-10-03T12:00:00Z', [])];
+
+    // Act
+    const medias = mediasRecentes(sessoes, 2);
+
+    // Assert
+    expect(medias?.nota).toBe(80);
+    expect(mediasRecentes([sessao('2026-10-03T12:00:00Z', [])])).toBeUndefined();
+  });
+
   test('por padrão usa os últimos treinos do resumo', () => {
     expect(TREINOS_NO_RESUMO).toBeGreaterThanOrEqual(2);
     const sessoes = Array.from({ length: TREINOS_NO_RESUMO + 2 }, (_, i) => sessao(`2026-10-0${i + 1}T12:00:00Z`, [i < 2 ? 0 : 100]));

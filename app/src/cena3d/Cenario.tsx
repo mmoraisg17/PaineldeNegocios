@@ -2,36 +2,15 @@ import type { Cadeira as CadeiraDaAnimacao } from '../movimento/animacao';
 import { PLATAFORMA } from '../movimento/cenario';
 import type { CoresDaCena } from './cores';
 
-/* Tampa inclinável (fase 6): gira na borda de trás, frente para cima, como o
-   seletor da plataforma. As barras ficam na base e continuam verticais. A
-   superfície bate com alturaDaSuperficie (movimento/corpo.ts). Com a base
-   plana, é só a área dos sensores em destaque sobre o topo. */
-export function Tampa({ cores, inclinacao }: { cores: CoresDaCena; inclinacao: number }) {
+/* Tampa dos sensores: a área sensível em destaque sobre o topo plano da base.
+   A superfície bate com alturaDaSuperficie (movimento/corpo.ts). */
+export function Tampa({ cores }: { cores: CoresDaCena }) {
   const { largura, profundidade, altura, margemTampa } = PLATAFORMA;
-  const angulo = (inclinacao * Math.PI) / 180;
-  const subidaNaFrente = profundidade * Math.tan(angulo);
   return (
-    <>
-      <group position={[0, altura, -profundidade / 2]} rotation={[-angulo, 0, 0]}>
-        {inclinacao > 0 && (
-          <mesh position={[0, -0.008, profundidade / 2]}>
-            <boxGeometry args={[largura, 0.016, profundidade]} />
-            <meshStandardMaterial color={cores.base} roughness={0.6} />
-          </mesh>
-        )}
-        <mesh position={[0, 0.002, profundidade / 2]}>
-          <boxGeometry args={[largura - 2 * margemTampa, 0.004, profundidade - 2 * margemTampa]} />
-          <meshStandardMaterial color={cores.sensores} roughness={0.9} />
-        </mesh>
-      </group>
-      {/* Calço da frente: fecha o vão entre a base e a tampa levantada. */}
-      {inclinacao > 0 && (
-        <mesh position={[0, altura + subidaNaFrente / 2, profundidade / 2 - 0.01]}>
-          <boxGeometry args={[largura - 0.04, subidaNaFrente, 0.02]} />
-          <meshStandardMaterial color={cores.base} roughness={0.6} />
-        </mesh>
-      )}
-    </>
+    <mesh position={[0, altura + 0.002, 0]}>
+      <boxGeometry args={[largura - 2 * margemTampa, 0.004, profundidade - 2 * margemTampa]} />
+      <meshStandardMaterial color={cores.sensores} roughness={0.9} />
+    </mesh>
   );
 }
 
@@ -64,7 +43,7 @@ export function Barras({ cores }: { cores: CoresDaCena }) {
 
 /* Plataforma em caixas: a reserva enquanto o modelo do desenho carrega (ou se
    ele falhar). Mesmas medidas da bandeja do desenho (movimento/cenario.ts). */
-export function PlataformaSimples({ cores, inclinacao = 0 }: { cores: CoresDaCena; inclinacao?: number }) {
+export function PlataformaSimples({ cores }: { cores: CoresDaCena }) {
   const { largura, profundidade, altura } = PLATAFORMA;
   return (
     <group>
@@ -72,7 +51,7 @@ export function PlataformaSimples({ cores, inclinacao = 0 }: { cores: CoresDaCen
         <boxGeometry args={[largura, altura, profundidade]} />
         <meshStandardMaterial color={cores.base} roughness={0.6} />
       </mesh>
-      <Tampa cores={cores} inclinacao={inclinacao} />
+      <Tampa cores={cores} />
       <Barras cores={cores} />
     </group>
   );

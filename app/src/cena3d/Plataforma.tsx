@@ -11,9 +11,9 @@ import { ModeloComReserva } from './ModeloComReserva';
    a bandeja de 0,60 × 1,00 × 0,13 m com os cantos arredondados, os quatro
    pinos das laterais e as duas alças em C. O arquivo está em metros reais, com
    a origem no centro da bandeja, no chão. A tampa dos sensores e as barras
-   continuam sendo desenhadas aqui, porque a tampa gira com o seletor de
-   inclinação e as barras são o que o boneco segura. */
-function PlataformaCarregada({ cores, inclinacao }: { cores: CoresDaCena; inclinacao: number }) {
+   continuam sendo desenhadas aqui: a tampa marca a área que mede o peso e as
+   barras são o que o boneco segura. */
+function PlataformaCarregada({ cores }: { cores: CoresDaCena }) {
   const gltf = useLoader(GLTFLoader, urlDaPlataforma);
   const geometrias = useMemo(() => geometriasDoModelo(gltf.scene), [gltf]);
   const bandeja = geometrias.get('bandeja');
@@ -36,16 +36,16 @@ function PlataformaCarregada({ cores, inclinacao }: { cores: CoresDaCena; inclin
           )
         );
       })}
-      <Tampa cores={cores} inclinacao={inclinacao} />
+      <Tampa cores={cores} />
       <Barras cores={cores} />
     </group>
   );
 }
 
-export function Plataforma({ cores, inclinacao = 0 }: { cores: CoresDaCena; inclinacao?: number }) {
+export function Plataforma({ cores }: { cores: CoresDaCena }) {
   return (
-    <ModeloComReserva reserva={<PlataformaSimples cores={cores} inclinacao={inclinacao} />}>
-      <PlataformaCarregada cores={cores} inclinacao={inclinacao} />
+    <ModeloComReserva reserva={<PlataformaSimples cores={cores} />}>
+      <PlataformaCarregada cores={cores} />
     </ModeloComReserva>
   );
 }

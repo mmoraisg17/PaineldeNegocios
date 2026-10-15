@@ -59,8 +59,8 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
   const meta = itemDoTreino?.meta?.simetriaEsquerda;
   const config = exercicio.niveis[nivel];
   const animacao = useMemo(
-    () => animacaoDe(exercicio.id, { bracos: BRACOS_DO_APOIO[config.apoio], nivel, inclinacao: config.inclinacao }),
-    [exercicio.id, config.apoio, nivel, config.inclinacao],
+    () => animacaoDe(exercicio.id, { bracos: BRACOS_DO_APOIO[config.apoio], nivel }),
+    [exercicio.id, config.apoio, nivel],
   );
   const relogio = useRef(novoRelogio(prefereMenosMovimento()));
   const tituloRef = useTituloDaTela(exercicio.nome);

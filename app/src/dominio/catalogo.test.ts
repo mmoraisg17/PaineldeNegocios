@@ -4,12 +4,12 @@ import {
   buscarExercicio,
   exerciciosDaTrilha,
 } from './catalogo';
-import { IDS_DOS_EXERCICIOS, type Apoio, type Dose, type IdExercicio, type Inclinacao, type Nivel } from './tipos';
+import { IDS_DOS_EXERCICIOS, type Apoio, type Dose, type IdExercicio, type Nivel } from './tipos';
 
 const NIVEIS: Nivel[] = [1, 2, 3];
 const TAMANHO_MAXIMO_DA_MENSAGEM = 60;
 
-type EsperadoDoNivel = { dose: Dose; apoio: Apoio; inclinacao: Inclinacao };
+type EsperadoDoNivel = { dose: Dose; apoio: Apoio };
 
 const rep = (repeticoes: number, porLado = false): Dose =>
   porLado ? { tipo: 'repeticoes', repeticoes, porLado } : { tipo: 'repeticoes', repeticoes };
@@ -17,96 +17,95 @@ const seg = (segundos: number, porLado = false): Dose =>
   porLado ? { tipo: 'tempo', segundos, porLado } : { tipo: 'tempo', segundos };
 
 /* Tabela transcrita do manual, seção 7. Onde o manual cala (dose do sentar e
-   levantar e da transferência de peso, apoio de alguns níveis), o catálogo
-   escolheu um valor coerente com a regra geral "subir de nível = mais
-   repetição, menos apoio, mais inclinação". */
+   levantar, apoio de alguns níveis), o catálogo escolheu um valor coerente
+   com a regra geral "subir de nível = mais repetição, menos apoio". */
 const ESPERADO: Record<IdExercicio, Record<Nivel, EsperadoDoNivel>> = {
   'sentar-e-levantar': {
-    1: { dose: rep(8), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(10), apoio: 'uma-mao', inclinacao: 0 },
-    3: { dose: rep(12), apoio: 'sem-maos', inclinacao: 0 },
+    1: { dose: rep(8), apoio: 'duas-maos' },
+    2: { dose: rep(10), apoio: 'uma-mao' },
+    3: { dose: rep(12), apoio: 'sem-maos' },
   },
   'pes-em-linha': {
-    1: { dose: seg(10), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: seg(20), apoio: 'uma-mao', inclinacao: 0 },
-    3: { dose: seg(30), apoio: 'toque', inclinacao: 0 },
+    1: { dose: seg(10), apoio: 'duas-maos' },
+    2: { dose: seg(20), apoio: 'uma-mao' },
+    3: { dose: seg(30), apoio: 'toque' },
   },
   'abducao-com-elastico': {
-    1: { dose: rep(8, true), apoio: 'uma-mao', inclinacao: 0 },
-    2: { dose: rep(12, true), apoio: 'uma-mao', inclinacao: 0 },
-    3: { dose: rep(12, true), apoio: 'uma-mao', inclinacao: 0 },
-  },
-  'transferencia-de-peso': {
-    1: { dose: rep(8), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(10), apoio: 'uma-mao', inclinacao: 1 },
-    3: { dose: rep(12), apoio: 'uma-mao', inclinacao: 2 },
+    1: { dose: rep(8, true), apoio: 'uma-mao' },
+    2: { dose: rep(12, true), apoio: 'uma-mao' },
+    3: { dose: rep(12, true), apoio: 'uma-mao' },
   },
   'miniagachamento-simetrico': {
-    1: { dose: rep(8), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(12), apoio: 'duas-maos', inclinacao: 0 },
-    3: { dose: rep(12), apoio: 'uma-mao', inclinacao: 0 },
+    1: { dose: rep(8), apoio: 'duas-maos' },
+    2: { dose: rep(12), apoio: 'duas-maos' },
+    3: { dose: rep(12), apoio: 'uma-mao' },
   },
   'descida-de-degrau': {
-    1: { dose: rep(6, true), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(10, true), apoio: 'uma-mao', inclinacao: 0 },
-    3: { dose: rep(10, true), apoio: 'uma-mao', inclinacao: 0 },
+    1: { dose: rep(6, true), apoio: 'duas-maos' },
+    2: { dose: rep(10, true), apoio: 'uma-mao' },
+    3: { dose: rep(10, true), apoio: 'uma-mao' },
   },
   'panturrilha-unilateral': {
-    1: { dose: rep(10), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(8, true), apoio: 'duas-maos', inclinacao: 0 },
-    3: { dose: rep(12, true), apoio: 'uma-mao', inclinacao: 0 },
-  },
-  'equilibrio-com-inclinacao': {
-    1: { dose: seg(15), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: seg(20), apoio: 'uma-mao', inclinacao: 1 },
-    3: { dose: seg(30), apoio: 'toque', inclinacao: 2 },
+    1: { dose: rep(10), apoio: 'duas-maos' },
+    2: { dose: rep(8, true), apoio: 'duas-maos' },
+    3: { dose: rep(12, true), apoio: 'uma-mao' },
   },
   /* Fora do manual: entrou com a trilha Força e explosão (pesquisa 10, plano
-     de potência do Lucas). Sem salto e sem inclinação, para poupar a plataforma. */
+     de potência do Lucas). Sem salto, para poupar a plataforma. */
   'agachamento-bulgaro-explosivo': {
-    1: { dose: rep(4, true), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(5, true), apoio: 'uma-mao', inclinacao: 0 },
-    3: { dose: rep(6, true), apoio: 'sem-maos', inclinacao: 0 },
+    1: { dose: rep(4, true), apoio: 'duas-maos' },
+    2: { dose: rep(5, true), apoio: 'uma-mao' },
+    3: { dose: rep(6, true), apoio: 'sem-maos' },
   },
 };
 
 describe('catálogo: composição', () => {
-  test('tem os 8 exercícios do manual, na ordem do manual, e depois os da trilha Força e explosão', () => {
+  test('tem os 6 exercícios do manual, na ordem do manual, e depois os da trilha Força e explosão', () => {
     expect(CATALOGO.map((exercicio) => exercicio.id)).toEqual([...IDS_DOS_EXERCICIOS]);
+    expect(CATALOGO).toHaveLength(7);
   });
 
   test('não repete ids', () => {
     expect(new Set(CATALOGO.map((exercicio) => exercicio.id)).size).toBe(CATALOGO.length);
   });
 
-  test('as trilhas do manual têm 4 exercícios; a de Força e explosão começa com o búlgaro explosivo', () => {
-    expect(exerciciosDaTrilha('equilibrio60')).toHaveLength(4);
-    expect(exerciciosDaTrilha('fisio')).toHaveLength(4);
+  test('as trilhas do manual têm 3 exercícios; a de Força e explosão começa com o búlgaro explosivo', () => {
+    expect(exerciciosDaTrilha('equilibrio60')).toHaveLength(3);
+    expect(exerciciosDaTrilha('fisio')).toHaveLength(3);
     expect(exerciciosDaTrilha('desempenho').map((exercicio) => exercicio.id)).toEqual(['agachamento-bulgaro-explosivo']);
   });
 
-  test('os exercícios de potência nunca pedem inclinação, em nenhum nível', () => {
-    for (const exercicio of exerciciosDaTrilha('desempenho')) {
-      expect(NIVEIS.every((nivel) => exercicio.niveis[nivel].inclinacao === 0)).toBe(true);
-    }
-  });
-
-  test('a trilha Equilíbrio 60+ traz sentar, tandem, abdução e transferência', () => {
+  test('a trilha Equilíbrio 60+ traz sentar, tandem e abdução', () => {
     const ids = exerciciosDaTrilha('equilibrio60').map((exercicio) => exercicio.id);
-    expect(ids).toEqual([
-      'sentar-e-levantar',
-      'pes-em-linha',
-      'abducao-com-elastico',
-      'transferencia-de-peso',
-    ]);
+    expect(ids).toEqual(['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico']);
   });
 
-  test('só a trilha de fisioterapia tem região, com 2 exercícios por região', () => {
+  test('a trilha Fisioterapia traz 2 exercícios de joelho e 1 de tornozelo', () => {
+    const ids = exerciciosDaTrilha('fisio').map((exercicio) => exercicio.id);
+    expect(ids).toEqual(['miniagachamento-simetrico', 'descida-de-degrau', 'panturrilha-unilateral']);
+  });
+
+  test('só a trilha de fisioterapia tem região', () => {
     const fisio = exerciciosDaTrilha('fisio');
     const equilibrio = exerciciosDaTrilha('equilibrio60');
     expect(equilibrio.every((exercicio) => exercicio.regiao === undefined)).toBe(true);
     expect(fisio.filter((exercicio) => exercicio.regiao === 'joelho')).toHaveLength(2);
-    expect(fisio.filter((exercicio) => exercicio.regiao === 'tornozelo')).toHaveLength(2);
+    expect(fisio.filter((exercicio) => exercicio.regiao === 'tornozelo')).toHaveLength(1);
+  });
+
+  /* Regressão: a inclinação da plataforma foi descartada do produto. Os tipos
+     já não a aceitam, mas o catálogo é dado: este teste acusa quem a trouxer
+     de volta por fora do tipo (um campo a mais, um acessório, um exercício). */
+  test('nenhum exercício declara inclinação, em nenhum nível nem acessório', () => {
+    for (const exercicio of CATALOGO) {
+      expect(exercicio.acessorios).not.toContain('inclinacao');
+      for (const nivel of NIVEIS) {
+        expect(exercicio.niveis[nivel]).not.toHaveProperty('inclinacao');
+        expect(exercicio.niveis[nivel].descricao).not.toMatch(/inclina/i);
+      }
+    }
+    expect(IDS_DOS_EXERCICIOS).not.toContain('equilibrio-com-inclinacao');
+    expect(IDS_DOS_EXERCICIOS).not.toContain('transferencia-de-peso');
   });
 });
 
@@ -146,24 +145,11 @@ describe('catálogo: conteúdo de cada exercício', () => {
     },
   );
 
-  test('a inclinação pedida nunca diminui ao subir de nível', () => {
-    for (const exercicio of CATALOGO) {
-      expect(exercicio.niveis[2].inclinacao).toBeGreaterThanOrEqual(exercicio.niveis[1].inclinacao);
-      expect(exercicio.niveis[3].inclinacao).toBeGreaterThanOrEqual(exercicio.niveis[2].inclinacao);
-    }
-  });
-
-  test('o nível 1 é sempre plano, para qualquer plataforma conseguir executá-lo', () => {
-    for (const exercicio of CATALOGO) {
-      expect(exercicio.niveis[1].inclinacao).toBe(0);
-    }
-  });
-
-  test('dose, apoio e inclinação de cada nível seguem o manual', () => {
+  test('dose e apoio de cada nível seguem o manual', () => {
     for (const exercicio of CATALOGO) {
       for (const nivel of NIVEIS) {
-        const { dose, apoio, inclinacao } = exercicio.niveis[nivel];
-        expect({ dose, apoio, inclinacao }).toEqual(ESPERADO[exercicio.id][nivel]);
+        const { dose, apoio } = exercicio.niveis[nivel];
+        expect({ dose, apoio }).toEqual(ESPERADO[exercicio.id][nivel]);
       }
     }
   });

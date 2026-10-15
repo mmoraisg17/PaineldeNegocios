@@ -61,9 +61,13 @@ const media = (valores: readonly number[]): number =>
 
 /* Sem treinos devolve undefined: mostrar "0" daria a impressão de uma nota
    péssima onde na verdade não há o que medir. A nota é a média das notas dos
-   treinos (como no domínio); as outras medidas são a média de cada exercício. */
+   treinos (como no domínio); as outras medidas são a média de cada exercício.
+   Pelo mesmo motivo, treino sem exercício medido não entra: é o que sobra de
+   um treino salvo só com exercícios que saíram do catálogo (ver
+   sanitizacao.ts), e a nota "0" dele puxaria a média para baixo. */
 export function mediasRecentes(sessoes: readonly Sessao[], quantidade: number = TREINOS_NO_RESUMO): MediasDoAluno | undefined {
-  const recentes = ordenarSessoes(sessoes).slice(-quantidade);
+  const comMedidas = sessoes.filter((sessao) => sessao.exercicios.length > 0);
+  const recentes = ordenarSessoes(comMedidas).slice(-quantidade);
   if (recentes.length === 0) return undefined;
   const exercicios = recentes.flatMap((sessao) => sessao.exercicios);
   return {

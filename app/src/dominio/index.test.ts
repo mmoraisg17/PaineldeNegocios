@@ -9,7 +9,6 @@ describe('API pública do domínio', () => {
       'nivelInicial',
       'trilhaDoObjetivo',
       'montarRotina',
-      'nivelMaximoCompativel',
       'permissoesDoVinculo',
       'solicitarVinculo',
       'ajusteVigente',
@@ -64,7 +63,8 @@ describe('API pública do domínio', () => {
     expect('ACESSORIOS_DA_PLATAFORMA' in dominio).toBe(false);
   });
 
-  test('expõe o catálogo e a lista de ids com os mesmos 8 exercícios', () => {
+  test('expõe o catálogo e a lista de ids com os mesmos 7 exercícios', () => {
     expect(dominio.CATALOGO.map((exercicio) => exercicio.id)).toEqual([...dominio.IDS_DOS_EXERCICIOS]);
+    expect(dominio.IDS_DOS_EXERCICIOS).toHaveLength(7);
   });
 });

@@ -6,7 +6,7 @@ import { type Esqueleto, alturaDaSuperficie } from './corpo';
 
 export const LIMIAR_DE_ALINHAMENTO = 0.025; // m: até 2,5 cm é "no meio"
 
-/* Meio dos pés APOIADOS: num pé só (panturrilha, abdução, equilíbrio), o
+/* Meio dos pés APOIADOS: num pé só (panturrilha, abdução, búlgaro), o
    quadril deve ficar sobre o pé de apoio, não entre os dois. */
 export function meioDosPes(e: Esqueleto): { x: number; y: number; z: number } {
   const todos = [e.lados.esquerdo, e.lados.direito];
@@ -14,13 +14,13 @@ export function meioDosPes(e: Esqueleto): { x: number; y: number; z: number } {
   const pes = apoiados.length > 0 ? apoiados : todos;
   const x = pes.reduce((s, l) => s + l.tornozelo.x, 0) / pes.length;
   const z = pes.reduce((s, l) => s + l.tornozelo.z, 0) / pes.length;
-  return { x, y: alturaDaSuperficie(x, z, e.inclinacaoDaBase), z };
+  return { x, y: alturaDaSuperficie(x), z };
 }
 
 /* Dois jeitos de estar alinhado:
    - 'centro' (exercícios simétricos): o quadril sobre o MEIO dos pés de
      apoio; assim o peso jogado numa perna aparece;
-   - 'apoio' (troca de apoio, alvos): basta o quadril estar DENTRO da base
+   - 'apoio' (troca de apoio, pés em linha): basta o quadril estar DENTRO da base
      de apoio (entre os pés apoiados); num pé só, os dois modos coincidem.
    desvio > 0: quadril para a esquerda do praticante (+X); < 0: direita. */
 export type ModoDoPrumo = 'centro' | 'apoio';

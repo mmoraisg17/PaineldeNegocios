@@ -30,9 +30,6 @@ export type Animacao = {
   readonly musculos?: readonly Musculo[];
   /* Ângulo ideal para ver o exercício (V8). Sem isto, a câmera padrão 3/4. */
   readonly camera?: { readonly posicao: [number, number, number]; readonly alvo: [number, number, number] };
-  /* Inclinação da base em graus (nível do seletor × 5°, fase 6). Constante no
-     ciclo: o praticante ajusta o seletor antes de subir. */
-  readonly inclinacaoDaBase?: number;
   /* Regra do fio de prumo (V7): 'centro' (padrão, simétricos) ou 'apoio'. */
   readonly prumo?: ModoDoPrumo;
   /* Elástico preso num ponto fixo (base da barra) e no tornozelo de um lado. */
@@ -126,8 +123,7 @@ export function amostrar(animacao: Animacao, tempo: number): Amostra {
   if (!a || !b) throw new Error(`Animação ${animacao.id} sem quadros`);
   const u = b.t > a.t ? suavizar((t - a.t) / (b.t - a.t)) : 0;
   const pose = poseNaCurva(quadros, t, a.pose.bracos);
-  const comBase = animacao.inclinacaoDaBase ? { ...pose, inclinacaoDaBase: animacao.inclinacaoDaBase } : pose;
-  return { pose: comBase, carga: misturarCarga(a.carga, b.carga, u), fase: a.fase, indiceFase: i };
+  return { pose, carga: misturarCarga(a.carga, b.carga, u), fase: a.fase, indiceFase: i };
 }
 
 const LADOS = ['esquerdo', 'direito'] as const;

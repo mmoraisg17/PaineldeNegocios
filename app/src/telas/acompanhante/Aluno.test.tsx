@@ -328,19 +328,16 @@ describe('ajustar a rotina', () => {
     expect(rotina?.ajustadoPor).toBe('Carlos');
   });
 
-  test('só mostra o nível se o exercício estiver na rotina e bloqueia o que a plataforma não alcança', async () => {
-    // Arrange: a plataforma desta aluna só chega à inclinação 1
+  test('só mostra o nível se o exercício estiver na rotina, com os 3 níveis disponíveis', async () => {
+    // Arrange
     const usuario = userEvent.setup();
-    const limitarInclinacao = (e: EstadoApp): EstadoApp => {
-      const lucia = e.praticantes['lucia'];
-      return lucia ? { ...e, praticantes: { ...e.praticantes, lucia: { ...lucia, perfil: { ...lucia.perfil, inclinacaoMaxima: 1 } } } } : e;
-    };
-    abrir('carlos', 'lucia', limitarInclinacao);
+    abrir('carlos', 'lucia');
 
-    // Act / Assert: a transferência de peso pede inclinação 2 no nível 3
-    const transferencia = screen.getByRole('group', { name: 'Nível de Transferência de peso com alvos' });
-    expect(within(transferencia).getByRole('radio', { name: 'Nível 3' })).toBeDisabled();
-    expect(within(transferencia).getByRole('radio', { name: 'Nível 2' })).toBeEnabled();
+    // Act / Assert: qualquer plataforma executa todos os níveis
+    const abducao = screen.getByRole('group', { name: 'Nível de Abdução de quadril com elástico' });
+    for (const nivel of [1, 2, 3]) {
+      expect(within(abducao).getByRole('radio', { name: `Nível ${nivel}` })).toBeEnabled();
+    }
 
     await usuario.click(screen.getByRole('checkbox', { name: 'Pés em linha (tandem)' }));
     expect(screen.queryByRole('group', { name: 'Nível de Pés em linha (tandem)' })).not.toBeInTheDocument();

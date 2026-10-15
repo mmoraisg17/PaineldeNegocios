@@ -1,6 +1,6 @@
 import { buscarExercicio, exerciciosDaTrilha } from './catalogo';
 import { trilhaDoObjetivo, type Perfil } from './perfil';
-import type { Apoio, Dose, Exercicio, IdExercicio, Inclinacao, Nivel } from './tipos';
+import type { Apoio, Dose, Exercicio, IdExercicio, Nivel } from './tipos';
 
 /* Nível atual de cada exercício. Quem não aparece aqui ainda não foi treinado. */
 export type NiveisAtuais = Partial<Record<IdExercicio, Nivel>>;
@@ -28,7 +28,6 @@ export type ItemRotina = {
   nivel: Nivel;
   dose: Dose;
   apoio: Apoio;
-  inclinacao: Inclinacao;
   /* Presente quando o profissional fixou o nível: o app não o muda sozinho. */
   fixadoPor?: string;
   meta?: MetaDeSimetria;
@@ -58,8 +57,7 @@ export function segundosDaDose(dose: Dose): number {
   return dose.porLado === true ? segundos * 2 : segundos;
 }
 
-/* O kit do produto traz todos os itens (barras, inclinação, elástico e assento
-   acoplável), então a rotina padrão é a trilha inteira: ninguém precisa dizer
+/* O kit do produto traz todos os itens (barras, elástico e assento acoplável), então a rotina padrão é a trilha inteira: ninguém precisa dizer
    o que tem em casa. Na fisioterapia a região do objetivo vem primeiro: quem
    tem o joelho como foco faz primeiro os exercícios do joelho, com a energia
    do começo do treino. */
@@ -83,33 +81,10 @@ function aplicarListasDoAjuste(base: Exercicio[], ajuste: AjusteProfissional | u
   return [...base, ...incluidos].filter((exercicio) => !removidos.includes(exercicio.id));
 }
 
-/* O limite de inclinação é físico (o seletor da plataforma não passa dele),
-   então vale até para nível fixado pelo profissional. Desce até achar o maior
-   nível compatível; o nível 1 é plano em todos os exercícios. */
-function maiorNivelCompativel(exercicio: Exercicio, desejado: Nivel, inclinacaoMaxima: Inclinacao): Nivel {
-  for (let nivel = desejado; nivel > NIVEL_PADRAO; nivel -= 1) {
-    if (exercicio.niveis[nivel as Nivel].inclinacao <= inclinacaoMaxima) return nivel as Nivel;
-  }
-  return NIVEL_PADRAO;
-}
-
-/* Maior nível do exercício que a plataforma consegue executar. É o
-   `nivelMaximo` que a progressão precisa para não propor uma subida que a
-   rotina depois recusaria. */
-export function nivelMaximoCompativel(exercicio: Exercicio, inclinacaoMaxima: Inclinacao): Nivel {
-  return maiorNivelCompativel(exercicio, 3, inclinacaoMaxima);
-}
-
-function montarItem(
-  exercicio: Exercicio,
-  niveis: NiveisAtuais,
-  perfil: Perfil,
-  ajuste: AjusteProfissional | undefined,
-): ItemRotina {
+function montarItem(exercicio: Exercicio, niveis: NiveisAtuais, ajuste: AjusteProfissional | undefined): ItemRotina {
   const nivelFixado = ajuste?.niveisFixados?.[exercicio.id];
-  const desejado = nivelFixado ?? niveis[exercicio.id] ?? NIVEL_PADRAO;
-  const nivel = maiorNivelCompativel(exercicio, desejado, perfil.inclinacaoMaxima);
-  const { dose, apoio, inclinacao } = exercicio.niveis[nivel];
+  const nivel = nivelFixado ?? niveis[exercicio.id] ?? NIVEL_PADRAO;
+  const { dose, apoio } = exercicio.niveis[nivel];
   const meta = ajuste?.metas?.[exercicio.id];
 
   return {
@@ -117,7 +92,6 @@ function montarItem(
     nivel,
     dose,
     apoio,
-    inclinacao,
     ...(nivelFixado !== undefined && ajuste ? { fixadoPor: ajuste.autor } : {}),
     ...(meta ? { meta } : {}),
   };
@@ -130,7 +104,7 @@ function minutosDe(itens: readonly ItemRotina[]): number {
 
 export function montarRotina(perfil: Perfil, niveis: NiveisAtuais, ajuste?: AjusteProfissional): Rotina {
   const exercicios = aplicarListasDoAjuste(exerciciosDoPerfil(perfil), ajuste);
-  const itens = exercicios.map((exercicio) => montarItem(exercicio, niveis, perfil, ajuste));
+  const itens = exercicios.map((exercicio) => montarItem(exercicio, niveis, ajuste));
 
   return {
     itens,
