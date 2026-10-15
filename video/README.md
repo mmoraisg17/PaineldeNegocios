@@ -1,6 +1,9 @@
 # Vídeo das animações (Remotion)
 
-Gera um vídeo vertical (1080×1920, 30 fps, 15,6 s) do **Búlgaro explosivo** (agachamento
+Duas composições: `Bulgaro` (abaixo) e `LucasEDiego` (as duas contas modelo de
+demonstração lado a lado; ver a seção [Vídeo "LucasEDiego"](#vídeo-lucasediego-as-duas-contas-modelo)).
+
+A `Bulgaro` gera um vídeo vertical (1080×1920, 30 fps, 15,6 s) do **Búlgaro explosivo** (agachamento
 búlgaro com o pé de trás no banquinho e subida o mais rápida possível, sem salto) com as
 mesmas poses, fases e cargas do app, para a apresentação do perfil do Lucas (conta de
 demonstração: atleta de futevôlei, 24 anos, força e explosão).
@@ -90,6 +93,64 @@ O que **não** dá para reaproveitar direto, e por quê:
   no cache. Uma chamada por arquivo: o cache do `useLoader` é por lista de URLs. Por isso o
   `Banquinho` entra sem nenhuma mudança no app.
 
+## Vídeo "LucasEDiego": as duas contas modelo
+
+Composição `LucasEDiego` (1080×1920, 30 fps, 23,9 s, sem áudio): o mesmo búlgaro explosivo
+nível 3 apresentado pelas duas contas de demonstração do app, **Lucas** (24 anos, treina por
+conta própria) e **Diego** (30 anos, acompanhado pela preparadora física **Renata**). São
+contas de demonstração, não pessoas reais; o fecho diz isso.
+
+Roteiro (`src/roteiroLucasEDiego.ts`):
+
+| Trecho | Duração | O que mostra |
+| --- | --- | --- |
+| Abertura | 2 s | "Força e explosão" + "Búlgaro explosivo", boneco em pé com a cor do manequim |
+| Lucas | 8,2 s | câmera lenta 0,5× (4,2 s) do fim da descida até em pé, depois o ciclo inteiro em velocidade real (4 s) |
+| Diego | 8,2 s | o mesmo, com o cartão e a cor dele |
+| Comparação | 4 s | barras lado a lado: simetria, estabilidade, apoio nas barras e treinos feitos |
+| Fecho | 1,5 s | "Dados: simulação do app, não substitui orientação profissional" e o aviso das contas de demonstração |
+
+A câmera lenta não pega o ciclo inteiro: a 0,5× os 4 s do ciclo virariam 8 s por atleta, e o
+vídeo passaria de 30 s. Ela pega o que interessa ver devagar (fim da descida, meio segundo no
+fundo e a subida de 0,6 s); a velocidade real mostra o ciclo todo. Nas trocas de atleta a
+imagem escurece por alguns quadros, porque o boneco passa de "em pé" para "fim da descida".
+
+Durante cada atleta aparecem a legenda da fase, o cronômetro descida × subida
+(`temposDoBulgaro(3)`), o medidor de carga nos pés (0–2×) e, no alto, o cartão do atleta.
+Cada atleta tem uma cor de destaque (cartão, selos, faixa da subida e a "camisa" do boneco,
+que é o tronco pintado só no vídeo): Lucas com a cor primária do app, Diego com o âmbar da
+cena (`cena-atencao`), com texto escuro por cima para ter contraste.
+
+```bash
+npm run render:lucas-diego   # out/lucas-e-diego.mp4
+npm run poster:lucas-diego   # out/lucas-e-diego-poster.png (quadro 396: Diego no meio da subida, com o recado)
+```
+
+**De onde vêm os números.** Nada é digitado à mão: `src/dadosDaDemo.ts` monta o estado com
+`criarEstadoDemo(new Date('2026-10-07T15:30:00.000Z'))` (a data fixa dos testes do app; a
+demo gera o histórico relativo a ela) e lê `praticantes.lucas`, `praticantes.diego`,
+`acompanhantes` e `recados` com as mesmas funções das telas:
+
+- médias dos últimos 3 treinos (nota, simetria, estabilidade, apoio nas barras):
+  `mediasRecentes` do relatório do profissional, arredondadas como em `ResumoDoRelatorio`;
+- treinos feitos nas últimas 6 semanas ("17 de 18", "24 de 24"): `resumirSemanas` +
+  `adesaoDoPeriodo`, a conta da tela Progresso (extraída da tela para cá, sem mudar o
+  resultado);
+- quem ajustou, nível e frequência: `rotinaDoPraticante` (com o ajuste vigente da Renata);
+- o recado: `estado.recados` (o da Renata para o Diego).
+
+Valores exibidos com essa data: Lucas nota 94, simetria 89%, estabilidade 97%, apoio 1% do
+peso, 17 de 18 treinos, 3 por semana (rotina do app); Diego nota 97, simetria 94%,
+estabilidade 98%, apoio 1% do peso, 24 de 24 treinos, búlgaro fixo no nível 3 e 4 treinos
+por semana (ajuste da Renata). Se a demo do app mudar, o vídeo muda junto; os testes
+(`src/lucasEDiego.test.ts`) conferem os números contra o estado, o recado, o "17 de 18" e o
+"24 de 24", a duração, o roteiro e a diferença de cor entre os blocos.
+
+**Para mudar:** durações em `src/roteiroLucasEDiego.ts` (`ABERTURA`, `COMPARACAO`, `FECHO`,
+`LENTA_ANTES_DO_FUNDO`); enquadramento em `ENQUADRAMENTO_DOS_ATLETAS` (`src/LucasEDiego.tsx`);
+cores em `coresDosAtletas()` (`src/cores.ts`). Se o roteiro mudar, o teste avisa que o
+`--frame=` do `poster:lucas-diego` ficou desatualizado.
+
 ## Limitações
 
 - Sem anéis de pressão, seta de correção e fio de prumo: no app eles dependem da leitura do
@@ -97,6 +158,10 @@ O que **não** dá para reaproveitar direto, e por quê:
   animação (`Carga.pes`), não uma leitura simulada com ruído.
 - O pé de trás do boneco não tem o peito do pé deitado: como no app, ele apoia a ponta dos
   dedos na borda de trás do assento, com o calcanhar alto.
-- Só a composição do búlgaro. Outra animação do app precisa de um roteiro próprio (janela
+- No "LucasEDiego" o movimento dos dois atletas é o mesmo (a animação do app não muda com
+  a pessoa); o que os diferencia são os dados, os textos e a cor. O recado da Renata pede
+  "descida em 3 segundos" e a fase do app diz "contando até 3", mas a animação do nível 3
+  desce em 2,5 s, e é isso que o cronômetro mostra.
+- Só o búlgaro. Outra animação do app precisa de um roteiro próprio (janela
   de tempo, textos).
 - Sem áudio.
