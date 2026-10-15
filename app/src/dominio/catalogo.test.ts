@@ -61,13 +61,12 @@ const ESPERADO: Record<IdExercicio, Record<Nivel, EsperadoDoNivel>> = {
     2: { dose: seg(20), apoio: 'uma-mao', inclinacao: 1 },
     3: { dose: seg(30), apoio: 'toque', inclinacao: 2 },
   },
-  /* Fora do manual: entrou com a trilha Força e explosão (pesquisa 09, plano
-     de potência do Lucas). Salto sempre sem inclinação (a pesquisa desaconselha
-     5° e 10° para saltos). */
-  'salto-com-contramovimento': {
-    1: { dose: rep(5), apoio: 'duas-maos', inclinacao: 0 },
-    2: { dose: rep(5), apoio: 'sem-maos', inclinacao: 0 },
-    3: { dose: rep(6), apoio: 'sem-maos', inclinacao: 0 },
+  /* Fora do manual: entrou com a trilha Força e explosão (pesquisa 10, plano
+     de potência do Lucas). Sem salto e sem inclinação, para poupar a plataforma. */
+  'agachamento-bulgaro-explosivo': {
+    1: { dose: rep(4, true), apoio: 'duas-maos', inclinacao: 0 },
+    2: { dose: rep(5, true), apoio: 'uma-mao', inclinacao: 0 },
+    3: { dose: rep(6, true), apoio: 'sem-maos', inclinacao: 0 },
   },
 };
 
@@ -80,13 +79,13 @@ describe('catálogo: composição', () => {
     expect(new Set(CATALOGO.map((exercicio) => exercicio.id)).size).toBe(CATALOGO.length);
   });
 
-  test('as trilhas do manual têm 4 exercícios; a de Força e explosão começa com o salto', () => {
+  test('as trilhas do manual têm 4 exercícios; a de Força e explosão começa com o búlgaro explosivo', () => {
     expect(exerciciosDaTrilha('equilibrio60')).toHaveLength(4);
     expect(exerciciosDaTrilha('fisio')).toHaveLength(4);
-    expect(exerciciosDaTrilha('desempenho').map((exercicio) => exercicio.id)).toEqual(['salto-com-contramovimento']);
+    expect(exerciciosDaTrilha('desempenho').map((exercicio) => exercicio.id)).toEqual(['agachamento-bulgaro-explosivo']);
   });
 
-  test('os saltos nunca pedem inclinação, em nenhum nível', () => {
+  test('os exercícios de potência nunca pedem inclinação, em nenhum nível', () => {
     for (const exercicio of exerciciosDaTrilha('desempenho')) {
       expect(NIVEIS.every((nivel) => exercicio.niveis[nivel].inclinacao === 0)).toBe(true);
     }

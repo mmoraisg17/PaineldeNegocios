@@ -39,14 +39,14 @@ test('para quem treina fisioterapia, a aba inicial é a de fisioterapia', () => 
   expect(screen.getAllByRole('article')).toHaveLength(nomesDaTrilha('fisio').length);
 });
 
-test('para o atleta de força e explosão, a aba inicial é a dele, com o aviso dos saltos', () => {
+test('para o atleta de força e explosão, a aba inicial é a dele, com o aviso de segurança', () => {
   // Arrange / Act
   abrirTela('/praticante/biblioteca', { estado: estadoDeTeste('lucas') });
 
   // Assert
   expect(screen.getByRole('tab', { name: 'Força e explosão' })).toHaveAttribute('aria-selected', 'true');
   expect(screen.getAllByRole('article')).toHaveLength(nomesDaTrilha('desempenho').length);
-  expect(screen.getByText(/tire o banquinho da plataforma/)).toBeInTheDocument();
+  expect(screen.getByText(/trave o banquinho/)).toBeInTheDocument();
 });
 
 test('o painel da aba é ligado a ela por aria-labelledby', () => {

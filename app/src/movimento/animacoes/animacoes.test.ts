@@ -8,7 +8,8 @@ import { distancia } from '../vetor';
 import { alvoDaTransferencia } from '../../sensores/esperado';
 import { quadrilParaFlexao } from './comum';
 import { animacaoDe, exerciciosAnimados } from './index';
-import { alturaDoSalto, tempoDeVoo, temposDoSalto } from './saltoComContramovimento';
+import { PE_DA_FRENTE_DZ, temposDoBulgaro } from './agachamentoBulgaroExplosivo';
+import { CADEIRA_SENTAR } from './sentarELevantar';
 
 /* Fatos de todas as animações da fase 6, como pede a skill de inspeção de
    movimento: medidos quadro a quadro a 30 qps, antes de qualquer screenshot.
@@ -53,11 +54,9 @@ describe.each(variacoes)('$id, nível $nivel: fatos gerais', ({ animacao }) => {
     }
   });
 
-  test('sempre há pelo menos um pé apoiado na base (os sensores medem o corpo todo), salvo no voo declarado', () => {
-    for (const { esqueleto: e, amostra, t } of quadros) {
-      const apoiado = e.lados.esquerdo.apoiado || e.lados.direito.apoiado;
-      // Só uma animação com voo pode ficar sem pé na base, e então a base mede ~0.
-      expect(apoiado || (animacao.comVoo === true && amostra.carga.pes < 0.05), `t=${t.toFixed(2)}`).toBe(true);
+  test('sempre há pelo menos um pé apoiado na base (os sensores medem o corpo todo)', () => {
+    for (const { esqueleto: e, t } of quadros) {
+      expect(e.lados.esquerdo.apoiado || e.lados.direito.apoiado, `t=${t.toFixed(2)}`).toBe(true);
     }
   });
 
@@ -373,108 +372,88 @@ describe('transferência de peso', () => {
   });
 });
 
-/* ---- 9. Salto vertical com contramovimento (pesquisa 09, seção 3) ---- */
-describe('salto com contramovimento', () => {
-  const animacaoDoSalto = (nivel: 1 | 2 | 3, bracos: 'barras' | 'cruzados' = 'cruzados') => animacaoDe('salto-com-contramovimento', { nivel, bracos })!;
-  const joelhoEm = (animacao: Animacao, t: number) => flexaoDoJoelho(montarEsqueleto(amostrar(animacao, t).pose));
+/* ---- 9. Agachamento búlgaro explosivo (pesquisa 10) ---- */
+describe('agachamento búlgaro explosivo', () => {
+  const animacaoDoBulgaro = (nivel: 1 | 2 | 3, bracos: 'barras' | 'uma-mao' | 'cruzados' = 'cruzados') =>
+    animacaoDe('agachamento-bulgaro-explosivo', { nivel, bracos })!;
+  const joelhoEm = (animacao: Animacao, t: number, lado: 'esquerdo' | 'direito' = 'esquerdo') =>
+    flexaoDoJoelho(montarEsqueleto(amostrar(animacao, t).pose), lado);
 
-  test('declara o voo: é a única animação que fica sem pé na base', () => {
-    expect(animacaoDoSalto(3).comVoo).toBe(true);
-    for (const id of exerciciosAnimados().filter((id) => id !== 'salto-com-contramovimento')) {
-      expect(animacaoDe(id)?.comVoo, id).toBeUndefined();
+  test('nível 3: joelho da frente a ~90° no fundo e o de trás entre 90° e 120°', () => {
+    const animacao = animacaoDoBulgaro(3);
+    const { tFundo } = temposDoBulgaro(3);
+    expect(joelhoEm(animacao, tFundo)).toBeGreaterThan(85);
+    expect(joelhoEm(animacao, tFundo)).toBeLessThan(95);
+    expect(joelhoEm(animacao, tFundo, 'direito')).toBeGreaterThan(90);
+    expect(joelhoEm(animacao, tFundo, 'direito')).toBeLessThan(120);
+  });
+
+  test('a descida pede 2–3 s e a subida do nível 3 leva menos de 0,7 s (explosiva, sem voo)', () => {
+    const { tFundo, tComeca, tTopo } = temposDoBulgaro(3);
+    expect(tFundo - 1.0).toBeGreaterThanOrEqual(2);
+    expect(tFundo - 1.0).toBeLessThanOrEqual(3);
+    expect(tTopo - tComeca).toBeLessThan(0.7);
+    const subidas = NIVEIS.map((n) => temposDoBulgaro(n).tTopo - temposDoBulgaro(n).tComeca);
+    expect(subidas[0]).toBeGreaterThan(subidas[1]!);
+    expect(subidas[1]).toBeGreaterThan(subidas[2]!);
+  });
+
+  test.each(NIVEIS)('nível %i: a subida é pelo menos 2× mais rápida que a descida', (nivel) => {
+    const { tFundo, tComeca, tTopo } = temposDoBulgaro(nivel);
+    expect((tFundo - 1.0) / (tTopo - tComeca)).toBeGreaterThan(2);
+  });
+
+  test.each(NIVEIS)('nível %i: o pé da frente fica plantado, inteiro no chão e dentro da base', (nivel) => {
+    const qs = quadrosDe(animacaoDoBulgaro(nivel));
+    const inicio = qs[0]!.esqueleto.lados.esquerdo.ponta;
+    for (const { esqueleto, t } of qs) {
+      const pe = esqueleto.lados.esquerdo;
+      expect(pe.apoiado, `t=${t.toFixed(2)}`).toBe(true);
+      expect(distancia(pe.ponta, inicio), `t=${t.toFixed(2)}`).toBeLessThan(MM);
+      expect(Math.abs(pe.ponta.y - pe.calcanhar.y), `pé inteiro t=${t.toFixed(2)}`).toBeLessThan(MM);
+      expect(pe.ponta.z).toBeLessThan(0.5); // a base termina a 0,50 m
     }
+    expect(PE_DA_FRENTE_DZ + 0.17).toBeLessThan(0.5);
   });
 
-  test.each(NIVEIS)('nível %i: o tempo no ar bate com a altura (T = 2·√(2h/g)), medido a 30 qps', (nivel) => {
-    const quadros = quadrosDe(animacaoDoSalto(nivel));
-    const noAr = quadros.filter(({ esqueleto: e }) => !e.lados.esquerdo.apoiado && !e.lados.direito.apoiado);
-    const medido = noAr.length / QPS;
-    expect(Math.abs(medido - tempoDeVoo(alturaDoSalto(nivel)))).toBeLessThanOrEqual(1.5 / QPS);
+  test.each(NIVEIS)('nível %i: o pé de trás fica sobre o assento do banquinho, sem sair do lugar', (nivel) => {
+    const animacao = animacaoDoBulgaro(nivel);
+    const qs = quadrosDe(animacao);
+    const inicio = qs[0]!.esqueleto.lados.direito.ponta;
+    const centroDoAssento = (animacao.cadeira!.frenteZ + animacao.cadeira!.fundoZ) / 2;
+    expect(animacao.cadeira).toEqual(CADEIRA_SENTAR);
+    expect(inicio.y).toBeCloseTo(CADEIRA_SENTAR.assentoY, 2);
+    expect(Math.hypot(inicio.x, inicio.z - centroDoAssento)).toBeLessThan(0.225); // dentro do assento de Ø0,45 m
+    for (const { esqueleto, t } of qs) expect(distancia(esqueleto.lados.direito.ponta, inicio), `t=${t.toFixed(2)}`).toBeLessThan(MM);
   });
 
-  test.each(NIVEIS)('nível %i: o quadril sobe a altura do salto entre a decolagem e o ponto mais alto', (nivel) => {
-    const animacao = animacaoDoSalto(nivel);
-    const { tDecola } = temposDoSalto(nivel);
-    const alto = Math.max(...quadrosDe(animacao).map((q) => q.esqueleto.pelve.y));
-    const naDecolagem = montarEsqueleto(amostrar(animacao, tDecola).pose).pelve.y;
-    expect(alto - naDecolagem).toBeGreaterThan(alturaDoSalto(nivel) - 0.03);
-    expect(alto - naDecolagem).toBeLessThan(alturaDoSalto(nivel) + 0.03);
+  test.each(NIVEIS)('nível %i: nunca há voo; a base mede carga o ciclo inteiro e o pico da subida fica em 1,2–1,6× o peso', (nivel) => {
+    const cargas = quadrosDe(animacaoDoBulgaro(nivel)).map((q) => q.amostra.carga.pes);
+    expect(Math.min(...cargas)).toBeGreaterThan(0.9);
+    expect(Math.max(...cargas)).toBeGreaterThan(1.2);
+    expect(Math.max(...cargas)).toBeLessThan(1.6);
   });
 
-  test('nível 3: joelho a ~95° no fundo do contramovimento e ~25° no contato (valores da pesquisa)', () => {
-    const animacao = animacaoDoSalto(3);
-    const { tFundo, tPouso } = temposDoSalto(3);
-    expect(joelhoEm(animacao, tFundo)).toBeGreaterThan(90);
-    expect(joelhoEm(animacao, tFundo)).toBeLessThan(100);
-    expect(joelhoEm(animacao, tPouso)).toBeGreaterThan(20);
-    expect(joelhoEm(animacao, tPouso)).toBeLessThan(30);
+  test('o pico de carga sobe com o nível (mais velocidade, mais força)', () => {
+    const pico = (n: 1 | 2 | 3) => Math.max(...quadrosDe(animacaoDoBulgaro(n)).map((q) => q.amostra.carga.pes));
+    expect(pico(1)).toBeLessThan(pico(2));
+    expect(pico(2)).toBeLessThan(pico(3));
   });
 
-  test('o contramovimento é rápido (~0,5 s) e a aterrissagem absorve em 0,3–0,4 s', () => {
-    const { tFundo, tDecola } = temposDoSalto(3);
-    expect(tFundo - 1.0).toBeCloseTo(0.5, 2);
-    expect(tDecola - tFundo).toBeCloseTo(0.25, 2);
-    const animacao = animacaoDoSalto(3);
-    const { tPouso } = temposDoSalto(3);
-    const absorcao = animacao.quadros.find((q) => q.t > tPouso + 0.1 && joelhoEm(animacao, q.t) > 85);
-    expect(absorcao!.t - tPouso).toBeGreaterThanOrEqual(0.3);
-    expect(absorcao!.t - tPouso).toBeLessThanOrEqual(0.45);
+  test('o quadril desce até o fundo e volta: mais baixo no fundo do que em pé', () => {
+    const animacao = animacaoDoBulgaro(3);
+    const { tFundo } = temposDoBulgaro(3);
+    const emPe = montarEsqueleto(amostrar(animacao, 0).pose).pelve.y;
+    const fundo = montarEsqueleto(amostrar(animacao, tFundo).pose).pelve.y;
+    expect(emPe - fundo).toBeGreaterThan(0.2);
   });
 
-  test.each(NIVEIS)('nível %i: os pés saem e voltam ao mesmo lugar, sem escorregar (ponta fixa no plano da base)', (nivel) => {
-    const qs = quadrosDe(animacaoDoSalto(nivel));
-    for (const lado of ['esquerdo', 'direito'] as const) {
-      const inicio = qs[0]!.esqueleto.lados[lado].ponta;
-      for (const { esqueleto, t } of qs) {
-        const ponta = esqueleto.lados[lado].ponta;
-        expect(Math.hypot(ponta.x - inicio.x, ponta.z - inicio.z), `${lado} t=${t.toFixed(2)}`).toBeLessThan(MM);
-      }
-    }
+  test('nível 1 e 2: as mãos que seguram a barra alcançam a barra o ciclo inteiro', () => {
+    for (const { esqueleto, t } of quadrosDe(animacaoDoBulgaro(1, 'barras'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
+    for (const { esqueleto, t } of quadrosDe(animacaoDoBulgaro(2, 'uma-mao'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
   });
 
-  test('sem inclinação: o ciclo inteiro fica na base plana', () => {
-    expect(animacaoDe('salto-com-contramovimento', { nivel: 3 })?.inclinacaoDaBase).toBeUndefined();
-  });
-
-  test.each(NIVEIS)('nível %i: a carga vai a zero no ar e passa de 1,4× o peso no impulso e na aterrissagem', (nivel) => {
-    const { tDecola, tPouso } = temposDoSalto(nivel);
-    const animacao = animacaoDoSalto(nivel);
-    const cargas = quadrosDe(animacao).map(({ amostra, t }) => ({ t, pes: amostra.carga.pes }));
-    for (const { t, pes } of cargas.filter((c) => c.t > tDecola + 0.04 && c.t < tPouso - 0.04)) expect(pes, `t=${t.toFixed(2)}`).toBeLessThan(0.05);
-    expect(Math.max(...cargas.filter((c) => c.t < tDecola).map((c) => c.pes))).toBeGreaterThan(1.4);
-    expect(Math.max(...cargas.filter((c) => c.t > tPouso).map((c) => c.pes))).toBeGreaterThan(1.4);
-    expect(Math.min(...cargas.map((c) => c.pes))).toBeGreaterThanOrEqual(0);
-  });
-
-  test('nível 3: a aterrissagem pesa mais que o impulso e passa de 2× o peso (faixa da pesquisa: 2–3×)', () => {
-    const { tDecola } = temposDoSalto(3);
-    const cargas = quadrosDe(animacaoDoSalto(3)).map(({ amostra, t }) => ({ t, pes: amostra.carga.pes }));
-    const impulso = Math.max(...cargas.filter((c) => c.t < tDecola).map((c) => c.pes));
-    const impacto = Math.max(...cargas.filter((c) => c.t > tDecola + 0.3).map((c) => c.pes));
-    expect(impacto).toBeGreaterThan(impulso);
-    expect(impacto).toBeGreaterThan(2);
-    expect(impacto).toBeLessThan(3);
-  });
-
-  test('termina parado: nos últimos 2 s o quadril não se mexe (tempo de estabilização)', () => {
-    const animacao = animacaoDoSalto(3);
-    const fim = duracao(animacao);
-    const ys = quadrosDe(animacao).filter((q) => q.t >= fim - 2).map((q) => q.esqueleto.pelve.y);
-    expect(Math.max(...ys) - Math.min(...ys)).toBeLessThan(0.002);
-  });
-
-  test('nível 1 (mãos nas barras): as mãos alcançam a barra o ciclo inteiro', () => {
-    for (const { esqueleto, t } of quadrosDe(animacaoDoSalto(1, 'barras'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
-  });
-
-  test('níveis 2 e 3 cruzam os braços no peito, qualquer que seja o apoio pedido', () => {
-    for (const nivel of [2, 3] as const) {
-      expect(amostrar(animacaoDoSalto(nivel, 'barras'), 0).pose.bracos).toBe('cruzados');
-    }
-  });
-
-  test('o salto sobe com o nível', () => {
-    expect(alturaDoSalto(1)).toBeLessThan(alturaDoSalto(2));
-    expect(alturaDoSalto(2)).toBeLessThan(alturaDoSalto(3));
+  test('sem inclinação: a base fica plana', () => {
+    expect(animacaoDe('agachamento-bulgaro-explosivo', { nivel: 3 })?.inclinacaoDaBase).toBeUndefined();
   });
 });

@@ -33,7 +33,7 @@ const NIVEL_PADRAO: Nivel = 1;
 
 const AVISO_DA_TRILHA: Partial<Record<Trilha, string>> = {
   fisio: 'Estes exercícios são feitos com a orientação de um profissional.',
-  desempenho: 'Saltos: aqueça antes, salte no centro da base e tire o banquinho da plataforma.',
+  desempenho: 'Subida rápida, sem saltar: aqueça antes, trave o banquinho e use as barras se perder o equilíbrio.',
 };
 
 const idDaAba = (trilha: Trilha) => `aba-${trilha}`;

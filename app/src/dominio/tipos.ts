@@ -39,7 +39,7 @@ export const IDS_DOS_EXERCICIOS = [
   'descida-de-degrau',
   'panturrilha-unilateral',
   'equilibrio-com-inclinacao',
-  'salto-com-contramovimento',
+  'agachamento-bulgaro-explosivo',
 ] as const;
 
 export type IdExercicio = (typeof IDS_DOS_EXERCICIOS)[number];

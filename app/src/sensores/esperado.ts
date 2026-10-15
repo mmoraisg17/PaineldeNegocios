@@ -8,7 +8,7 @@ import type { Esperado } from './tipos';
    (o esquerdo, por convenção da demonstração), e não no meio da base.
    Transferência de peso: o alvo anda pela base (frente, direita, trás,
    esquerda) e a execução certa leva o ponto até ele. */
-const EM_UM_PE = new Set(['panturrilha-unilateral', 'equilibrio-com-inclinacao', 'abducao-com-elastico']);
+const EM_UM_PE = new Set(['panturrilha-unilateral', 'equilibrio-com-inclinacao', 'abducao-com-elastico', 'agachamento-bulgaro-explosivo']);
 const PE_DE_APOIO_ML = 0.5;
 
 export const TEMPO_POR_ALVO = 4; // segundos em cada alvo (a animação segue o mesmo ritmo)
