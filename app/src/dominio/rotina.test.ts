@@ -5,18 +5,16 @@ import type { Perfil } from './perfil';
 import {
   FREQUENCIA_SEMANAL_PADRAO,
   montarRotina,
-  nivelMaximoCompativel,
   segundosDaDose,
   type AjusteProfissional,
 } from './rotina';
-import type { IdExercicio, Nivel } from './tipos';
+import type { IdExercicio } from './tipos';
 
 function perfilDe(sobrescrever: Partial<Perfil> = {}): Perfil {
   return congelarProfundo({
     nome: 'Teste',
     objetivo: 'equilibrio',
     firmeza: 'as-vezes',
-    inclinacaoMaxima: 3,
     ...sobrescrever,
   } satisfies Perfil);
 }
@@ -44,21 +42,16 @@ describe('segundosDaDose', () => {
 });
 
 describe('montarRotina: trilha Equilíbrio 60+', () => {
-  test('traz os 4 exercícios da trilha, na ordem do catálogo, quando a pessoa tem tudo', () => {
+  test('traz os 3 exercícios da trilha, na ordem do catálogo, quando a pessoa tem tudo', () => {
     const rotina = montarRotina(perfilDe(), {});
 
-    expect(idsDaRotina(rotina)).toEqual([
-      'sentar-e-levantar',
-      'pes-em-linha',
-      'abducao-com-elastico',
-      'transferencia-de-peso',
-    ]);
+    expect(idsDaRotina(rotina)).toEqual(['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico']);
   });
 
   test('fortalecimento também usa a trilha Equilíbrio 60+', () => {
     const rotina = montarRotina(perfilDe({ objetivo: 'fortalecimento' }), {});
 
-    expect(rotina.itens).toHaveLength(4);
+    expect(rotina.itens).toHaveLength(3);
   });
 
   test('todos os exercícios da trilha entram na rotina padrão, porque o kit traz todos os itens', () => {
@@ -80,23 +73,13 @@ describe('montarRotina: trilha Fisioterapia', () => {
   test('objetivo joelho põe primeiro os 2 exercícios do joelho, depois os do tornozelo', () => {
     const rotina = montarRotina(perfilDe({ objetivo: 'joelho' }), {});
 
-    expect(idsDaRotina(rotina)).toEqual([
-      'miniagachamento-simetrico',
-      'descida-de-degrau',
-      'panturrilha-unilateral',
-      'equilibrio-com-inclinacao',
-    ]);
+    expect(idsDaRotina(rotina)).toEqual(['miniagachamento-simetrico', 'descida-de-degrau', 'panturrilha-unilateral']);
   });
 
-  test('objetivo tornozelo põe primeiro os 2 exercícios do tornozelo, depois os do joelho', () => {
+  test('objetivo tornozelo põe primeiro o exercício do tornozelo, depois os do joelho', () => {
     const rotina = montarRotina(perfilDe({ objetivo: 'tornozelo' }), {});
 
-    expect(idsDaRotina(rotina)).toEqual([
-      'panturrilha-unilateral',
-      'equilibrio-com-inclinacao',
-      'miniagachamento-simetrico',
-      'descida-de-degrau',
-    ]);
+    expect(idsDaRotina(rotina)).toEqual(['panturrilha-unilateral', 'miniagachamento-simetrico', 'descida-de-degrau']);
   });
 
   test('todos os exercícios da trilha entram na rotina padrão', () => {
@@ -114,7 +97,7 @@ describe('montarRotina: níveis', () => {
     expect(rotina.itens.every((item) => item.nivel === 1)).toBe(true);
   });
 
-  test('aplica o nível informado e copia dose, apoio e inclinação do catálogo', () => {
+  test('aplica o nível informado e copia dose e apoio do catálogo', () => {
     const rotina = montarRotina(perfilDe(), { 'pes-em-linha': 3 });
     const item = rotina.itens.find((candidato) => candidato.exercicioId === 'pes-em-linha');
     const esperado = buscarExercicio('pes-em-linha')?.niveis[3];
@@ -123,70 +106,17 @@ describe('montarRotina: níveis', () => {
       nivel: 3,
       dose: esperado?.dose,
       apoio: esperado?.apoio,
-      inclinacao: esperado?.inclinacao,
     });
-  });
-
-  test.each([
-    [3, 'transferencia-de-peso', 3],
-    [2, 'transferencia-de-peso', 3],
-    [1, 'transferencia-de-peso', 2],
-    [0, 'transferencia-de-peso', 1],
-    [1, 'equilibrio-com-inclinacao', 2],
-    [0, 'equilibrio-com-inclinacao', 1],
-  ] as const)(
-    'com inclinação máxima %i, o nível pedido 3 de %s vira o nível %i',
-    (inclinacaoMaxima, id, nivelEsperado) => {
-      const objetivo = id === 'transferencia-de-peso' ? 'equilibrio' : 'tornozelo';
-      const rotina = montarRotina(perfilDe({ objetivo, inclinacaoMaxima }), { [id]: 3 });
-      const item = rotina.itens.find((candidato) => candidato.exercicioId === id);
-
-      expect(item?.nivel).toBe(nivelEsperado);
-      expect(item?.inclinacao).toBeLessThanOrEqual(inclinacaoMaxima);
-    },
-  );
-
-  test('nunca devolve item com inclinação acima da máxima, em nenhum nível', () => {
-    const todosNiveis: Nivel[] = [1, 2, 3];
-    for (const nivel of todosNiveis) {
-      const niveis = {
-        'transferencia-de-peso': nivel,
-        'equilibrio-com-inclinacao': nivel,
-      } as const;
-      const rotinas = [
-        montarRotina(perfilDe({ inclinacaoMaxima: 0 }), niveis),
-        montarRotina(perfilDe({ objetivo: 'tornozelo', inclinacaoMaxima: 0 }), niveis),
-      ];
-      for (const rotina of rotinas) {
-        expect(rotina.itens.every((item) => item.inclinacao === 0)).toBe(true);
-      }
-    }
-  });
-});
-
-describe('nivelMaximoCompativel', () => {
-  test.each([
-    ['transferencia-de-peso', 3, 3],
-    ['transferencia-de-peso', 2, 3],
-    ['transferencia-de-peso', 1, 2],
-    ['transferencia-de-peso', 0, 1],
-    ['equilibrio-com-inclinacao', 1, 2],
-    ['equilibrio-com-inclinacao', 0, 1],
-    ['sentar-e-levantar', 0, 3],
-  ] as const)('%s com inclinação máxima %i permite até o nível %i', (id, inclinacaoMaxima, esperado) => {
-    const exercicio = buscarExercicio(id);
-
-    expect(exercicio && nivelMaximoCompativel(exercicio, inclinacaoMaxima)).toBe(esperado);
   });
 });
 
 describe('montarRotina: tempo estimado', () => {
   test('soma as doses e 1 minuto de transição por exercício, arredondando para cima', () => {
-    // tandem nível 1: 10 s; transferência nível 1: 8 repetições x 4 s = 32 s.
-    // (10 + 32 + 2 x 60) s = 162 s = 2,7 min -> 3 min.
-    const rotina = montarRotina(perfilDe(), {}, { autor: 'Ana', exerciciosRemovidos: ['sentar-e-levantar', 'abducao-com-elastico'] });
+    // sentar e levantar nível 1: 8 repetições x 4 s = 32 s; tandem nível 1: 10 s.
+    // (32 + 10 + 2 x 60) s = 162 s = 2,7 min -> 3 min.
+    const rotina = montarRotina(perfilDe(), {}, { autor: 'Ana', exerciciosRemovidos: ['abducao-com-elastico'] });
 
-    expect(idsDaRotina(rotina)).toEqual(['pes-em-linha', 'transferencia-de-peso']);
+    expect(idsDaRotina(rotina)).toEqual(['sentar-e-levantar', 'pes-em-linha']);
     expect(rotina.minutosEstimados).toBe(3);
   });
 
@@ -194,27 +124,27 @@ describe('montarRotina: tempo estimado', () => {
     // descida de degrau nível 1: 6 repetições x 4 s x 2 lados = 48 s, mais 60 s de transição.
     const rotina = montarRotina(perfilDe({ objetivo: 'joelho' }), {}, {
       autor: 'Ana',
-      exerciciosRemovidos: ['panturrilha-unilateral', 'miniagachamento-simetrico', 'equilibrio-com-inclinacao'],
+      exerciciosRemovidos: ['panturrilha-unilateral', 'miniagachamento-simetrico'],
     });
 
     expect(idsDaRotina(rotina)).toEqual(['descida-de-degrau']);
     expect(rotina.minutosEstimados).toBe(2);
   });
 
-  test('o equilíbrio num pé só não dobra a dose (15 s + 60 s de transição = 2 min)', () => {
+  test('a panturrilha do nível 1, com os dois pés, não dobra a dose (40 s + 60 s de transição = 2 min)', () => {
     const rotina = montarRotina(perfilDe({ objetivo: 'tornozelo' }), {}, {
       autor: 'Ana',
-      exerciciosRemovidos: ['panturrilha-unilateral', 'miniagachamento-simetrico', 'descida-de-degrau'],
+      exerciciosRemovidos: ['miniagachamento-simetrico', 'descida-de-degrau'],
     });
 
-    expect(rotina.itens[0]?.dose).toEqual({ tipo: 'tempo', segundos: 15 });
+    expect(rotina.itens[0]?.dose).toEqual({ tipo: 'repeticoes', repeticoes: 10 });
     expect(rotina.minutosEstimados).toBe(2);
   });
 
   test('uma rotina sem exercícios tem 0 minuto', () => {
     const rotina = montarRotina(perfilDe(), {}, {
       autor: 'Carlos',
-      exerciciosRemovidos: ['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico', 'transferencia-de-peso'],
+      exerciciosRemovidos: ['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico'],
     });
 
     expect(rotina.itens).toEqual([]);
@@ -243,14 +173,14 @@ describe('montarRotina: ajustes do profissional', () => {
     const rotina = montarRotina(perfilDe(), {}, { ...ajusteBase, exerciciosRemovidos: ['pes-em-linha'] });
 
     expect(idsDaRotina(rotina)).not.toContain('pes-em-linha');
-    expect(rotina.itens).toHaveLength(3);
+    expect(rotina.itens).toHaveLength(2);
   });
 
   test('inclui, no fim, um exercício de outra trilha', () => {
     const rotina = montarRotina(perfilDe(), {}, { ...ajusteBase, exerciciosIncluidos: ['miniagachamento-simetrico'] });
 
     expect(idsDaRotina(rotina).at(-1)).toBe('miniagachamento-simetrico');
-    expect(rotina.itens).toHaveLength(5);
+    expect(rotina.itens).toHaveLength(4);
   });
 
   test('incluir um exercício que já está na rotina não o duplica', () => {
@@ -275,7 +205,7 @@ describe('montarRotina: ajustes do profissional', () => {
       exerciciosIncluidos: ['nao-existe' as IdExercicio],
     });
 
-    expect(rotina.itens).toHaveLength(4);
+    expect(rotina.itens).toHaveLength(3);
   });
 
   test('o nível fixado prevalece sobre o nível calculado e leva o nome do autor', () => {
@@ -288,16 +218,6 @@ describe('montarRotina: ajustes do profissional', () => {
 
     expect(fixado).toMatchObject({ nivel: 2, fixadoPor: 'Carlos' });
     expect(livre?.fixadoPor).toBeUndefined();
-  });
-
-  test('o nível fixado também respeita o limite físico de inclinação da plataforma', () => {
-    const rotina = montarRotina(perfilDe({ inclinacaoMaxima: 1 }), {}, {
-      ...ajusteBase,
-      niveisFixados: { 'transferencia-de-peso': 3 },
-    });
-    const item = rotina.itens.find((candidato) => candidato.exercicioId === 'transferencia-de-peso');
-
-    expect(item).toMatchObject({ nivel: 2, fixadoPor: 'Carlos' });
   });
 
   test('anexa a meta de simetria ao item do exercício', () => {

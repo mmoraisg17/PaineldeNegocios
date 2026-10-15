@@ -203,7 +203,7 @@ function Graficos({ semanas, rotulos }: { semanas: readonly SemanaResumida[]; ro
 type NivelDoExercicio = { id: string; nome: string; nivel: Nivel };
 
 /* O nível da rotina vale mais que o salvo: ele já respeita o nível fixado
-   pelo profissional e a inclinação máxima da plataforma da pessoa. */
+   pelo profissional. */
 function niveisDosExercicios(praticante: DadosPraticante, itensDaRotina: readonly ItemRotina[]): NivelDoExercicio[] {
   return exerciciosDaTrilha(trilhaDoObjetivo(praticante.perfil.objetivo)).map((exercicio) => ({
     id: exercicio.id,

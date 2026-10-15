@@ -6,16 +6,12 @@ const NIVEIS: readonly Nivel[] = [1, 2, 3];
 type Props = {
   exercicio: Exercicio;
   item: ItemDoFormulario;
-  /* Maior nível que a plataforma do aluno executa (inclinação máxima). */
-  nivelMaximo: Nivel;
   aoMudar: (mudanca: Partial<ItemDoFormulario>) => void;
 };
 
 /* Um exercício da trilha no formulário "Ajustar rotina": incluir/remover e,
-   se incluído, o nível (com a opção de fixá-lo). Os níveis que a plataforma do
-   aluno não alcança ficam desabilitados e com o motivo escrito, porque a
-   rotina os rebaixaria em silêncio ao montar. */
-export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Props) {
+   se incluído, o nível (com a opção de fixá-lo). */
+export function LinhaDoExercicio({ exercicio, item, aoMudar }: Props) {
   return (
     <li className="flex flex-col gap-2 rounded-botao border-2 border-borda p-3">
       <label className="flex min-h-12 items-center gap-3 text-lg font-semibold text-texto">
@@ -35,14 +31,13 @@ export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Prop
             {NIVEIS.map((nivel) => (
               <label
                 key={nivel}
-                className="flex min-h-16 flex-col items-center justify-center gap-1 whitespace-nowrap rounded-botao border-2 border-borda px-1 py-2 text-base font-semibold has-checked:border-marca has-checked:bg-primaria-suave has-disabled:border-dashed has-disabled:text-texto-suave"
+                className="flex min-h-16 flex-col items-center justify-center gap-1 whitespace-nowrap rounded-botao border-2 border-borda px-1 py-2 text-base font-semibold has-checked:border-marca has-checked:bg-primaria-suave"
               >
                 <input
                   type="radio"
                   name={`nivel-${exercicio.id}`}
                   value={nivel}
                   checked={item.nivel === nivel}
-                  disabled={nivel > nivelMaximo}
                   onChange={() => aoMudar({ nivel })}
                   className="size-5 shrink-0 accent-marca"
                 />
@@ -50,9 +45,6 @@ export function LinhaDoExercicio({ exercicio, item, nivelMaximo, aoMudar }: Prop
               </label>
             ))}
           </div>
-          {nivelMaximo < 3 ? (
-            <p className="text-base text-texto-suave">A plataforma deste aluno chega até o nível {nivelMaximo}.</p>
-          ) : null}
           <label className="flex min-h-12 items-center gap-3 text-base text-texto">
             <input
               type="checkbox"

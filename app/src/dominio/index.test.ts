@@ -9,7 +9,6 @@ describe('API pública do domínio', () => {
       'nivelInicial',
       'trilhaDoObjetivo',
       'montarRotina',
-      'nivelMaximoCompativel',
       'permissoesDoVinculo',
       'solicitarVinculo',
       'ajusteVigente',

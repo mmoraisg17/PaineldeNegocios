@@ -51,15 +51,8 @@ export function MapaDePressao({ leitura, esperado, estado }: { leitura: Leitura;
         ].map(([x, y]) => (
           <circle key={`${x}-${y}`} cx={x} cy={y} r="7" className="fill-texto-suave" />
         ))}
-        {/* Zona da execução certa naquele instante (ou o alvo, na transferência de peso) */}
-        <circle
-          cx={zona.x}
-          cy={zona.y}
-          r={esperado.alvo ? 20 : 26}
-          className={esperado.alvo ? 'fill-none stroke-dado' : 'fill-dado-trilha stroke-dado/30'}
-          strokeWidth={esperado.alvo ? 3 : 1.5}
-          strokeDasharray={esperado.alvo ? '6 4' : undefined}
-        />
+        {/* Zona da execução certa naquele instante */}
+        <circle cx={zona.x} cy={zona.y} r={26} className="fill-dado-trilha stroke-dado/30" strokeWidth={1.5} />
         <g style={{ transform: `translate(${ponto.x}px, ${ponto.y}px)`, transition: 'transform 100ms linear' }}>
           <circle r="13" className={`${COR_DO_PONTO[estado]} transition-colors`} />
           <circle r="5" className="fill-superficie" />

@@ -8,7 +8,6 @@ import {
   ajusteVigente,
   exerciciosDaTrilha,
   montarRotina,
-  nivelMaximoCompativel,
   rotinaDoPraticante,
   trilhaDoObjetivo,
 } from '../../dominio';
@@ -49,7 +48,7 @@ const limitar = (valor: number, minimo: number, maximo: number): number => Math.
 
 /* Parte do que vale hoje para o aluno: a rotina já montada (com o ajuste
    vigente), os níveis atuais e as metas. Devolve undefined se o aluno não
-   existe. O nível mostrado nunca passa do que a plataforma dele alcança. */
+   existe. */
 export function formularioInicial(estado: EstadoApp, alunoId: string): FormularioDaRotina | undefined {
   const praticante = estado.praticantes[alunoId];
   if (!praticante) return undefined;
@@ -60,12 +59,10 @@ export function formularioInicial(estado: EstadoApp, alunoId: string): Formulari
 
   const itens = exerciciosDaTrilha(trilhaDoObjetivo(praticante.perfil.objetivo)).map((exercicio): ItemDoFormulario => {
     const fixado = ajuste?.niveisFixados?.[exercicio.id];
-    const desejado = fixado ?? praticante.niveis[exercicio.id] ?? 1;
-    const maximo = nivelMaximoCompativel(exercicio, praticante.perfil.inclinacaoMaxima);
     return {
       exercicioId: exercicio.id,
       incluido: naRotina.has(exercicio.id),
-      nivel: Math.min(desejado, maximo) as Nivel,
+      nivel: fixado ?? praticante.niveis[exercicio.id] ?? 1,
       fixar: fixado !== undefined,
     };
   });

@@ -257,7 +257,7 @@ test('os filtros oferecem os quatro acessórios e os três níveis', () => {
 
   // Assert
   const acessorios = within(screen.getByRole('group', { name: 'Filtrar por acessório' }));
-  expect(acessorios.getAllByRole('button').map((b) => b.textContent?.replace('✓', '').trim())).toEqual(['Barras', 'Elástico', 'Inclinação', 'Cadeira']);
+  expect(acessorios.getAllByRole('button').map((b) => b.textContent?.replace('✓', '').trim())).toEqual(['Barras', 'Elástico', 'Cadeira']);
   const niveis = within(screen.getByRole('group', { name: 'Filtrar por nível' }));
   expect(niveis.getAllByRole('button')).toHaveLength(3);
 });

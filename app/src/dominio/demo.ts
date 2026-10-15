@@ -1,5 +1,4 @@
 import { autorizar, criarVinculoPendente, type Vinculo } from './acompanhamento';
-import { buscarExercicio } from './catalogo';
 import { ITERACOES_DA_SENHA, type Credencial } from './credenciais';
 import {
   estadoInicial,
@@ -13,7 +12,7 @@ import { copiarProfundo } from './imutavel';
 import { limitar } from './numeros';
 import { nivelInicial, type Perfil } from './perfil';
 import { decidirNivel, notaDeExecucao } from './progressao';
-import { montarRotina, nivelMaximoCompativel, type AjusteProfissional, type ItemRotina, type NiveisAtuais } from './rotina';
+import { montarRotina, type AjusteProfissional, type ItemRotina, type NiveisAtuais } from './rotina';
 import { notaMediaDaSessao, notasRecentesDoExercicio, type ResultadoExercicio, type Sessao } from './sessao';
 import type { Percepcao } from './tipos';
 
@@ -110,14 +109,12 @@ const PERFIL_DA_LUCIA: Perfil = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
   firmeza: 'as-vezes',
-  inclinacaoMaxima: 2,
 };
 
 const PERFIL_DO_RAFAEL: Perfil = {
   nome: 'Rafael',
   objetivo: 'joelho',
   firmeza: 'as-vezes',
-  inclinacaoMaxima: 3,
 };
 
 /* Jogador de futevôlei de 24 anos: quer força e explosão nas pernas. */
@@ -125,7 +122,6 @@ const PERFIL_DO_LUCAS: Perfil = {
   nome: 'Lucas',
   objetivo: 'potencia',
   firmeza: 'firme',
-  inclinacaoMaxima: 3,
 };
 
 /* A fisioterapeuta fixa o miniagachamento no nível 2 e quer 50/50. */
@@ -195,16 +191,13 @@ function reavaliarNiveis(
   itens: readonly ItemRotina[],
   historico: readonly Sessao[],
   percepcao: Percepcao,
-  perfil: Perfil,
 ): NiveisAtuais {
   return itens.reduce<NiveisAtuais>((atuais, item) => {
-    const exercicio = buscarExercicio(item.exercicioId);
     const decisao = decidirNivel({
       nivelAtual: item.nivel,
       notasRecentes: notasRecentesDoExercicio(historico, item.exercicioId, item.nivel),
       percepcao,
       fixado: item.fixadoPor !== undefined,
-      ...(exercicio ? { nivelMaximo: nivelMaximoCompativel(exercicio, perfil.inclinacaoMaxima) } : {}),
     });
     return { ...atuais, [item.exercicioId]: decisao.nivel };
   }, niveis);
@@ -240,7 +233,7 @@ function simularHistorico(
     const percepcao = percepcaoDaNota(notaMediaDaSessao(sessaoSemPercepcao));
     const sessao: Sessao = { ...sessaoSemPercepcao, percepcao };
     const sessoes = [...historico.sessoes, sessao];
-    historico = { sessoes, niveis: reavaliarNiveis(historico.niveis, itens, sessoes, percepcao, perfil) };
+    historico = { sessoes, niveis: reavaliarNiveis(historico.niveis, itens, sessoes, percepcao) };
   }
   return historico;
 }

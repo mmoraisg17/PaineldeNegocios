@@ -121,7 +121,7 @@ describe('TabelaPorExercicio', () => {
       <TabelaPorExercicio
         exercicios={[
           exercicio({ id: 'pes-em-linha', nome: 'Caiu', variacaoDaNota: -7 }),
-          exercicio({ id: 'transferencia-de-peso', nome: 'Igual', variacaoDaNota: 0 }),
+          exercicio({ id: 'abducao-com-elastico', nome: 'Igual', variacaoDaNota: 0 }),
           exercicio({ id: 'descida-de-degrau', nome: 'Subiu pouco', variacaoDaNota: 1 }),
         ]}
       />,

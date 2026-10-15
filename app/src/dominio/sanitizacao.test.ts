@@ -6,7 +6,6 @@ const PERFIL = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
   firmeza: 'as-vezes',
-  inclinacaoMaxima: 2,
 };
 
 const RESULTADO = {
@@ -208,8 +207,6 @@ describe('sanearEstado: praticantes', () => {
           lucia: PRATICANTE,
           sem: { ...PRATICANTE, id: 'sem', perfil: null },
           ruim: { ...PRATICANTE, id: 'ruim', perfil: { ...PERFIL, objetivo: 'voar' } },
-          alto: { ...PRATICANTE, id: 'alto', perfil: { ...PERFIL, inclinacaoMaxima: 9 } },
-          fracionado: { ...PRATICANTE, id: 'fracionado', perfil: { ...PERFIL, inclinacaoMaxima: 1.5 } },
           firmeza: { ...PRATICANTE, id: 'firmeza', perfil: { ...PERFIL, firmeza: 'tanto faz' } },
           semNome: { ...PRATICANTE, id: 'semNome', perfil: { ...PERFIL, nome: 7 } },
           semId: { ...PRATICANTE, id: undefined },
@@ -250,16 +247,16 @@ describe('sanearEstado: níveis', () => {
       'sentar-e-levantar': 2,
       'descida-de-degrau': 0,
       'abducao-com-elastico': 2.5,
-      'transferencia-de-peso': '3',
       'miniagachamento-simetrico': Number.NaN,
-      'panturrilha-unilateral': null,
-      'equilibrio-com-inclinacao': 1,
+      'panturrilha-unilateral': '3',
+      'agachamento-bulgaro-explosivo': null,
+      'descida-de-degrau-2': 1,
       inexistente: 2,
     };
 
     const estado = sanearEstado(comPraticante({ niveis }));
 
-    expect(lucia(estado)?.niveis).toEqual({ 'sentar-e-levantar': 2, 'equilibrio-com-inclinacao': 1 });
+    expect(lucia(estado)?.niveis).toEqual({ 'sentar-e-levantar': 2 });
   });
 
   test('níveis que não é objeto vira objeto vazio, sem descartar o praticante', () => {

@@ -41,7 +41,7 @@ const ids = (() => {
   return () => `id-${(n += 1)}`;
 })();
 
-const PERFIL: Perfil = { nome: 'Você', objetivo: 'equilibrio', firmeza: 'as-vezes', inclinacaoMaxima: 3 };
+const PERFIL: Perfil = { nome: 'Você', objetivo: 'equilibrio', firmeza: 'as-vezes' };
 
 const resultado = (id: ResultadoExercicio['id'], nota: number, nivel: 1 | 2 | 3 = 1): ResultadoExercicio => ({
   id,
@@ -63,12 +63,10 @@ describe('conta', () => {
 });
 
 describe('criar praticante', () => {
-  test('aplica o nível sugerido a todos os exercícios da trilha, limitado pela inclinação', () => {
-    const { estado, id } = criarPraticante(estadoInicial(), { ...PERFIL, inclinacaoMaxima: 0 }, 3, ids);
+  test('aplica o nível sugerido a todos os exercícios da trilha, e só a eles', () => {
+    const { estado, id } = criarPraticante(estadoInicial(), PERFIL, 3, ids);
     const niveis = estado.praticantes[id]!.niveis;
-    expect(niveis['pes-em-linha']).toBe(3);
-    // Transferência de peso pede inclinação nos níveis 2 e 3: com plataforma plana, fica no 1.
-    expect(niveis['transferencia-de-peso']).toBe(1);
+    expect(niveis).toEqual({ 'sentar-e-levantar': 3, 'pes-em-linha': 3, 'abducao-com-elastico': 3 });
     expect(niveis['miniagachamento-simetrico']).toBeUndefined();
   });
 });

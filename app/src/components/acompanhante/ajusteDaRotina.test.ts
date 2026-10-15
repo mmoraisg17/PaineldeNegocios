@@ -30,12 +30,7 @@ describe('formularioInicial', () => {
     const formulario = formularioDe(estado, 'lucia');
 
     // Assert
-    expect(formulario.itens.map((i) => i.exercicioId)).toEqual([
-      'sentar-e-levantar',
-      'pes-em-linha',
-      'abducao-com-elastico',
-      'transferencia-de-peso',
-    ]);
+    expect(formulario.itens.map((i) => i.exercicioId)).toEqual(['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico']);
     expect(formulario.itens.every((i) => i.incluido && !i.fixar)).toBe(true);
     expect(formulario.itens.map((i) => i.nivel)).toEqual(
       formulario.itens.map((i) => estado.praticantes['lucia']?.niveis[i.exercicioId] ?? 1),
@@ -129,7 +124,7 @@ describe('ajusteDoFormulario', () => {
     const lucia = estado.praticantes['lucia']!;
     let formulario = comItem(formularioDe(estado, 'lucia'), 'sentar-e-levantar', { nivel: 3, fixar: true });
     formulario = comItem(formulario, 'pes-em-linha', { nivel: 2, fixar: true, incluido: false });
-    formulario = comItem(formulario, 'transferencia-de-peso', { nivel: 2, fixar: false });
+    formulario = comItem(formulario, 'abducao-com-elastico', { nivel: 2, fixar: false });
 
     // Act
     const ajuste = ajusteDoFormulario(formulario, lucia);

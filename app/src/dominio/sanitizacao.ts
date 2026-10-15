@@ -22,7 +22,7 @@ import {
 import { TAMANHO_MAXIMO_DA_FUNCAO, limparNome, type Firmeza, type Objetivo, type Perfil } from './perfil';
 import type { AjusteProfissional, MetaDeSimetria, NiveisAtuais } from './rotina';
 import type { ResultadoExercicio, Sessao } from './sessao';
-import { IDS_DOS_EXERCICIOS, type IdExercicio, type Inclinacao, type Nivel, type Percepcao } from './tipos';
+import { IDS_DOS_EXERCICIOS, type IdExercicio, type Nivel, type Percepcao } from './tipos';
 
 /* Sanitização do estado lido do aparelho. O dado salvo é "não confiável": pode
    ter vindo de uma versão antiga, de uma edição manual ou de corrupção.
@@ -40,7 +40,6 @@ const STATUS: readonly StatusDoVinculo[] = ['pendente', 'autorizado', 'revogado'
 const PERCEPCOES: readonly Percepcao[] = ['facil', 'ok', 'dificil'];
 const PAPEIS: readonly PapelDaConta[] = ['praticante', 'acompanhante'];
 const NIVEIS: readonly Nivel[] = [1, 2, 3];
-const INCLINACOES: readonly Inclinacao[] = [0, 1, 2, 3];
 
 function ehObjeto(valor: unknown): valor is Objeto {
   return typeof valor === 'object' && valor !== null && !Array.isArray(valor);
@@ -107,13 +106,15 @@ function sanearAjuste(valor: unknown): AjusteProfissional | undefined {
   };
 }
 
+/* Perfis salvos antes da retirada da inclinação ainda trazem
+   `inclinacaoMaxima`: como todo campo que não está na lista, ele é ignorado
+   (o perfil é montado campo a campo) e o perfil continua válido. */
 function sanearPerfil(valor: unknown): Perfil | undefined {
   if (!ehObjeto(valor)) return undefined;
   const objetivo = dentroDe(OBJETIVOS, valor['objetivo']);
   const firmeza = dentroDe(FIRMEZAS, valor['firmeza']);
-  const inclinacaoMaxima = dentroDe(INCLINACOES, valor['inclinacaoMaxima']);
-  if (!ehTexto(valor['nome']) || !objetivo || !firmeza || inclinacaoMaxima === undefined) return undefined;
-  return { nome: limparNome(valor['nome']), objetivo, firmeza, inclinacaoMaxima };
+  if (!ehTexto(valor['nome']) || !objetivo || !firmeza) return undefined;
+  return { nome: limparNome(valor['nome']), objetivo, firmeza };
 }
 
 function sanearResultado(valor: unknown): ResultadoExercicio | undefined {

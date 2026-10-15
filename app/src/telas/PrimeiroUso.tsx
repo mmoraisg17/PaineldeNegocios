@@ -120,7 +120,7 @@ function Triagem() {
 
       {passo === 'conectar' && <Conectar aoConcluir={() => setPasso('calibrar')} />}
       {passo === 'calibrar' && <Medicao titulo="Calibração" instrucao="Suba na plataforma com os dois pés na área dos sensores, um ao lado do outro. Segure as barras se quiser e fique parado." segundos={DURACAO_CALIBRACAO} rotuloBotao="Estou em cima da plataforma" fim="Pronto! Seu peso foi registrado." aoConcluir={() => setPasso('resultado')} />}
-      {passo === 'resultado' && <Resultado perfil={{ nome: nome.trim() || 'Você', objetivo, firmeza, inclinacaoMaxima: 3 }} />}
+      {passo === 'resultado' && <Resultado perfil={{ nome: nome.trim() || 'Você', objetivo, firmeza }} />}
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { TOLERANCIA_DA_META_EM_PONTOS, alertasDoAluno, podeVer, permissoes, revo
 import { CONTAS_DA_DEMO, SENHA_DA_DEMO, criarEstadoDemo, criarGeradorPseudoaleatorio, IDS_DEMO } from './demo';
 import { ITERACOES_DA_SENHA, buscarCredencial, conferirSenha } from './credenciais';
 import { carregarEstado, salvarEstado, type Armazenamento } from './persistencia';
-import { buscarExercicio } from './catalogo';
 import { ajusteVigente, rotinaDoPraticante } from './estado';
 import { montarRotina } from './rotina';
 import { notaDeExecucao } from './progressao';
@@ -315,7 +314,7 @@ describe('estado de demonstração: alertas e recados', () => {
   });
 });
 
-describe('estado de demonstração: vínculos, ajuste vigente e inclinação', () => {
+describe('estado de demonstração: vínculos e ajuste vigente', () => {
   test('cada vínculo tem um id único que não deriva de aluno e acompanhante', () => {
     const ids = demo.vinculos.map((vinculo) => vinculo.id);
 
@@ -338,21 +337,6 @@ describe('estado de demonstração: vínculos, ajuste vigente e inclinação', (
 
     expect(ajusteVigente(semAna, IDS_DEMO.rafael)).toBeUndefined();
     expect(rotinaDoPraticante(semAna, IDS_DEMO.rafael)?.ajustadoPor).toBeUndefined();
-  });
-
-  test('os níveis gravados e treinados nunca exigem mais inclinação do que a plataforma da pessoa tem', () => {
-    for (const dados of [lucia, rafael]) {
-      const maxima = dados?.perfil.inclinacaoMaxima ?? 0;
-      const niveis = Object.entries(dados?.niveis ?? {});
-
-      expect(niveis.length).toBeGreaterThan(0);
-      for (const [id, nivel] of niveis) {
-        expect(buscarExercicio(id)?.niveis[nivel].inclinacao).toBeLessThanOrEqual(maxima);
-      }
-      for (const exercicio of exerciciosDe(dados?.sessoes ?? [])) {
-        expect(buscarExercicio(exercicio.id)?.niveis[exercicio.nivel].inclinacao).toBeLessThanOrEqual(maxima);
-      }
-    }
   });
 });
 
@@ -464,9 +448,9 @@ describe('estado de demonstração: contas com senha', () => {
   );
 
   test('a rotina e o histórico das contas de demonstração seguem o mesmo sem a pergunta "o que há em casa"', () => {
-    // Lúcia fica com a trilha inteira (4 exercícios); Rafael também (4, da trilha de fisio).
-    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(4);
-    expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(4);
+    // Lúcia fica com a trilha inteira (3 exercícios); Rafael também (3, da trilha de fisio).
+    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(3);
+    expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(3);
     expect(lucia?.sessoes).toHaveLength(16);
     expect(rafael?.sessoes).toHaveLength(17);
   });
@@ -479,7 +463,7 @@ describe('conta modelo do Lucas (atleta de futevôlei, força e explosão)', () 
     expect(lucas).toMatchObject({
       id: 'lucas',
       idade: 24,
-      perfil: { nome: 'Lucas', objetivo: 'potencia', firmeza: 'firme', inclinacaoMaxima: 3 },
+      perfil: { nome: 'Lucas', objetivo: 'potencia', firmeza: 'firme' },
     });
   });
 

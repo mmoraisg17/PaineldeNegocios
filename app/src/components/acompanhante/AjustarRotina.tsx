@@ -1,10 +1,5 @@
 import { useId, useState } from 'react';
-import {
-  type Acompanhante,
-  type DadosPraticante,
-  buscarExercicio,
-  nivelMaximoCompativel,
-} from '../../dominio';
+import { type Acompanhante, type DadosPraticante, buscarExercicio } from '../../dominio';
 import { salvarAjuste } from '../../estado/acoes';
 import { useApp } from '../../estado/ContextoApp';
 import {
@@ -74,7 +69,6 @@ export function AjustarRotina({ aluno, acompanhante }: { aluno: DadosPraticante;
               key={item.exercicioId}
               exercicio={exercicio}
               item={item}
-              nivelMaximo={nivelMaximoCompativel(exercicio, aluno.perfil.inclinacaoMaxima)}
               aoMudar={(mudanca) => mudarItem(item.exercicioId, mudanca)}
             />,
           ];
