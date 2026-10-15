@@ -11,7 +11,7 @@ import { Icone } from '../components/Icone';
    perfil em 2 perguntas → conectar a plataforma → calibração de 2 s → nível
    sugerido. A plataforma é simulada: conexão e calibração são encenadas.
    Não há avaliação de 10 s nem pergunta de acessórios: o produto já vem com
-   elástico e assento, e o nível inicial vem só das respostas (nivelPelaFirmeza).
+   as barras e o assento, e o nível inicial vem só das respostas (nivelPelaFirmeza).
    Se ele ficar alto ou baixo, a progressão corrige depois, treino a treino. */
 
 type Passo = 'perfil' | 'conectar' | 'calibrar' | 'resultado';

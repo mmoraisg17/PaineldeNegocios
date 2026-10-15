@@ -6,7 +6,7 @@ import { type Esqueleto, alturaDaSuperficie } from './corpo';
 
 export const LIMIAR_DE_ALINHAMENTO = 0.025; // m: até 2,5 cm é "no meio"
 
-/* Meio dos pés APOIADOS: num pé só (panturrilha, abdução, búlgaro), o
+/* Meio dos pés APOIADOS: num pé só (panturrilha, búlgaro), o
    quadril deve ficar sobre o pé de apoio, não entre os dois. */
 export function meioDosPes(e: Esqueleto): { x: number; y: number; z: number } {
   const todos = [e.lados.esquerdo, e.lados.direito];

@@ -450,7 +450,7 @@ describe('sanearEstado: dados salvos antes da retirada da inclinação', () => {
     const rotina = rotinaDoPraticante(antigo(), 'lucia');
 
     // Assert: trilha sem o sentar e levantar (removido pelo ajuste), mais a descida incluída
-    expect(rotina?.itens.map((item) => item.exercicioId)).toEqual(['pes-em-linha', 'abducao-com-elastico', 'descida-de-degrau']);
+    expect(rotina?.itens.map((item) => item.exercicioId)).toEqual(['pes-em-linha', 'descida-de-degrau']);
     expect(rotina?.itens.every((item) => !('inclinacao' in item))).toBe(true);
   });
 });

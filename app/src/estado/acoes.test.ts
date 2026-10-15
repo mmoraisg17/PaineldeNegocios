@@ -66,7 +66,7 @@ describe('criar praticante', () => {
   test('aplica o nível sugerido a todos os exercícios da trilha, e só a eles', () => {
     const { estado, id } = criarPraticante(estadoInicial(), PERFIL, 3, ids);
     const niveis = estado.praticantes[id]!.niveis;
-    expect(niveis).toEqual({ 'sentar-e-levantar': 3, 'pes-em-linha': 3, 'abducao-com-elastico': 3 });
+    expect(niveis).toEqual({ 'sentar-e-levantar': 3, 'pes-em-linha': 3 });
     expect(niveis['miniagachamento-simetrico']).toBeUndefined();
   });
 });

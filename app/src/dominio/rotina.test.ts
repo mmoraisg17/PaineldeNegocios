@@ -42,16 +42,16 @@ describe('segundosDaDose', () => {
 });
 
 describe('montarRotina: trilha Equilíbrio 60+', () => {
-  test('traz os 3 exercícios da trilha, na ordem do catálogo, quando a pessoa tem tudo', () => {
+  test('traz os 2 exercícios da trilha, na ordem do catálogo, quando a pessoa tem tudo', () => {
     const rotina = montarRotina(perfilDe(), {});
 
-    expect(idsDaRotina(rotina)).toEqual(['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico']);
+    expect(idsDaRotina(rotina)).toEqual(['sentar-e-levantar', 'pes-em-linha']);
   });
 
   test('fortalecimento também usa a trilha Equilíbrio 60+', () => {
     const rotina = montarRotina(perfilDe({ objetivo: 'fortalecimento' }), {});
 
-    expect(rotina.itens).toHaveLength(3);
+    expect(rotina.itens).toHaveLength(2);
   });
 
   test('todos os exercícios da trilha entram na rotina padrão, porque o kit traz todos os itens', () => {
@@ -61,10 +61,9 @@ describe('montarRotina: trilha Equilíbrio 60+', () => {
     expect(idsDaRotina(rotina)).toEqual(naTrilha);
   });
 
-  test('a abdução com elástico e o sentar e levantar entram sem nenhuma pergunta sobre a casa', () => {
+  test('o sentar e levantar entra sem nenhuma pergunta sobre a casa', () => {
     const rotina = montarRotina(perfilDe(), {});
 
-    expect(idsDaRotina(rotina)).toContain('abducao-com-elastico');
     expect(idsDaRotina(rotina)).toContain('sentar-e-levantar');
   });
 });
@@ -114,7 +113,7 @@ describe('montarRotina: tempo estimado', () => {
   test('soma as doses e 1 minuto de transição por exercício, arredondando para cima', () => {
     // sentar e levantar nível 1: 8 repetições x 4 s = 32 s; tandem nível 1: 10 s.
     // (32 + 10 + 2 x 60) s = 162 s = 2,7 min -> 3 min.
-    const rotina = montarRotina(perfilDe(), {}, { autor: 'Ana', exerciciosRemovidos: ['abducao-com-elastico'] });
+    const rotina = montarRotina(perfilDe(), {});
 
     expect(idsDaRotina(rotina)).toEqual(['sentar-e-levantar', 'pes-em-linha']);
     expect(rotina.minutosEstimados).toBe(3);
@@ -144,7 +143,7 @@ describe('montarRotina: tempo estimado', () => {
   test('uma rotina sem exercícios tem 0 minuto', () => {
     const rotina = montarRotina(perfilDe(), {}, {
       autor: 'Carlos',
-      exerciciosRemovidos: ['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico'],
+      exerciciosRemovidos: ['sentar-e-levantar', 'pes-em-linha'],
     });
 
     expect(rotina.itens).toEqual([]);
@@ -173,14 +172,14 @@ describe('montarRotina: ajustes do profissional', () => {
     const rotina = montarRotina(perfilDe(), {}, { ...ajusteBase, exerciciosRemovidos: ['pes-em-linha'] });
 
     expect(idsDaRotina(rotina)).not.toContain('pes-em-linha');
-    expect(rotina.itens).toHaveLength(2);
+    expect(rotina.itens).toHaveLength(1);
   });
 
   test('inclui, no fim, um exercício de outra trilha', () => {
     const rotina = montarRotina(perfilDe(), {}, { ...ajusteBase, exerciciosIncluidos: ['miniagachamento-simetrico'] });
 
     expect(idsDaRotina(rotina).at(-1)).toBe('miniagachamento-simetrico');
-    expect(rotina.itens).toHaveLength(4);
+    expect(rotina.itens).toHaveLength(3);
   });
 
   test('incluir um exercício que já está na rotina não o duplica', () => {
@@ -205,7 +204,7 @@ describe('montarRotina: ajustes do profissional', () => {
       exerciciosIncluidos: ['nao-existe' as IdExercicio],
     });
 
-    expect(rotina.itens).toHaveLength(3);
+    expect(rotina.itens).toHaveLength(2);
   });
 
   test('o nível fixado prevalece sobre o nível calculado e leva o nome do autor', () => {

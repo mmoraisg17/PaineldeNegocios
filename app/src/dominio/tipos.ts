@@ -6,10 +6,10 @@ export type Trilha = 'equilibrio60' | 'fisio' | 'desempenho';
 
 export type Regiao = 'joelho' | 'tornozelo';
 
-/* Itens que um exercício usa. O kit do produto traz todos (barras, elástico e
-   assento acoplável), então a pessoa não precisa informar o que tem em casa:
+/* Itens que um exercício usa. O kit do produto traz todos (barras e assento
+   acoplável), então a pessoa não precisa informar o que tem em casa:
    a lista serve para a Biblioteca mostrar e filtrar "o que usa". */
-export type Acessorio = 'barras' | 'elastico' | 'cadeira';
+export type Acessorio = 'barras' | 'cadeira';
 
 export type Nivel = 1 | 2 | 3;
 
@@ -30,7 +30,6 @@ export type Percepcao = 'facil' | 'ok' | 'dificil';
 export const IDS_DOS_EXERCICIOS = [
   'sentar-e-levantar',
   'pes-em-linha',
-  'abducao-com-elastico',
   'miniagachamento-simetrico',
   'descida-de-degrau',
   'panturrilha-unilateral',

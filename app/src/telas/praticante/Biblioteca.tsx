@@ -22,10 +22,9 @@ import { Icone } from '../../components/Icone';
 
 const TRILHAS: readonly Trilha[] = ['equilibrio60', 'fisio', 'desempenho'];
 const NIVEIS: readonly Nivel[] = [1, 2, 3];
-const ACESSORIOS: readonly Acessorio[] = ['barras', 'elastico', 'cadeira'];
+const ACESSORIOS: readonly Acessorio[] = ['barras', 'cadeira'];
 const ROTULO_DO_ACESSORIO: Record<Acessorio, string> = {
   barras: 'Barras',
-  elastico: 'Elástico',
   cadeira: 'Cadeira',
 };
 const NIVEL_PADRAO: Nivel = 1;

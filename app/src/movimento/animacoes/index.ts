@@ -1,6 +1,5 @@
 import type { Animacao } from '../animacao';
 import type { ModoBracos } from '../corpo';
-import { abducao } from './abducao';
 import { agachamentoBulgaroExplosivo } from './agachamentoBulgaroExplosivo';
 import { descidaDeDegrau } from './descidaDeDegrau';
 import { miniagachamento } from './miniagachamento';
@@ -24,7 +23,6 @@ const FABRICAS: Record<string, (opcoes: OpcoesDaAnimacao) => Animacao> = {
   'panturrilha-unilateral': (o) => panturrilha(o.bracos, o.nivel),
   'pes-em-linha': (o) => pesEmLinha(o.bracos),
   'descida-de-degrau': (o) => descidaDeDegrau(o.bracos, o.nivel),
-  'abducao-com-elastico': (o) => abducao(o.bracos),
   'agachamento-bulgaro-explosivo': (o) => agachamentoBulgaroExplosivo(o.bracos, o.nivel),
 };
 

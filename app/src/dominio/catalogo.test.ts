@@ -30,11 +30,6 @@ const ESPERADO: Record<IdExercicio, Record<Nivel, EsperadoDoNivel>> = {
     2: { dose: seg(20), apoio: 'uma-mao' },
     3: { dose: seg(30), apoio: 'toque' },
   },
-  'abducao-com-elastico': {
-    1: { dose: rep(8, true), apoio: 'uma-mao' },
-    2: { dose: rep(12, true), apoio: 'uma-mao' },
-    3: { dose: rep(12, true), apoio: 'uma-mao' },
-  },
   'miniagachamento-simetrico': {
     1: { dose: rep(8), apoio: 'duas-maos' },
     2: { dose: rep(12), apoio: 'duas-maos' },
@@ -60,24 +55,24 @@ const ESPERADO: Record<IdExercicio, Record<Nivel, EsperadoDoNivel>> = {
 };
 
 describe('catálogo: composição', () => {
-  test('tem os 6 exercícios do manual, na ordem do manual, e depois os da trilha Força e explosão', () => {
+  test('tem os 5 exercícios do manual, na ordem do manual, e depois os da trilha Força e explosão', () => {
     expect(CATALOGO.map((exercicio) => exercicio.id)).toEqual([...IDS_DOS_EXERCICIOS]);
-    expect(CATALOGO).toHaveLength(7);
+    expect(CATALOGO).toHaveLength(6);
   });
 
   test('não repete ids', () => {
     expect(new Set(CATALOGO.map((exercicio) => exercicio.id)).size).toBe(CATALOGO.length);
   });
 
-  test('as trilhas do manual têm 3 exercícios; a de Força e explosão começa com o búlgaro explosivo', () => {
-    expect(exerciciosDaTrilha('equilibrio60')).toHaveLength(3);
+  test('a trilha Equilíbrio 60+ tem 2 exercícios e a Fisioterapia 3; a de Força e explosão começa com o búlgaro explosivo', () => {
+    expect(exerciciosDaTrilha('equilibrio60')).toHaveLength(2);
     expect(exerciciosDaTrilha('fisio')).toHaveLength(3);
     expect(exerciciosDaTrilha('desempenho').map((exercicio) => exercicio.id)).toEqual(['agachamento-bulgaro-explosivo']);
   });
 
-  test('a trilha Equilíbrio 60+ traz sentar, tandem e abdução', () => {
+  test('a trilha Equilíbrio 60+ traz sentar e tandem', () => {
     const ids = exerciciosDaTrilha('equilibrio60').map((exercicio) => exercicio.id);
-    expect(ids).toEqual(['sentar-e-levantar', 'pes-em-linha', 'abducao-com-elastico']);
+    expect(ids).toEqual(['sentar-e-levantar', 'pes-em-linha']);
   });
 
   test('a trilha Fisioterapia traz 2 exercícios de joelho e 1 de tornozelo', () => {
@@ -175,8 +170,7 @@ describe('catálogo: imutabilidade', () => {
 });
 
 describe('catálogo: acessórios', () => {
-  test('a abdução exige elástico e o sentar e levantar exige cadeira', () => {
-    expect(buscarExercicio('abducao-com-elastico')?.acessorios).toContain('elastico');
+  test('o sentar e levantar exige cadeira', () => {
     expect(buscarExercicio('sentar-e-levantar')?.acessorios).toContain('cadeira');
   });
 });

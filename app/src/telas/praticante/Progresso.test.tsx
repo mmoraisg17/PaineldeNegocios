@@ -99,7 +99,7 @@ test('mostra o nível atual de cada exercício da trilha', () => {
 
   // Assert
   const niveis = within(screen.getByRole('region', { name: 'Nível de cada exercício' }));
-  expect(niveis.getAllByRole('listitem')).toHaveLength(3);
+  expect(niveis.getAllByRole('listitem')).toHaveLength(2);
   expect(niveis.getByText('Sentar e levantar')).toBeInTheDocument();
   expect(niveis.getByText('Sentar e levantar').closest('li')).toHaveTextContent(/Nível [123] de 3/);
 });
@@ -125,7 +125,7 @@ test('sem treinos ainda: convida a treinar, sem gráficos, e mantém os níveis'
   expect(screen.getAllByRole('img')).toHaveLength(1);
   expect(screen.getByRole('img', { name: /Mascote do app/ })).toBeInTheDocument();
   expect(screen.getByText('0 de 18 treinos nas últimas 6 semanas (0%)')).toBeInTheDocument();
-  expect(within(screen.getByRole('region', { name: 'Nível de cada exercício' })).getAllByRole('listitem')).toHaveLength(3);
+  expect(within(screen.getByRole('region', { name: 'Nível de cada exercício' })).getAllByRole('listitem')).toHaveLength(2);
   expect(screen.getByText(/aparecem aqui conforme você treina/)).toBeInTheDocument();
 });
 

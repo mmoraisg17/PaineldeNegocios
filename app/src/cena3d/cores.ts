@@ -8,7 +8,6 @@ const RESERVA = {
   certo: '#3ddc84',
   atencao: '#ffb020',
   erro: '#ff4d4f',
-  elastico: '#ff8a3d',
   sapato: '#1b1f24',
   fundo: '#0e1217',
   base: '#4a5462',

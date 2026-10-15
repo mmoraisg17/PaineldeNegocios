@@ -226,12 +226,12 @@ test('o filtro de acessório deixa só os exercícios que usam aquele acessório
   abrirTela('/praticante/biblioteca');
 
   // Act
-  await userEvent.click(screen.getByRole('button', { name: 'Elástico' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Cadeira' }));
 
   // Assert
-  expect(screen.getByRole('button', { name: 'Elástico' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByRole('button', { name: 'Cadeira' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.getAllByRole('article')).toHaveLength(1);
-  expect(screen.getByRole('article', { name: 'Abdução de quadril com elástico' })).toBeInTheDocument();
+  expect(screen.getByRole('article', { name: 'Sentar e levantar' })).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent('1 exercício');
 });
 
@@ -239,7 +239,7 @@ test('sem nenhum exercício para o filtro, avisa e oferece limpar os filtros', a
   // Arrange
   abrirTela('/praticante/biblioteca');
   await userEvent.click(screen.getByRole('tab', { name: 'Fisioterapia' }));
-  await userEvent.click(screen.getByRole('button', { name: 'Elástico' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Cadeira' }));
   expect(screen.queryAllByRole('article')).toHaveLength(0);
   expect(screen.getByText(/Nenhum exercício/)).toBeInTheDocument();
 
@@ -248,16 +248,16 @@ test('sem nenhum exercício para o filtro, avisa e oferece limpar os filtros', a
 
   // Assert
   expect(screen.getAllByRole('article')).toHaveLength(nomesDaTrilha('fisio').length);
-  expect(screen.getByRole('button', { name: 'Elástico' })).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('button', { name: 'Cadeira' })).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('os filtros oferecem os quatro acessórios e os três níveis', () => {
+test('os filtros oferecem os dois acessórios e os três níveis', () => {
   // Arrange / Act
   abrirTela('/praticante/biblioteca');
 
   // Assert
   const acessorios = within(screen.getByRole('group', { name: 'Filtrar por acessório' }));
-  expect(acessorios.getAllByRole('button').map((b) => b.textContent?.replace('✓', '').trim())).toEqual(['Barras', 'Elástico', 'Cadeira']);
+  expect(acessorios.getAllByRole('button').map((b) => b.textContent?.replace('✓', '').trim())).toEqual(['Barras', 'Cadeira']);
   const niveis = within(screen.getByRole('group', { name: 'Filtrar por nível' }));
   expect(niveis.getAllByRole('button')).toHaveLength(3);
 });
