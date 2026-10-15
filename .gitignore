@@ -17,3 +17,9 @@ docs/modelagem/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# Material da PJ (custos, organização, tempos e fluxogramas): fora do git, o repositório é público
+docs/custos/
+docs/organizacional/
+docs/tempos/
+docs/fluxograma/
