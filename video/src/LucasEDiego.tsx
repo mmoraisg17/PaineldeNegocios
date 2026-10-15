@@ -39,8 +39,13 @@ import { CabecalhoDoAtleta, CartaoDoAtletaNaTela, Comparacao } from './Sobreposi
    caber entre ele e a legenda da fase. */
 export const ENQUADRAMENTO_DOS_ATLETAS: Enquadramento = { distancia: 6.1, altura: 1.25, alvoY: 0.98 };
 
-/* Posições do layout com o cartão (ver SobreposicoesDosAtletas.tsx). */
-const TOPO_DA_FAIXA = 632;
+/* Posições do layout com o cartão (ver SobreposicoesDosAtletas.tsx). O selo
+   de velocidade e a faixa da subida ficam à direita, no alto da cena, logo
+   abaixo do cartão: ali só há fundo (a cabeça do boneco fica à esquerda).
+   No topo, ao lado do nome, o selo encostava no "Acompanhado por Renata,
+   preparadora física", que é longo. */
+const SELO = { top: 598, right: MARGEM };
+const TOPO_DA_FAIXA = 684;
 const TOPO_DA_LEGENDA = 1428;
 const TOPO_DOS_CARTOES = 1580;
 
@@ -122,7 +127,7 @@ export function LucasEDiego() {
                 texto={NOMES_DOS_TRECHOS.lenta}
                 destaque={false}
                 duracao={lenta.ate - lenta.de}
-                posicao={{ top: 60, right: MARGEM }}
+                posicao={SELO}
               />
             </Sequence>
             <Sequence from={real.de - lenta.de} durationInFrames={real.ate - real.de}>
@@ -131,7 +136,7 @@ export function LucasEDiego() {
                 texto={NOMES_DOS_TRECHOS.real}
                 destaque
                 duracao={real.ate - real.de}
-                posicao={{ top: 60, right: MARGEM }}
+                posicao={SELO}
               />
             </Sequence>
           </Sequence>
