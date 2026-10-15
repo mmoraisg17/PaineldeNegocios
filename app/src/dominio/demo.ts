@@ -27,6 +27,7 @@ export const IDS_DEMO = {
   carlos: 'carlos',
   ana: 'ana',
   marta: 'marta',
+  lucas: 'lucas',
 } as const;
 
 /* Gerador pseudoaleatório "mulberry32": minúsculo, rápido e reproduzível a
@@ -95,6 +96,16 @@ const PLANO_DO_RAFAEL: PlanoDeEvolucao = {
   faltas: [6],
 };
 
+/* Atleta: começa firme (nível 3), quase sem apoio nas barras, e evolui menos em
+   pontos porque já parte alto; falta a um treino. */
+const PLANO_DO_LUCAS: PlanoDeEvolucao = {
+  semente: 24101526,
+  simetria: [80, 92],
+  estabilidade: [84, 95],
+  apoio: [0.04, 0],
+  faltas: [7],
+};
+
 const PERFIL_DA_LUCIA: Perfil = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
@@ -106,6 +117,14 @@ const PERFIL_DO_RAFAEL: Perfil = {
   nome: 'Rafael',
   objetivo: 'joelho',
   firmeza: 'as-vezes',
+  inclinacaoMaxima: 3,
+};
+
+/* Jogador de futevôlei de 24 anos: quer força e explosão nas pernas. */
+const PERFIL_DO_LUCAS: Perfil = {
+  nome: 'Lucas',
+  objetivo: 'potencia',
+  firmeza: 'firme',
   inclinacaoMaxima: 3,
 };
 
@@ -278,7 +297,7 @@ function criarRecadoDoCarlos(agora: Date): Recado {
   };
 }
 
-/* SENHA PÚBLICA: é a mesma das 5 contas e aparece impressa na tela de login,
+/* SENHA PÚBLICA: é a mesma das 6 contas e aparece impressa na tela de login,
    para o avaliador entrar sem cadastro. Não é um segredo e nunca deve ser a
    senha de uma conta de verdade. */
 export const SENHA_DA_DEMO = 'demo1234';
@@ -286,6 +305,7 @@ export const SENHA_DA_DEMO = 'demo1234';
 export const CONTAS_DA_DEMO: readonly { papel: PapelDaConta; pessoaId: string; email: string }[] = [
   { papel: 'praticante', pessoaId: IDS_DEMO.lucia, email: 'lucia@demo.test' },
   { papel: 'praticante', pessoaId: IDS_DEMO.rafael, email: 'rafael@demo.test' },
+  { papel: 'praticante', pessoaId: IDS_DEMO.lucas, email: 'lucas@demo.test' },
   { papel: 'acompanhante', pessoaId: IDS_DEMO.carlos, email: 'carlos@demo.test' },
   { papel: 'acompanhante', pessoaId: IDS_DEMO.ana, email: 'ana@demo.test' },
   { papel: 'acompanhante', pessoaId: IDS_DEMO.marta, email: 'marta@demo.test' },
@@ -293,7 +313,7 @@ export const CONTAS_DA_DEMO: readonly { papel: PapelDaConta; pessoaId: string; e
 
 /* Sal e hash de SENHA_DA_DEMO por conta, calculados UMA vez (PBKDF2-HMAC-SHA-256,
    ITERACOES_DA_SENHA iterações, 256 bits) e gravados aqui. Assim `criarEstadoDemo`
-   continua síncrono e determinístico (derivar 5 hashes custaria ~2 s a cada
+   continua síncrono e determinístico (derivar 6 hashes custaria ~2 s a cada
    chamada). O sal é fixo e legível de propósito: a senha é pública. Se
    ITERACOES_DA_SENHA mudar, estes hashes precisam ser recalculados (o teste
    "a senha demo1234 abre ..." acusa). */
@@ -305,6 +325,10 @@ const SAL_E_HASH_DA_DEMO: Record<string, { sal: string; hash: string }> = {
   [IDS_DEMO.rafael]: {
     sal: '64656d6f2d72616661656c5f5f5f5f5f',
     hash: '87e405274d23f996b2ede55f20f155e2f0a49a1a9cac45a211597d39ebff5bc2',
+  },
+  [IDS_DEMO.lucas]: {
+    sal: '64656d6f2d6c756361735f5f5f5f5f5f',
+    hash: '647509c26c81933270e7435318d821adc648e1f70bc3281d1ab63835262180d5',
   },
   [IDS_DEMO.carlos]: {
     sal: '64656d6f2d6361726c6f735f5f5f5f5f',
@@ -337,9 +361,12 @@ export function criarEstadoDemo(agora: Date): EstadoApp {
   const rafael = criarPraticante(
     IDS_DEMO.rafael, 34, PERFIL_DO_RAFAEL, { oscilacao: 0.35, apoioNasBarras: 0.15 }, PLANO_DO_RAFAEL, agora, AJUSTE_DA_ANA,
   );
+  const lucas = criarPraticante(
+    IDS_DEMO.lucas, 24, PERFIL_DO_LUCAS, { oscilacao: 0.12, apoioNasBarras: 0.02 }, PLANO_DO_LUCAS, agora,
+  );
   return {
     ...estadoInicial(),
-    praticantes: { [IDS_DEMO.lucia]: lucia, [IDS_DEMO.rafael]: rafael },
+    praticantes: { [IDS_DEMO.lucia]: lucia, [IDS_DEMO.rafael]: rafael, [IDS_DEMO.lucas]: lucas },
     acompanhantes: copiarProfundo(ACOMPANHANTES),
     vinculos: criarVinculosAutorizados(agora),
     recados: [criarRecadoDoCarlos(agora)],

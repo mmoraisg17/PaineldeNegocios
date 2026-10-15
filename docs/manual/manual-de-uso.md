@@ -508,6 +508,7 @@ O protótipo **simula os sensores** porque a plataforma física ainda está em d
 |---|---|---|---|
 | **Dona Lúcia, 68** | `lucia@demo.test` | Praticante · Equilíbrio 60+ | Rotina, exercício com correções, evolução |
 | **Rafael, 34** | `rafael@demo.test` | Praticante · Fisioterapia (joelho) | Trilha de fisioterapia e metas do profissional |
+| **Lucas, 24** | `lucas@demo.test` | Praticante · Fortalecimento e explosão (atleta de futevôlei) | Conta sem acompanhante, começa no nível 3, quase sem apoio nas barras |
 | **Carlos** | `carlos@demo.test` | Acompanhante · Personal da Dona Lúcia | Lista de alunos, relatório, ajustar rotina, recados |
 | **Ana** | `ana@demo.test` | Acompanhante · Fisioterapeuta do Rafael | Metas de simetria, alertas e gráficos de evolução |
 | **Marta** | `marta@demo.test` | Acompanhante · Filha da Dona Lúcia (familiar) | Relatórios somente leitura |
