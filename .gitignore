@@ -17,3 +17,7 @@ docs/modelagem/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# Vídeo (video/): dependências e saídas pesadas (MP4, pôster) ficam fora do git.
+video/node_modules/
+video/out/

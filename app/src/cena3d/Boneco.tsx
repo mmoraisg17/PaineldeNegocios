@@ -36,7 +36,7 @@ import type { RelogioDaAnimacao } from './relogio';
    meshes são movidos por ref, sem re-render do React: são ~20 objetos a
    60 fps, e passar isso por estado travaria celulares mais simples. */
 
-type Segmento = {
+export type Segmento = {
   de: (e: Esqueleto) => Vec3;
   ate: (e: Esqueleto) => Vec3;
   raio: number;
@@ -48,7 +48,7 @@ type Segmento = {
      da direita para a esquerda do corpo (ombro direito → esquerdo). */
   achatar?: { lateral: (e: Esqueleto) => Vec3; largura: number; profundidade: number };
 };
-type Junta = { em: (e: Esqueleto) => Vec3; raio: number; cor: keyof CoresDaCena; regiao: RegiaoDoCorpo };
+export type Junta = { em: (e: Esqueleto) => Vec3; raio: number; cor: keyof CoresDaCena; regiao: RegiaoDoCorpo };
 
 /* Juntas um pouco mais finas que os membros, para não virarem "bolas"
    (auditoria visual, V2). A cabeça visível é menor que CORPO.raioCabeca (movimento/cenario.ts), que
@@ -61,7 +61,10 @@ const lado = (l: 'esquerdo' | 'direito') => (e: Esqueleto) => e.lados[l];
 const L = lado('esquerdo');
 const R = lado('direito');
 
-const SEGMENTOS: Segmento[] = [
+/* Exportados (com JUNTAS e achatamento) para o vídeo em video/, que desenha
+   este mesmo corpo quadro a quadro sem o useFrame: assim o vídeo nunca fica
+   com um boneco diferente do app. */
+export const SEGMENTOS: Segmento[] = [
   ...[L, R].flatMap((s): Segmento[] => [
     { de: (e) => s(e).calcanhar, ate: (e) => s(e).ponta, raio: 0.038, cor: 'corpo', regiao: 'pernas', perfil: PE },
     { de: (e) => s(e).joelho, ate: (e) => s(e).tornozelo, raio: 0.048, cor: 'corpo', regiao: 'pernas', perfil: CANELA },
@@ -83,7 +86,7 @@ const SEGMENTOS: Segmento[] = [
   { de: (e) => e.pescoco, ate: (e) => e.cabeca, raio: 0.04, cor: 'corpo', regiao: 'tronco' },
 ];
 
-const JUNTAS: Junta[] = [
+export const JUNTAS: Junta[] = [
   ...[L, R].flatMap((s): Junta[] => [
     { em: (e) => s(e).joelho, raio: 0.046, cor: 'corpo', regiao: 'pernas' },
     { em: (e) => s(e).tornozelo, raio: 0.031, cor: 'corpo', regiao: 'pernas' },
@@ -104,7 +107,7 @@ const DELTA_MAXIMO_DA_COR = 1 / 30;
    primeiro delta é grande e a velocidade saltaria em vez de subir. */
 const DELTA_MAXIMO_DA_RAMPA = 1 / 30;
 
-function achatamento(s: Segmento, e: Esqueleto) {
+export function achatamento(s: Segmento, e: Esqueleto) {
   return s.achatar ? { lateral: s.achatar.lateral(e), largura: s.achatar.largura, profundidade: s.achatar.profundidade } : undefined;
 }
 
