@@ -18,6 +18,14 @@ docs/modelagem/
 Thumbs.db
 *.tsbuildinfo
 
+# Material da PJ (custos, organização, tempos e fluxogramas): fora do git, o repositório é público
+docs/custos/
+docs/organizacional/
+docs/tempos/
+docs/fluxograma/
+# Registros da ferramenta de imagens (trazem o identificador da conta nas URLs)
+*.job.json
+
 # Vídeo (video/): dependências e saídas pesadas (MP4, pôster) ficam fora do git.
 video/node_modules/
 video/out/
