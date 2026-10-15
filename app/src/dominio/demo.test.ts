@@ -393,10 +393,11 @@ describe('estado de demonstração: contas com senha', () => {
     expect(SENHA_DA_DEMO).toBe('demo1234');
   });
 
-  test('lista as 5 contas na ordem lucia, rafael, carlos, ana, marta', () => {
+  test('lista as 6 contas na ordem lucia, rafael, lucas, carlos, ana, marta', () => {
     expect(CONTAS_DA_DEMO).toEqual([
       { papel: 'praticante', pessoaId: 'lucia', email: 'lucia@demo.test' },
       { papel: 'praticante', pessoaId: 'rafael', email: 'rafael@demo.test' },
+      { papel: 'praticante', pessoaId: 'lucas', email: 'lucas@demo.test' },
       { papel: 'acompanhante', pessoaId: 'carlos', email: 'carlos@demo.test' },
       { papel: 'acompanhante', pessoaId: 'ana', email: 'ana@demo.test' },
       { papel: 'acompanhante', pessoaId: 'marta', email: 'marta@demo.test' },
@@ -453,8 +454,8 @@ describe('estado de demonstração: contas com senha', () => {
   test(
     'as outras três contas também aceitam demo1234',
     async () => {
-      for (const email of ['rafael@demo.test', 'carlos@demo.test', 'marta@demo.test']) {
-        const papel = email.startsWith('rafael') ? 'praticante' : 'acompanhante';
+      for (const email of ['rafael@demo.test', 'lucas@demo.test', 'carlos@demo.test', 'marta@demo.test']) {
+        const papel = email.startsWith('rafael') || email.startsWith('lucas') ? 'praticante' : 'acompanhante';
         const credencial = buscarCredencial(demo.credenciais, email, papel);
         expect(credencial && (await conferirSenha(credencial, SENHA_DA_DEMO))).toBe(true);
       }
@@ -468,5 +469,54 @@ describe('estado de demonstração: contas com senha', () => {
     expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(4);
     expect(lucia?.sessoes).toHaveLength(16);
     expect(rafael?.sessoes).toHaveLength(17);
+  });
+});
+
+describe('conta modelo do Lucas (atleta de futevôlei, força e explosão)', () => {
+  const lucas = demo.praticantes[IDS_DEMO.lucas];
+
+  test('é um atleta de 24 anos com objetivo de fortalecimento e explosão', () => {
+    expect(lucas).toMatchObject({
+      id: 'lucas',
+      idade: 24,
+      perfil: { nome: 'Lucas', objetivo: 'potencia', firmeza: 'firme', inclinacaoMaxima: 3 },
+    });
+  });
+
+  test('não tem acompanhante nem ajuste: treina por conta própria', () => {
+    expect(lucas?.ajuste).toBeUndefined();
+    expect(demo.vinculos.some((vinculo) => vinculo.alunoId === IDS_DEMO.lucas)).toBe(false);
+    expect(demo.recados.some((recado) => recado.paraId === IDS_DEMO.lucas)).toBe(false);
+  });
+
+  test('parte do nível 3 (firme, quase sem apoio) e treina 17 das 18 sessões planejadas', () => {
+    expect(lucas?.sessoes).toHaveLength(SEMANAS * PLANEJADAS_POR_SEMANA - 1);
+    const primeiroTreino = lucas?.sessoes[0]?.exercicios ?? [];
+    expect(primeiroTreino.length).toBeGreaterThan(0);
+    expect(primeiroTreino.every((exercicio) => exercicio.nivel === 3)).toBe(true);
+  });
+
+  test('é mais estável e usa menos as barras que as contas de 60+', () => {
+    const { primeiras } = primeirasEUltimas(lucas?.sessoes ?? [], 3);
+    const { primeiras: daLucia } = primeirasEUltimas(lucia?.sessoes ?? [], 3);
+    expect(media(primeiras.map((e) => e.estabilidade))).toBeGreaterThan(media(daLucia.map((e) => e.estabilidade)));
+    expect(media(primeiras.map((e) => e.apoioNasBarras))).toBeLessThan(media(daLucia.map((e) => e.apoioNasBarras)));
+  });
+
+  test('evolui: as últimas sessões têm nota maior que as primeiras', () => {
+    const { primeiras, ultimas } = primeirasEUltimas(lucas?.sessoes ?? [], 4);
+    expect(media(ultimas.map((e) => e.nota))).toBeGreaterThan(media(primeiras.map((e) => e.nota)));
+  });
+
+  test('a rotina vem da trilha de fortalecimento de perna, com 4 exercícios', () => {
+    const rotina = rotinaDoPraticante(demo, IDS_DEMO.lucas);
+    expect(rotina?.itens.map((item) => item.exercicioId).toSorted()).toEqual(
+      ['descida-de-degrau', 'equilibrio-com-inclinacao', 'miniagachamento-simetrico', 'panturrilha-unilateral'],
+    );
+    expect(trilhaDoObjetivo('potencia')).toBe('fisio');
+  });
+
+  test('a conta é reproduzível: a mesma data gera o mesmo histórico', () => {
+    expect(criarEstadoDemo(AGORA).praticantes[IDS_DEMO.lucas]).toEqual(lucas);
   });
 });

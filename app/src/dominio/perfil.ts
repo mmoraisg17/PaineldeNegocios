@@ -1,7 +1,9 @@
 import { limitar } from './numeros';
 import type { Inclinacao, Nivel, Trilha } from './tipos';
 
-export type Objetivo = 'equilibrio' | 'fortalecimento' | 'joelho' | 'tornozelo';
+/* 'potencia' é "Fortalecimento e explosão": atleta jovem saudável que treina força
+   e potência de pernas (a conta modelo do Lucas, jogador de futevôlei). */
+export type Objetivo = 'equilibrio' | 'fortalecimento' | 'potencia' | 'joelho' | 'tornozelo';
 
 /* As três respostas de "Sua firmeza hoje" (manual, seção 4.3). */
 export type Firmeza = 'preciso-apoio' | 'as-vezes' | 'firme';
@@ -42,8 +44,13 @@ export function nivelPelaFirmeza(firmeza: Firmeza): Nivel {
   return firmeza === 'firme' ? 2 : 1;
 }
 
+/* Provisório para 'potencia': o catálogo ainda não tem a trilha de força e
+   explosão (os exercícios de salto vêm com a próxima animação). Até lá a rotina
+   do atleta usa a trilha de fortalecimento de perna (miniagachamento, panturrilha,
+   descida de degrau, equilíbrio inclinado), a única que treina força. Quando a
+   trilha de desempenho existir, é só trocar aqui. */
 export function trilhaDoObjetivo(objetivo: Objetivo): Trilha {
-  return objetivo === 'joelho' || objetivo === 'tornozelo' ? 'fisio' : 'equilibrio60';
+  return objetivo === 'joelho' || objetivo === 'tornozelo' || objetivo === 'potencia' ? 'fisio' : 'equilibrio60';
 }
 
 function medidaInvalida(medidas: MedidasDaAvaliacao): boolean {

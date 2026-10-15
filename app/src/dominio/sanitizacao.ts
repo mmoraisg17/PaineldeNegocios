@@ -33,7 +33,7 @@ import { IDS_DOS_EXERCICIOS, type IdExercicio, type Inclinacao, type Nivel, type
 
 type Objeto = Record<string, unknown>;
 
-const OBJETIVOS: readonly Objetivo[] = ['equilibrio', 'fortalecimento', 'joelho', 'tornozelo'];
+const OBJETIVOS: readonly Objetivo[] = ['equilibrio', 'fortalecimento', 'potencia', 'joelho', 'tornozelo'];
 const FIRMEZAS: readonly Firmeza[] = ['preciso-apoio', 'as-vezes', 'firme'];
 const TIPOS: readonly TipoAcompanhante[] = ['profissional', 'familiar'];
 const STATUS: readonly StatusDoVinculo[] = ['pendente', 'autorizado', 'revogado'];

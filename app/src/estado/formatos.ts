@@ -20,6 +20,7 @@ export const ROTULO_DA_TRILHA: Record<Trilha, string> = { equilibrio60: 'Equilí
 export const ROTULO_DO_OBJETIVO: Record<Objetivo, string> = {
   equilibrio: 'Equilíbrio',
   fortalecimento: 'Fortalecimento',
+  potencia: 'Fortalecimento e explosão',
   joelho: 'Joelho',
   tornozelo: 'Tornozelo',
 };

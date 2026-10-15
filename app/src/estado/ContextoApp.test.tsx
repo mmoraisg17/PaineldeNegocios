@@ -56,8 +56,8 @@ describe('arranque do app', () => {
     abrir();
 
     expect(lerApp().estado.contaAtual).toBeNull();
-    expect(Object.keys(lerApp().estado.praticantes)).toEqual(['lucia', 'rafael']);
-    expect(lerApp().estado.credenciais).toHaveLength(5);
+    expect(Object.keys(lerApp().estado.praticantes)).toEqual(['lucia', 'rafael', 'lucas']);
+    expect(lerApp().estado.credenciais).toHaveLength(6);
   });
 
   test('apaga os dados da versão 1 que ficaram esquecidos no aparelho', () => {
@@ -159,7 +159,7 @@ describe('reiniciarDemonstracao', () => {
     expect(lerApp().estado.contaAtual).toBeNull();
     expect(sessionStorage.getItem(CHAVE_DA_SESSAO)).toBeNull();
     expect(noLocal().contaAtual).toBeNull();
-    expect(lerApp().estado.credenciais).toHaveLength(5);
+    expect(lerApp().estado.credenciais).toHaveLength(6);
   });
 });
 
@@ -247,7 +247,7 @@ describe('várias abas', () => {
     });
 
     expect(lerApp().estado.contaAtual).toBeNull();
-    expect(lerApp().estado.credenciais).toHaveLength(5);
+    expect(lerApp().estado.credenciais).toHaveLength(6);
   });
 
   test('ignora o evento de outras chaves (preferências, por exemplo)', () => {
