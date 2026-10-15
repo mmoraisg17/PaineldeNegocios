@@ -419,3 +419,43 @@ export function criarEstadoDemo(agora: Date): EstadoApp {
     credenciais: criarCredenciaisDaDemo(agora),
   };
 }
+
+/* Quem já abriu o app antes tem a demonstração antiga guardada no aparelho e
+   não receberia as contas criadas depois. Se o estado salvo já é de
+   demonstração (tem alguma credencial da demo), acrescenta só as contas da
+   demo que faltam, sem tocar no que já existe. Dados de quem não usa a demo
+   ficam como estão. */
+export function completarContasDaDemo(estado: EstadoApp, agora: Date): EstadoApp {
+  const ehDemo = (email: string, papel: PapelDaConta) =>
+    estado.credenciais.some((c) => c.email === email && c.papel === papel);
+  if (!CONTAS_DA_DEMO.some((conta) => ehDemo(conta.email, conta.papel))) return estado;
+  const faltantes = CONTAS_DA_DEMO.filter((conta) => !ehDemo(conta.email, conta.papel));
+  if (faltantes.length === 0) return estado;
+
+  const demo = criarEstadoDemo(agora);
+  const ids = new Set(faltantes.map((conta) => conta.pessoaId));
+  const envolve = (...pontas: string[]) => pontas.some((id) => ids.has(id));
+  return {
+    ...estado,
+    praticantes: {
+      ...Object.fromEntries(Object.entries(demo.praticantes).filter(([id]) => ids.has(id))),
+      ...estado.praticantes,
+    },
+    acompanhantes: [
+      ...estado.acompanhantes,
+      ...demo.acompanhantes.filter((p) => ids.has(p.id) && !estado.acompanhantes.some((x) => x.id === p.id)),
+    ],
+    vinculos: [
+      ...estado.vinculos,
+      ...demo.vinculos.filter((v) => envolve(v.alunoId, v.acompanhanteId) && !estado.vinculos.some((x) => x.id === v.id)),
+    ],
+    recados: [
+      ...estado.recados,
+      ...demo.recados.filter((r) => envolve(r.deId, r.paraId) && !estado.recados.some((x) => x.id === r.id)),
+    ],
+    credenciais: [
+      ...estado.credenciais,
+      ...demo.credenciais.filter((c) => faltantes.some((f) => f.email === c.email && f.papel === c.papel)),
+    ],
+  };
+}
