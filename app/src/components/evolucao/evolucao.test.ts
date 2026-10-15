@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ResultadoExercicio, Sessao } from '../../dominio';
-import { contarSemanasCompletas, descreverEvolucao, resumirSemanas, semanasSeguidas, type SemanaResumida } from './evolucao';
+import { adesaoDoPeriodo, contarSemanasCompletas, descreverEvolucao, resumirSemanas, semanasSeguidas, type SemanaResumida } from './evolucao';
 
 const AGORA = new Date('2026-10-07T12:00:00Z');
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
@@ -183,5 +183,16 @@ describe('descreverEvolucao', () => {
     expect(descreverEvolucao({ nome: 'Estabilidade', valores: [80, 81, 80, 80, 81, 81], rotulos, unidade: 'pontos' })).toBe(
       'Estabilidade: de 80 pontos (semana até 02/09) para 81 pontos (semana até 07/10): ficou estável.',
     );
+  });
+});
+
+describe('adesaoDoPeriodo', () => {
+  test('soma os treinos das semanas contra a frequência vezes o número de semanas', () => {
+    expect(adesaoDoPeriodo([3, 3, 2, 3, 3, 3].map(semana), 3)).toEqual({ feitos: 17, previstos: 18, semanas: 6, porcentagem: 94 });
+  });
+
+  test('treino a mais não passa de 100% e, sem frequência, a porcentagem é zero', () => {
+    expect(adesaoDoPeriodo([5, 4].map(semana), 3).porcentagem).toBe(100);
+    expect(adesaoDoPeriodo([1, 1].map(semana), 0)).toEqual({ feitos: 2, previstos: 0, semanas: 2, porcentagem: 0 });
   });
 });

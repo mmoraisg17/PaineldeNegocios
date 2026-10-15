@@ -8,6 +8,8 @@
     "render": "remotion render src/index.ts Bulgaro out/bulgaro.mp4",
     "render:720": "remotion render src/index.ts Bulgaro out/bulgaro-720.mp4 --scale=0.6667",
     "poster": "remotion still src/index.ts Bulgaro out/bulgaro-poster.png --frame=264",
+    "render:lucas-diego": "remotion render src/index.ts LucasEDiego out/lucas-e-diego.mp4",
+    "poster:lucas-diego": "remotion still src/index.ts LucasEDiego out/lucas-e-diego-poster.png --frame=396",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

@@ -66,6 +66,19 @@ export function resumirSemanas(sessoes: readonly Sessao[], agora: Date, semanas:
   });
 }
 
+export type AdesaoDoPeriodo = { feitos: number; previstos: number; semanas: number; porcentagem: number };
+
+/* Adesão das semanas mostradas ("17 de 18 treinos nas últimas 6 semanas"). A
+   frequência vigente vale para todas as semanas: o app não guarda o histórico
+   dela. A porcentagem para em 100 (treino a mais não compensa semana fraca).
+   Fora da tela para o vídeo de video/ mostrar exatamente o mesmo número. */
+export function adesaoDoPeriodo(semanas: readonly SemanaResumida[], planejadas: number): AdesaoDoPeriodo {
+  const feitos = semanas.reduce((total, semana) => total + semana.treinos, 0);
+  const previstos = planejadas * semanas.length;
+  const porcentagem = previstos > 0 ? Math.min(Math.round((feitos / previstos) * PORCENTAGEM), PORCENTAGEM) : 0;
+  return { feitos, previstos, semanas: semanas.length, porcentagem };
+}
+
 /* Semanas consecutivas com ao menos um treino, contando da mais recente. */
 export function semanasSeguidas(semanas: readonly SemanaResumida[]): number {
   let seguidas = 0;

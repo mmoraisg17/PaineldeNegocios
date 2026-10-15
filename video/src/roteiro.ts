@@ -26,12 +26,14 @@ const FECHO = 1.6;
    de o atleta voltar a ficar em pé. A pausa parada do início e o "firme no
    fim" do ciclo do app ficam quase todos de fora: no vídeo seriam tempo morto,
    e a câmera lenta dobra tudo o que entra na janela. */
-const ANTES_DA_DESCIDA = 0.1;
-const DEPOIS_DO_TOPO = 0.3;
+export const ANTES_DA_DESCIDA = 0.1;
+export const DEPOIS_DO_TOPO = 0.3;
 
 export type IdDoTrecho = 'abertura' | 'lenta' | 'real' | 'fecho';
-export type Trecho = {
-  readonly id: IdDoTrecho;
+/* Genérico no id: o roteiro do vídeo "LucasEDiego" (roteiroLucasEDiego.ts)
+   usa as mesmas funções com trechos próprios. */
+export type Trecho<Id extends string = IdDoTrecho> = {
+  readonly id: Id;
   readonly de: number; // primeiro quadro do trecho
   readonly ate: number; // primeiro quadro DEPOIS do trecho
   readonly tempoInicial: number; // segundos da animação no quadro `de`
@@ -47,6 +49,13 @@ export type TemposDoCiclo = ReturnType<typeof temposDoBulgaro> & {
   readonly subida: number; // s, do fim da pausa no fundo até em pé
 };
 
+/* Qualquer roteiro do búlgaro (o deste vídeo ou o do "LucasEDiego"). */
+export type RoteiroQualquer = {
+  readonly animacao: Animacao;
+  readonly trechos: readonly Trecho<string>[];
+  readonly tempos: TemposDoCiclo;
+};
+
 export type Roteiro = {
   readonly animacao: Animacao;
   readonly trechos: readonly Trecho[];
@@ -54,7 +63,7 @@ export type Roteiro = {
   readonly tempos: TemposDoCiclo;
 };
 
-const quadros = (segundos: number) => Math.round(segundos * FPS);
+export const quadros = (segundos: number) => Math.round(segundos * FPS);
 
 export function temposDoCiclo(animacao: Animacao, nivel: Nivel): TemposDoCiclo {
   const tempos = temposDoBulgaro(nivel);
@@ -63,12 +72,17 @@ export function temposDoCiclo(animacao: Animacao, nivel: Nivel): TemposDoCiclo {
   return { ...tempos, inicioDaDescida, descida: tempos.tFundo - inicioDaDescida, subida: tempos.tTopo - tempos.tComeca };
 }
 
-export function montarRoteiro({ nivel, velocidadeLenta }: ParametrosDoVideo): Roteiro {
-  /* Braços cruzados no peito: no nível 3 o búlgaro é sem as mãos, e as
-     barras só poluiriam a vista lateral. Inclinação 0 de propósito: a ideia de
-     inclinar a plataforma neste vídeo foi descartada (o teste confere). */
+/* Braços cruzados no peito: no nível 3 o búlgaro é sem as mãos, e as barras
+   só poluiriam a vista lateral. A plataforma é sempre plana: a inclinação foi
+   removida do app (o teste confere). */
+export function animacaoDoBulgaro(nivel: Nivel): Animacao {
   const animacao = animacaoDe(ID_DO_EXERCICIO, { nivel, bracos: 'cruzados' });
   if (!animacao) throw new Error(`O app não tem animação para ${ID_DO_EXERCICIO}`);
+  return animacao;
+}
+
+export function montarRoteiro({ nivel, velocidadeLenta }: ParametrosDoVideo): Roteiro {
+  const animacao = animacaoDoBulgaro(nivel);
   const tempos = temposDoCiclo(animacao, nivel);
   const inicio = tempos.inicioDaDescida - ANTES_DA_DESCIDA;
   const fim = tempos.tTopo + DEPOIS_DO_TOPO;
@@ -92,7 +106,11 @@ export function montarRoteiro({ nivel, velocidadeLenta }: ParametrosDoVideo): Ro
   return { animacao, trechos, duracaoEmQuadros: trechos.at(-1)?.ate ?? 0, tempos };
 }
 
-export function trechoNoQuadro(roteiro: Roteiro, quadro: number): Trecho {
+/* O mínimo que as funções abaixo precisam de um roteiro. */
+type ComTrechos<T> = { readonly trechos: readonly T[] };
+type ComAnimacao<T> = ComTrechos<T> & { readonly animacao: Animacao };
+
+export function trechoNoQuadro<T extends Trecho<string>>(roteiro: ComTrechos<T>, quadro: number): T {
   const trechos = roteiro.trechos;
   const achado = trechos.find((t) => quadro >= t.de && quadro < t.ate);
   // Fora da duração (o Studio deixa arrastar até o fim): o último trecho segura.
@@ -100,26 +118,26 @@ export function trechoNoQuadro(roteiro: Roteiro, quadro: number): Trecho {
 }
 
 /* Segundos da animação do app mostrados no quadro. */
-export function tempoNoQuadro(roteiro: Roteiro, quadro: number): number {
+export function tempoNoQuadro(roteiro: ComTrechos<Trecho<string>>, quadro: number): number {
   const trecho = trechoNoQuadro(roteiro, quadro);
   return trecho.tempoInicial + ((quadro - trecho.de) / FPS) * trecho.velocidade;
 }
 
 /* O inverso: em que quadro do trecho a animação passa pelo instante `tempo`. */
-export function quadroDoTempo(roteiro: Roteiro, tempo: number, id: IdDoTrecho): number {
+export function quadroDoTempo<Id extends string>(roteiro: ComTrechos<Trecho<Id>>, tempo: number, id: Id): number {
   const trecho = roteiro.trechos.find((t) => t.id === id);
   if (!trecho) throw new Error(`Trecho ${id} não existe no roteiro`);
   return trecho.de + Math.round(((tempo - trecho.tempoInicial) / trecho.velocidade) * FPS);
 }
 
-export function amostraNoQuadro(roteiro: Roteiro, quadro: number): Amostra {
+export function amostraNoQuadro(roteiro: ComAnimacao<Trecho<string>>, quadro: number): Amostra {
   return amostrar(roteiro.animacao, tempoNoQuadro(roteiro, quadro));
 }
 
 /* Quadros desde que a legenda de fase mudou (para o texto novo aparecer
    esmaecendo). Olha para trás quadro a quadro: sem estado guardado, o
    resultado não depende da ordem em que o Remotion renderiza. */
-export function quadrosDesdeATrocaDeFase(roteiro: Roteiro, quadro: number, limite = 15): number {
+export function quadrosDesdeATrocaDeFase(roteiro: ComAnimacao<Trecho<string>>, quadro: number, limite = 15): number {
   const fase = amostraNoQuadro(roteiro, quadro).fase;
   for (let k = 1; k <= limite; k++) {
     if (quadro - k < 0 || amostraNoQuadro(roteiro, quadro - k).fase !== fase) return k - 1;
