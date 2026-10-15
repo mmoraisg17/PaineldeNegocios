@@ -85,12 +85,10 @@ describe('roteiro do vídeo do búlgaro explosivo', () => {
     expect(cronometroNoTempo(roteiro.tempos, (tComeca + tTopo) / 2).subida).toBeCloseTo(subida / 2, 9);
   });
 
-  test('nenhum quadro usa inclinação da plataforma', () => {
-    expect(roteiro.animacao.inclinacaoDaBase ?? 0).toBe(0);
-    for (const q of todos) expect(amostraNoQuadro(roteiro, q).pose.inclinacaoDaBase ?? 0).toBe(0);
-    // A cena também passa 0 fixo para a Plataforma.
+  test('a plataforma do vídeo é a do app, plana: sem nenhuma opção de inclinação (que o app removeu)', () => {
     const cena = readFileSync(new URL('./CenaDoBulgaro.tsx', import.meta.url), 'utf8');
-    expect(cena).toMatch(/<Plataforma cores=\{cores\} inclinacao=\{0\} \/>/);
+    expect(cena).toMatch(/<Plataforma cores=\{cores\} \/>/);
+    expect(JSON.stringify(roteiro.animacao)).not.toMatch(/inclinacaoDaBase/);
   });
 
   test('a carga nos pés cabe no medidor (até 2×) e o banquinho está na animação', () => {

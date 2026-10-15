@@ -67,7 +67,7 @@ export function montarRoteiro({ nivel, velocidadeLenta }: ParametrosDoVideo): Ro
   /* Braços cruzados no peito: no nível 3 o búlgaro é sem as mãos, e as
      barras só poluiriam a vista lateral. Inclinação 0 de propósito: a ideia de
      inclinar a plataforma neste vídeo foi descartada (o teste confere). */
-  const animacao = animacaoDe(ID_DO_EXERCICIO, { nivel, bracos: 'cruzados', inclinacao: 0 });
+  const animacao = animacaoDe(ID_DO_EXERCICIO, { nivel, bracos: 'cruzados' });
   if (!animacao) throw new Error(`O app não tem animação para ${ID_DO_EXERCICIO}`);
   const tempos = temposDoCiclo(animacao, nivel);
   const inicio = tempos.inicioDaDescida - ANTES_DA_DESCIDA;

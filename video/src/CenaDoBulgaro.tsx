@@ -77,7 +77,7 @@ export function CenaDoBulgaro({ animacao, pose, carga, cores }: { animacao: Anim
       <EsperarModelos />
       <Chao cores={cores} />
       {/* Plataforma sempre plana: inclinação fora deste vídeo (descartada). */}
-      <Plataforma cores={cores} inclinacao={0} />
+      <Plataforma cores={cores} />
       {animacao.cadeira && <Banquinho cadeira={animacao.cadeira} cores={cores} />}
       <BonecoNoQuadro pose={pose} carga={carga} musculos={animacao.musculos} cores={cores} />
     </ThreeCanvas>
