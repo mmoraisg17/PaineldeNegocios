@@ -57,7 +57,7 @@ export function segundosDaDose(dose: Dose): number {
   return dose.porLado === true ? segundos * 2 : segundos;
 }
 
-/* O kit do produto traz todos os itens (barras, elástico e assento acoplável), então a rotina padrão é a trilha inteira: ninguém precisa dizer
+/* O kit do produto traz todos os itens (barras e assento acoplável), então a rotina padrão é a trilha inteira: ninguém precisa dizer
    o que tem em casa. Na fisioterapia a região do objetivo vem primeiro: quem
    tem o joelho como foco faz primeiro os exercícios do joelho, com a energia
    do começo do treino. */

@@ -453,8 +453,8 @@ describe('estado de demonstração: contas com senha', () => {
   );
 
   test('a rotina e o histórico das contas de demonstração seguem o mesmo sem a pergunta "o que há em casa"', () => {
-    // Lúcia fica com a trilha inteira (3 exercícios); Rafael também (3, da trilha de fisio).
-    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(3);
+    // Lúcia fica com a trilha inteira (2 exercícios); Rafael também (3, da trilha de fisio).
+    expect(rotinaDoPraticante(demo, IDS_DEMO.lucia)?.itens).toHaveLength(2);
     expect(rotinaDoPraticante(demo, IDS_DEMO.rafael)?.itens).toHaveLength(3);
     expect(lucia?.sessoes).toHaveLength(16);
     expect(rafael?.sessoes).toHaveLength(17);

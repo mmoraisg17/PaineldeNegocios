@@ -5,7 +5,7 @@ import { CORPO, PLATAFORMA, TOPO_BASE } from './cenario';
 import { type Pose, alturaEmPe, montarEsqueleto, tornozeloPadrao } from './corpo';
 import { distancia } from './vetor';
 
-/* Fase 6: cada pé pode se mover (tandem, degrau, abdução), subir o calcanhar
+/* Fase 6: cada pé pode se mover (tandem, degrau), subir o calcanhar
    (panturrilha) e sair do chão (apoio num pé só). Fatos medidos, como nos
    testes do movimento. */
 

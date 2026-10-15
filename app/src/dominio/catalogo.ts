@@ -65,30 +65,6 @@ const EXERCICIOS: Exercicio[] = [
     ],
   },
   {
-    id: 'abducao-com-elastico',
-    nome: 'Abdução de quadril com elástico',
-    trilha: 'equilibrio60',
-    paraQue: 'Força na lateral do quadril, importante para não cair de lado.',
-    comoFazer: [
-      'Prenda o elástico na base da barra e no tornozelo de fora.',
-      'Segure a barra e fique apoiado na outra perna.',
-      'Afaste a perna para o lado, devagar, sem inclinar o tronco.',
-      'Volte devagar.',
-    ],
-    acessorios: ['barras', 'elastico'],
-    oQueOAppCorrige: 'A perna de apoio não pode balançar: o peso deve ficar firme nela.',
-    niveis: {
-      1: { dose: repeticoes(8, true), apoio: 'uma-mao', descricao: 'Elástico leve, 8 vezes.' },
-      2: { dose: repeticoes(12, true), apoio: 'uma-mao', descricao: 'Elástico leve, 12 vezes.' },
-      3: { dose: repeticoes(12, true), apoio: 'uma-mao', descricao: 'Elástico mais forte, 12 vezes.' },
-    },
-    correcoes: [
-      { id: 'apoio-balancando', mensagem: 'Firme a perna de apoio', gravidade: 'atencao' },
-      { id: 'tronco-inclinado', mensagem: 'Mantenha o peso sobre a perna de apoio', gravidade: 'atencao' },
-      { id: 'perda-de-equilibrio', mensagem: 'Pare e segure nas duas barras', gravidade: 'pare' },
-    ],
-  },
-  {
     id: 'miniagachamento-simetrico',
     nome: 'Miniagachamento com descarga simétrica',
     trilha: 'fisio',

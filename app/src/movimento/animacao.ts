@@ -1,4 +1,4 @@
-import type { Lado, Pose, PoseDoPe } from './corpo';
+import type { Pose, PoseDoPe } from './corpo';
 import type { ModoDoPrumo } from './alinhamento';
 import type { Musculo } from './musculos';
 
@@ -32,8 +32,6 @@ export type Animacao = {
   readonly camera?: { readonly posicao: [number, number, number]; readonly alvo: [number, number, number] };
   /* Regra do fio de prumo (V7): 'centro' (padrão, simétricos) ou 'apoio'. */
   readonly prumo?: ModoDoPrumo;
-  /* Elástico preso num ponto fixo (base da barra) e no tornozelo de um lado. */
-  readonly elastico?: { readonly ancora: readonly [number, number, number]; readonly lado: Lado };
 };
 
 export type Amostra = { readonly pose: Pose; readonly carga: Carga; readonly fase: string; readonly indiceFase: number };

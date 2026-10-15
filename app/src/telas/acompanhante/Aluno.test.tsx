@@ -334,9 +334,9 @@ describe('ajustar a rotina', () => {
     abrir('carlos', 'lucia');
 
     // Act / Assert: qualquer plataforma executa todos os níveis
-    const abducao = screen.getByRole('group', { name: 'Nível de Abdução de quadril com elástico' });
+    const sentar = screen.getByRole('group', { name: 'Nível de Sentar e levantar' });
     for (const nivel of [1, 2, 3]) {
-      expect(within(abducao).getByRole('radio', { name: `Nível ${nivel}` })).toBeEnabled();
+      expect(within(sentar).getByRole('radio', { name: `Nível ${nivel}` })).toBeEnabled();
     }
 
     await usuario.click(screen.getByRole('checkbox', { name: 'Pés em linha (tandem)' }));
