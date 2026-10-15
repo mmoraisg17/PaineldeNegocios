@@ -1,0 +1,54 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Comparação A1 × A2</title>
+<style>
+body{margin:0;padding:24px;font:14px Inter,system-ui,sans-serif;background:#e5e5e5;color:#1b1f24}
+h1{font-size:18px;margin:0 0 16px}h2{font-size:13px;margin:18px 0 8px;color:#4a5360}
+.linha{display:flex;gap:16px;flex-wrap:wrap}.bloco{padding:16px;border-radius:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.par{display:flex;gap:14px;align-items:flex-end}.par figure{margin:0;text-align:center;font-size:11px}
+.par img{display:block;margin:0 auto 4px}
+.claro{background:#f7f5f0}.branco{background:#fff;border:1px solid #c9ced6}.prim{background:#0f6e5c;color:#fff}.escuro{background:#0b0f14;color:#fff}.suave{background:#ddefea}
+.zoom{image-rendering:pixelated}
+.cartao{display:flex;gap:10px;align-items:center;background:#fff;border-radius:20px;padding:12px;width:300px}
+.cartao b{display:block}
+.btn{background:#0f6e5c;color:#fff;border-radius:16px;padding:10px 16px;font-weight:600}
+</style>
+<h1>Kettlebell: A1 (inferior esquerdo) × A2 (inferior direito)</h1>
+<h2>1. Tamanhos reais (32, 48, 64 px) e 32 px ampliado 6× sem suavização</h2>
+<div class="linha">
+<div class="bloco claro"><b>A1</b><div class="par"><figure><img src="A1.png" width="32"><span>32</span></figure><figure><img src="A1.png" width="48"><span>48</span></figure><figure><img src="A1.png" width="64"><span>64</span></figure></div></div>
+<div class="bloco claro"><b>A2</b><div class="par"><figure><img src="A2.png" width="32"><span>32</span></figure><figure><img src="A2.png" width="48"><span>48</span></figure><figure><img src="A2.png" width="64"><span>64</span></figure></div></div>
+<div class="bloco claro"><b>A1 a 32 px, 6×</b><canvas id="c1" width="192" height="192"></canvas></div>
+<div class="bloco claro"><b>A2 a 32 px, 6×</b><canvas id="c2" width="192" height="192"></canvas></div>
+</div>
+<h2>2. Silhueta em preto a 32 px (reconhecimento da forma)</h2>
+<div class="linha">
+<div class="bloco branco"><b>A1</b><canvas id="s1" width="96" height="96"></canvas></div>
+<div class="bloco branco"><b>A2</b><canvas id="s2" width="96" height="96"></canvas></div>
+</div>
+<h2>3. Sobre as superfícies do app (32 px e 96 px)</h2>
+<div class="linha">
+<div class="bloco claro"><b>Fundo #F7F5F0</b><div class="par"><img src="A1.png" width="32"><img src="A2.png" width="32"><img src="A1.png" width="96"><img src="A2.png" width="96"></div></div>
+<div class="bloco branco"><b>Superfície #FFFFFF</b><div class="par"><img src="A1.png" width="32"><img src="A2.png" width="32"><img src="A1.png" width="96"><img src="A2.png" width="96"></div></div>
+<div class="bloco prim"><b>Primária #0F6E5C</b><div class="par"><img src="A1.png" width="32"><img src="A2.png" width="32"><img src="A1.png" width="96"><img src="A2.png" width="96"></div></div>
+<div class="bloco suave"><b>Primária suave #DDEFEA</b><div class="par"><img src="A1.png" width="32"><img src="A2.png" width="32"><img src="A1.png" width="96"><img src="A2.png" width="96"></div></div>
+<div class="bloco escuro"><b>Moldura/cena #0B0F14</b><div class="par"><img src="A1.png" width="32"><img src="A2.png" width="32"><img src="A1.png" width="96"><img src="A2.png" width="96"></div></div>
+</div>
+<h2>4. Em uso: cartão e favicon</h2>
+<div class="linha">
+<div class="bloco claro">
+<div class="cartao"><img src="A1.png" width="48" style="border-radius:12px"><div><b>Equilíbrio</b>Treino de hoje: 3 exercícios</div></div>
+<div class="cartao"><img src="A2.png" width="48" style="border-radius:12px"><div><b>Equilíbrio</b>Treino de hoje: 3 exercícios</div></div>
+<div class="btn">Começar o treino</div></div>
+<div class="bloco claro"><b>Aba do navegador (16 px) e ícone de app (círculo 40 px)</b>
+<div class="par"><img src="A1.png" width="16"><img src="A2.png" width="16"><img src="A1.png" width="40" style="border-radius:50%"><img src="A2.png" width="40" style="border-radius:50%"></div></div>
+</div>
+<script>
+function amp(id,src,mask){const c=document.getElementById(id),x=c.getContext('2d');const i=new Image();i.onload=()=>{const t=document.createElement('canvas');t.width=t.height=32;const y=t.getContext('2d');y.drawImage(i,0,0,32,32);
+if(mask){const d=y.getImageData(0,0,32,32),p=d.data,bg=[p[0],p[1],p[2]];
+// fundo = cor do canto mais distante do personagem: usa a moda das bordas
+const cnt={};for(let k=0;k<32;k++)for(const [a,b] of [[k,0],[0,k],[31,k],[k,31]]){const o=(b*32+a)*4,key=[p[o]>>4,p[o+1]>>4,p[o+2]>>4].join();cnt[key]=(cnt[key]||0)+1}
+const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0].split(',').map(Number);
+for(let k=0;k<p.length;k+=4){const same=Math.abs((p[k]>>4)-top[0])<=1&&Math.abs((p[k+1]>>4)-top[1])<=1&&Math.abs((p[k+2]>>4)-top[2])<=1;const v=same?255:0;p[k]=p[k+1]=p[k+2]=v;p[k+3]=255}
+y.putImageData(d,0,0)}
+x.imageSmoothingEnabled=false;x.drawImage(t,0,0,c.width,c.height)};i.src=src}
+amp('c1','A1.png');amp('c2','A2.png');amp('s1','A1.png',1);amp('s2','A2.png',1);
+</script></html>
