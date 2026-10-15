@@ -23,16 +23,24 @@ import type { Musculo } from '../../app/src/movimento/musculos';
    igual em qualquer ordem de render, em vez de depender do quadro anterior. */
 const DELTA_DO_BRILHO = 1;
 
+/* A "camisa": o tronco é o único segmento achatado do corpo (o resto é
+   revolução). Só o vídeo pinta o tronco (para diferenciar um atleta do outro);
+   o boneco do app continua todo na cor do manequim. */
+export const ehDaCamisa = (segmento: (typeof SEGMENTOS)[number]) => segmento.achatar !== undefined;
+
 export function BonecoNoQuadro({
   pose,
   carga,
   musculos,
   cores,
+  camisa,
 }: {
   pose: Pose;
   carga: Carga;
-  musculos?: readonly Musculo[];
+  musculos?: readonly Musculo[] | undefined;
   cores: CoresDaCena;
+  /* Cor do tronco; sem ela, o manequim do app. */
+  camisa?: string | undefined;
 }) {
   const segmentos = useRef<(Mesh | null)[]>([]);
   const juntas = useRef<(Mesh | null)[]>([]);
@@ -63,7 +71,7 @@ export function BonecoNoQuadro({
           ) : (
             <cylinderGeometry args={[s.raio, s.raio, 1, 14]} />
           )}
-          <MaterialManequim cor={cores[s.cor]} borda={cores.borda} />
+          <MaterialManequim cor={camisa && ehDaCamisa(s) ? camisa : cores[s.cor]} borda={cores.borda} />
         </mesh>
       ))}
       {JUNTAS.map((j, i) => (

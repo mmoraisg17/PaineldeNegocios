@@ -22,3 +22,18 @@ export function tokenDoApp(nome: string, reserva: string): string {
   const achado = new RegExp(`--color-${nome}\\s*:\\s*([^;]+);`).exec(cssDoApp)?.[1];
   return achado?.trim() ?? reserva;
 }
+
+/* Cor de destaque de cada atleta no vídeo "LucasEDiego": vai no cartão, nos
+   selos, na faixa da subida e na camisa do boneco, para os dois blocos não se
+   confundirem. Lucas fica com a cor primária do app (a mesma do vídeo
+   "Bulgaro"); Diego, com o âmbar da cena (`cena-atencao`), bem distinto do
+   vermelho e do azul dos músculos. Em cima do âmbar o texto branco não tem
+   contraste, por isso o texto escuro (o fundo da cena). */
+export type CoresDoAtleta = { readonly acento: string; readonly sobreAcento: string };
+
+export function coresDosAtletas(): { readonly lucas: CoresDoAtleta; readonly diego: CoresDoAtleta } {
+  return {
+    lucas: { acento: tokenDoApp('primaria', '#e0214f'), sobreAcento: '#ffffff' },
+    diego: { acento: tokenDoApp('cena-atencao', '#ffb020'), sobreAcento: tokenDoApp('cena-fundo', '#14141e') },
+  };
+}

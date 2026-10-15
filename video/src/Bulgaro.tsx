@@ -8,6 +8,7 @@ import {
   type IdDoTrecho,
   type ParametrosDoVideo,
   type Roteiro,
+  type RoteiroQualquer,
   amostraNoQuadro,
   cronometroNoTempo,
   montarRoteiro,
@@ -34,11 +35,11 @@ import {
    fecho. A pose, a fase e a carga de cada quadro vêm do motor do app
    (amostrar + montarEsqueleto) no instante dado por roteiro.ts. */
 
-const FONTE = "'Inter Variable', system-ui, sans-serif";
+export const FONTE = "'Inter Variable', system-ui, sans-serif";
 
 /* A fonte vem de um CSS (@fontsource); sem esperar, os primeiros quadros
    sairiam com a fonte do sistema. */
-function useFonteCarregada() {
+export function useFonteCarregada() {
   const { delayRender, continueRender } = useDelayRender();
   const [espera] = useState(() => delayRender('Carregando a fonte Inter'));
   useEffect(() => {
@@ -51,7 +52,7 @@ function useFonteCarregada() {
 const trecho = (roteiro: Roteiro, id: IdDoTrecho) => roteiro.trechos.find((t) => t.id === id)!;
 
 /* Maior carga nos pés do início do trecho até o quadro: o "pico" do medidor. */
-function picoNoTrecho(roteiro: Roteiro, quadro: number): number {
+export function picoNoTrecho(roteiro: RoteiroQualquer, quadro: number): number {
   const atual = trechoNoQuadro(roteiro, quadro);
   let pico = 0;
   for (let q = atual.de; q <= quadro; q++) pico = Math.max(pico, amostraNoQuadro(roteiro, q).carga.pes);
@@ -62,7 +63,7 @@ function picoNoTrecho(roteiro: Roteiro, quadro: number): number {
    começo da subida e só apaga depois do topo, para a faixa ser lida mesmo na
    velocidade real (a subida dura 18 quadros). Apaga até o fim da janela do
    roteiro (topo + 0,3 s), para não cortar aceso na emenda lenta → real. */
-function intensidadeDaSubida(roteiro: Roteiro, tempo: number): number {
+export function intensidadeDaSubida(roteiro: RoteiroQualquer, tempo: number): number {
   const { tComeca, tTopo } = roteiro.tempos;
   return interpolate(tempo, [tComeca - 0.05, tComeca + 0.05, tTopo + 0.1, tTopo + 0.28], [0, 1, 1, 0], {
     extrapolateLeft: 'clamp',
@@ -76,7 +77,14 @@ export function Bulgaro({ nivel, velocidadeLenta }: ParametrosDoVideo) {
   const roteiro = useMemo(() => montarRoteiro({ nivel, velocidadeLenta }), [nivel, velocidadeLenta]);
   const cores = useMemo(() => coresDaCenaDoApp(), []);
   const paleta: Paleta = useMemo(
-    () => ({ fundo: cores.fundo, acento: tokenDoApp('primaria', '#e0214f'), salmao: cores.sensores, texto: '#ffffff', suave: '#c9cad6' }),
+    () => ({
+      fundo: cores.fundo,
+      acento: tokenDoApp('primaria', '#e0214f'),
+      sobreAcento: '#ffffff',
+      salmao: cores.sensores,
+      texto: '#ffffff',
+      suave: '#c9cad6',
+    }),
     [cores],
   );
 

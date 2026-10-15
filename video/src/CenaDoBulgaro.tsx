@@ -25,9 +25,16 @@ type Camera = NonNullable<Animacao['camera']>;
    pelo mesmo motivo do vídeo anterior (abrir em cima e embaixo sem mudar o
    ângulo). */
 const CAMPO_DE_VISAO = 40;
-export function cameraDoVideo(daAnimacao: Camera): Camera {
+
+/* Distância da câmera (de lado, no eixo x), altura dela e do alvo, em metros.
+   O vídeo "LucasEDiego" afasta a câmera para caber o cartão do atleta em cima. */
+export type Enquadramento = { readonly distancia: number; readonly altura: number; readonly alvoY: number };
+export const ENQUADRAMENTO_PADRAO: Enquadramento = { distancia: 5.0, altura: 1.3, alvoY: 0.66 };
+
+export function cameraDoVideo(daAnimacao: Camera, enquadramento: Enquadramento = ENQUADRAMENTO_PADRAO): Camera {
   const [, , z] = daAnimacao.alvo;
-  return { posicao: [5.0, 1.3, z], alvo: [0, 0.66, z] };
+  const { distancia, altura, alvoY } = enquadramento;
+  return { posicao: [distancia, altura, z], alvo: [0, alvoY, z] };
 }
 
 /* Câmera parada; o app gira a câmera com o dedo (Orbita, no useFrame). */
@@ -58,9 +65,25 @@ function EsperarModelos() {
   return null;
 }
 
-export function CenaDoBulgaro({ animacao, pose, carga, cores }: { animacao: Animacao; pose: Pose; carga: Carga; cores: CoresDaCena }) {
+export function CenaDoBulgaro({
+  animacao,
+  pose,
+  carga,
+  cores,
+  enquadramento = ENQUADRAMENTO_PADRAO,
+  camisa,
+}: {
+  animacao: Animacao;
+  pose: Pose;
+  carga: Carga;
+  cores: CoresDaCena;
+  enquadramento?: Enquadramento;
+  camisa?: string | undefined;
+}) {
   const { width, height } = useVideoConfig();
-  const camera = cameraDoVideo(animacao.camera ?? { posicao: [3.6, 1.45, -0.05], alvo: [0, 0.85, -0.05] });
+  const camera = cameraDoVideo(animacao.camera ?? { posicao: [3.6, 1.45, -0.05], alvo: [0, 0.85, -0.05] }, enquadramento);
+  // A névoa acompanha a distância da câmera, para o chão sumir no mesmo ponto.
+  const afastamento = enquadramento.distancia / ENQUADRAMENTO_PADRAO.distancia;
   return (
     <ThreeCanvas width={width} height={height} dpr={1} camera={{ position: camera.posicao, fov: CAMPO_DE_VISAO, near: 0.05, far: 20 }}>
       {/* Estúdio igual ao do app (cena3d/VisualizadorExercicio.tsx, V1): fundo
@@ -68,7 +91,7 @@ export function CenaDoBulgaro({ animacao, pose, carga, cores }: { animacao: Anim
           recorte por trás. A névoa começa mais longe que no app porque a
           câmera também está mais longe. */}
       <color attach="background" args={[cores.fundo]} />
-      <fog attach="fog" args={[cores.fundo, 5.6, 9.2]} />
+      <fog attach="fog" args={[cores.fundo, 5.6 * afastamento, 9.2 * afastamento]} />
       <hemisphereLight args={['#cfd8e3', cores.fundo, 0.55]} />
       <directionalLight position={[2.5, 4, 3]} intensity={1.3} />
       <directionalLight position={[-3, 3, -4]} intensity={2.6} />
@@ -79,7 +102,7 @@ export function CenaDoBulgaro({ animacao, pose, carga, cores }: { animacao: Anim
       {/* Plataforma sempre plana: inclinação fora deste vídeo (descartada). */}
       <Plataforma cores={cores} />
       {animacao.cadeira && <Banquinho cadeira={animacao.cadeira} cores={cores} />}
-      <BonecoNoQuadro pose={pose} carga={carga} musculos={animacao.musculos} cores={cores} />
+      <BonecoNoQuadro pose={pose} carga={carga} musculos={animacao.musculos} cores={cores} camisa={camisa} />
     </ThreeCanvas>
   );
 }
