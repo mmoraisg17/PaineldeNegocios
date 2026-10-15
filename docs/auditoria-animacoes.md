@@ -2,6 +2,8 @@
 
 > Data: 07/10/2026 · Etapas 1 a 3 (auditoria) e etapa 4 (implementação, aprovada pelo Murilo em 07/10). **Status: todas as correções implementadas**. Ver a seção 6.
 >
+> **Nota de 15/10/2026:** a inclinação da plataforma foi retirada do produto, junto com os exercícios "Equilíbrio num pé só com inclinação" e "Transferência de peso com alvos". O que esta auditoria diz sobre tampo inclinado (item 10 e "Tampo inclinando") ficou sem efeito; o resto do registro segue como foi feito.
+>
 > **Escopo definido pelo grupo:** só as **demonstrações dos exercícios**, isto é, a cena 3D da tela do exercício (`app/src/cena3d/` + `app/src/movimento/`). Ficam **fora**: microinterações da interface (botões, rotas, listas, gráficos), mapa de pressão, aviso de correção e qualquer entrega do Painel (break-even, organograma etc.).
 
 ## 0. Método e ferramentas

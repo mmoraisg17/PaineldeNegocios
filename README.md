@@ -4,11 +4,11 @@ Repositório de documentação do produto e do protótipo do aplicativo do Grupo
 
 ## O produto
 
-Uma **plataforma de exercícios para uso em casa** com sensores de pressão, barras de apoio retráteis e inclinação ajustável. O app que a acompanha:
+Uma **plataforma de exercícios para uso em casa** com sensores de pressão e barras de apoio retráteis. O app que a acompanha:
 
 - **mostra a distribuição do peso em tempo real**, ou seja, quanto peso vai para cada pé e se ele está no calcanhar ou na ponta;
 - **corrige a execução** com animações que mostram o movimento certo e com avisos visuais, sonoros e de vibração quando o peso sai do ideal;
-- **organiza os treinos** a partir de um portfólio de exercícios, com progressão de dificuldade pela inclinação e pela redução do apoio nas barras.
+- **organiza os treinos** a partir de um portfólio de exercícios, com progressão de dificuldade pelo volume (repetições ou tempo) e pela redução do apoio nas barras.
 
 ## Para quem
 
@@ -21,12 +21,10 @@ Uma **plataforma de exercícios para uso em casa** com sensores de pressão, bar
 |---|---|
 | Base com células de carga | Mede o peso e o centro de pressão de cada pé |
 | Barras de apoio retráteis | Dão segurança e medem quanto o usuário depende do apoio |
-| Inclinação ajustável | Ajusta o nível de dificuldade |
-| Sensor de inclinação | Compensa as leituras quando a plataforma está inclinada |
 | Microcontrolador com Bluetooth | Envia os dados para o app |
 | Botão de emergência | Interrompe o exercício a qualquer momento |
 
-**Exercícios em que a plataforma corrige a execução:** agachamento, sentar e levantar, elevação de panturrilha, equilíbrio em um pé só, transferência de peso e apoio parcial do peso.
+**Exercícios em que a plataforma corrige a execução:** agachamento, sentar e levantar, elevação de panturrilha e apoio parcial do peso.
 
 ## Protótipo do app
 
