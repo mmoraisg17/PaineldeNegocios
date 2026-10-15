@@ -85,29 +85,6 @@ describe('decidirNivel: sobe', () => {
     expect(decisao.mudanca).toBe('mantem');
     expect(decisao.motivo).toMatch(/máximo/i);
   });
-
-  test('não sobe acima do nível máximo que a inclinação da plataforma permite, e explica por quê', () => {
-    const decisao = decidirNivel(entrada({ nivelAtual: 2, nivelMaximo: 2 }));
-
-    expect(decisao).toMatchObject({ nivel: 2, mudanca: 'mantem' });
-    expect(decisao.motivo).toMatch(/inclinação/i);
-  });
-
-  test('sobe normalmente até o nível máximo permitido', () => {
-    const decisao = decidirNivel(entrada({ nivelAtual: 1, nivelMaximo: 2 }));
-
-    expect(decisao).toMatchObject({ nivel: 2, mudanca: 'sobe' });
-  });
-
-  test('um nível máximo abaixo do atual nunca faz o app subir', () => {
-    const decisao = decidirNivel(entrada({ nivelAtual: 2, nivelMaximo: 1 }));
-
-    expect(decisao.mudanca).toBe('mantem');
-  });
-
-  test('sem nível máximo informado, o teto é o nível 3', () => {
-    expect(decidirNivel(entrada({ nivelAtual: 2 })).nivel).toBe(3);
-  });
 });
 
 describe('decidirNivel: desce', () => {

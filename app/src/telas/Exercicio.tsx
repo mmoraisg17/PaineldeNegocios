@@ -6,6 +6,7 @@ import { PainelDemonstracao } from '../components/PainelDemonstracao';
 import { novoRelogio } from '../cena3d/relogio';
 import { type Apoio, type Exercicio as TipoExercicio, type Nivel, type ResultadoExercicio, buscarExercicio, notaDeExecucao } from '../dominio';
 import { useApp } from '../estado/ContextoApp';
+import { ROTULO_DA_TRILHA } from '../estado/formatos';
 import { useSimulacaoDeSensores } from '../hooks/useSimulacaoDeSensores';
 import { useTituloDaTela } from '../hooks/useTituloDaTela';
 import { useVoz } from '../hooks/useVoz';
@@ -58,8 +59,8 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
   const meta = itemDoTreino?.meta?.simetriaEsquerda;
   const config = exercicio.niveis[nivel];
   const animacao = useMemo(
-    () => animacaoDe(exercicio.id, { bracos: BRACOS_DO_APOIO[config.apoio], nivel, inclinacao: config.inclinacao }),
-    [exercicio.id, config.apoio, nivel, config.inclinacao],
+    () => animacaoDe(exercicio.id, { bracos: BRACOS_DO_APOIO[config.apoio], nivel }),
+    [exercicio.id, config.apoio, nivel],
   );
   const relogio = useRef(novoRelogio(prefereMenosMovimento()));
   const tituloRef = useTituloDaTela(exercicio.nome);
@@ -104,7 +105,7 @@ function TelaDoExercicio({ exercicio }: { exercicio: TipoExercicio }) {
   const mensagem = sim.avaliacao.correcao?.mensagem ?? MENSAGEM_OK;
   const { vozBrasileiraDisponivel } = useVoz(voz, sim.avaliacao.correcao?.id ?? sim.avaliacao.estado, mensagem);
 
-  const trilha = exercicio.trilha === 'fisio' ? 'Fisioterapia' : 'Equilíbrio 60+';
+  const trilha = ROTULO_DA_TRILHA[exercicio.trilha];
 
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">

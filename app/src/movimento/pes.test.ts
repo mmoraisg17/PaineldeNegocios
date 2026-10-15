@@ -6,8 +6,8 @@ import { type Pose, alturaEmPe, montarEsqueleto, tornozeloPadrao } from './corpo
 import { distancia } from './vetor';
 
 /* Fase 6: cada pé pode se mover (tandem, degrau, abdução), subir o calcanhar
-   (panturrilha), sair do chão (apoio num pé só) e a base pode inclinar. Fatos
-   medidos, como nos testes do movimento. */
+   (panturrilha) e sair do chão (apoio num pé só). Fatos medidos, como nos
+   testes do movimento. */
 
 const MM = 0.001;
 const EM_PE: Pose = {
@@ -66,15 +66,6 @@ describe('pés', () => {
     expect(l.ponta.y).toBeCloseTo(0, 6);
     expect(l.apoiado).toBe(false);
   });
-
-  test('base inclinada 10° (frente sobe): o pé acompanha a rampa, ponta mais alta que o calcanhar', () => {
-    const pose = comPes(undefined, { inclinacaoDaBase: 10 });
-    const d = montarEsqueleto(pose).lados.direito;
-    const comprimento = CORPO.peFrente + CORPO.peTras;
-    expect(d.ponta.y - d.calcanhar.y).toBeCloseTo(comprimento * Math.sin((10 * Math.PI) / 180), 3);
-    expect(d.apoiado).toBe(true);
-    ossosIntactos(pose);
-  });
 });
 
 describe('animação com pés', () => {
@@ -93,10 +84,5 @@ describe('animação com pés', () => {
     const meio = amostrar(animacao, 0.5).pose.pes?.direito?.dz ?? 0;
     expect(meio).toBeGreaterThan(0.05);
     expect(meio).toBeLessThan(0.15);
-  });
-
-  test('a inclinação da base vem da animação e chega à pose amostrada', () => {
-    const animacao: Animacao = { ...sentarELevantar(), inclinacaoDaBase: 5 };
-    expect(amostrar(animacao, 1).pose.inclinacaoDaBase).toBe(5);
   });
 });

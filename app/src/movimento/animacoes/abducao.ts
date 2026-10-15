@@ -65,6 +65,6 @@ export function abducao(bracos: ModoBracos): Animacao {
     // Base do poste da frente da barra esquerda.
     elastico: { ancora: [PLATAFORMA.barraX, TOPO_BASE + 0.02, PLATAFORMA.pegadaZ.ate], lado: 'direito' },
     // De frente: a perna abrindo para o lado e o tronco parado à vista.
-    camera: { posicao: [0.5, 1.72, 3.3], alvo: [-0.05, 1.07, 0] },
+    camera: { posicao: [0.5, 1.72, 3.9], alvo: [-0.05, 0.98, 0] },
   };
 }

@@ -7,17 +7,17 @@ import { abrirTela, estadoDeTeste, usarRelogioFixo } from './auxiliaresDeTeste';
 
 usarRelogioFixo();
 
-const nomesDaTrilha = (trilha: 'equilibrio60' | 'fisio') => CATALOGO.filter((e) => e.trilha === trilha).map((e) => e.nome);
+const nomesDaTrilha = (trilha: 'equilibrio60' | 'fisio' | 'desempenho') => CATALOGO.filter((e) => e.trilha === trilha).map((e) => e.nome);
 const cartao = (nome: string) => screen.getByRole('article', { name: nome });
 
-test('mostra o título e as duas abas', () => {
+test('mostra o título e as três abas', () => {
   // Arrange / Act
   abrirTela('/praticante/biblioteca');
 
   // Assert
   expect(screen.getByRole('heading', { level: 1, name: 'Biblioteca' })).toHaveFocus();
   expect(screen.getByRole('tablist', { name: 'Trilhas de exercícios' })).toBeInTheDocument();
-  expect(screen.getAllByRole('tab').map((aba) => aba.textContent)).toEqual(['Equilíbrio 60+', 'Fisioterapia']);
+  expect(screen.getAllByRole('tab').map((aba) => aba.textContent)).toEqual(['Equilíbrio 60+', 'Fisioterapia', 'Força e explosão']);
 });
 
 test('a aba inicial é a trilha do praticante', () => {
@@ -37,6 +37,16 @@ test('para quem treina fisioterapia, a aba inicial é a de fisioterapia', () => 
   // Assert
   expect(screen.getByRole('tab', { name: 'Fisioterapia' })).toHaveAttribute('aria-selected', 'true');
   expect(screen.getAllByRole('article')).toHaveLength(nomesDaTrilha('fisio').length);
+});
+
+test('para o atleta de força e explosão, a aba inicial é a dele, com o aviso de segurança', () => {
+  // Arrange / Act
+  abrirTela('/praticante/biblioteca', { estado: estadoDeTeste('lucas') });
+
+  // Assert
+  expect(screen.getByRole('tab', { name: 'Força e explosão' })).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getAllByRole('article')).toHaveLength(nomesDaTrilha('desempenho').length);
+  expect(screen.getByText(/trave o banquinho/)).toBeInTheDocument();
 });
 
 test('o painel da aba é ligado a ela por aria-labelledby', () => {
@@ -74,6 +84,7 @@ test('as setas do teclado movem o foco e a seleção entre as abas', async () =>
   abrirTela('/praticante/biblioteca');
   const equilibrio = screen.getByRole('tab', { name: 'Equilíbrio 60+' });
   const fisio = screen.getByRole('tab', { name: 'Fisioterapia' });
+  const desempenho = screen.getByRole('tab', { name: 'Força e explosão' });
   equilibrio.focus();
 
   // Act / Assert
@@ -82,18 +93,21 @@ test('as setas do teclado movem o foco e a seleção entre as abas', async () =>
   expect(fisio).toHaveAttribute('aria-selected', 'true');
 
   await userEvent.keyboard('{ArrowRight}');
+  expect(desempenho).toHaveFocus();
+
+  await userEvent.keyboard('{ArrowRight}');
   expect(equilibrio).toHaveFocus();
   expect(equilibrio).toHaveAttribute('aria-selected', 'true');
 
   await userEvent.keyboard('{ArrowLeft}');
-  expect(fisio).toHaveFocus();
+  expect(desempenho).toHaveFocus();
 
   await userEvent.keyboard('{Home}');
   expect(equilibrio).toHaveFocus();
 
   await userEvent.keyboard('{End}');
-  expect(fisio).toHaveFocus();
-  expect(fisio).toHaveAttribute('aria-selected', 'true');
+  expect(desempenho).toHaveFocus();
+  expect(desempenho).toHaveAttribute('aria-selected', 'true');
 });
 
 test('cada cartão traz o nome, o "para quê" e os acessórios', () => {
@@ -243,7 +257,7 @@ test('os filtros oferecem os quatro acessórios e os três níveis', () => {
 
   // Assert
   const acessorios = within(screen.getByRole('group', { name: 'Filtrar por acessório' }));
-  expect(acessorios.getAllByRole('button').map((b) => b.textContent?.replace('✓', '').trim())).toEqual(['Barras', 'Elástico', 'Inclinação', 'Cadeira']);
+  expect(acessorios.getAllByRole('button').map((b) => b.textContent?.replace('✓', '').trim())).toEqual(['Barras', 'Elástico', 'Cadeira']);
   const niveis = within(screen.getByRole('group', { name: 'Filtrar por nível' }));
   expect(niveis.getAllByRole('button')).toHaveLength(3);
 });

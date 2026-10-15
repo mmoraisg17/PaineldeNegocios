@@ -25,3 +25,7 @@ docs/tempos/
 docs/fluxograma/
 # Registros da ferramenta de imagens (trazem o identificador da conta nas URLs)
 *.job.json
+
+# Vídeo (video/): dependências e saídas pesadas (MP4, pôster) ficam fora do git.
+video/node_modules/
+video/out/

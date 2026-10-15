@@ -32,7 +32,6 @@ export type Pose = {
   readonly bracos: ModoBracos;
   readonly maoZ: number; // onde as mãos seguram a barra, ao longo dela
   readonly pes?: { readonly esquerdo?: PoseDoPe; readonly direito?: PoseDoPe };
-  readonly inclinacaoDaBase?: number; // graus; a frente da tampa sobe (seletor da plataforma)
 };
 
 export type Esqueleto = {
@@ -42,7 +41,6 @@ export type Esqueleto = {
   readonly lados: Record<Lado, LadoDoCorpo>;
   readonly maosNoAlvo: boolean;
   readonly quadrilAlcancavel: boolean;
-  readonly inclinacaoDaBase: number; // graus
 };
 
 export type LadoDoCorpo = {
@@ -74,8 +72,7 @@ export function alturaEmPe(z: number): number {
 
 export function montarEsqueleto(pose: Pose): Esqueleto {
   const centroPedido = vec(pose.deslocamentoLateral, pose.quadril.y, pose.quadril.z);
-  const inclinacao = pose.inclinacaoDaBase ?? 0;
-  const pernas = (['esquerdo', 'direito'] as const).map((lado) => perna(lado, centroPedido, pose.pes?.[lado], inclinacao));
+  const pernas = (['esquerdo', 'direito'] as const).map((lado) => perna(lado, centroPedido, pose.pes?.[lado]));
   const [esq, dir] = pernas as [ReturnType<typeof perna>, ReturnType<typeof perna>];
   const pelve = misturar(esq.quadril, dir.quadril, 0.5);
 
@@ -105,27 +102,30 @@ export function montarEsqueleto(pose: Pose): Esqueleto {
     },
     maosNoAlvo: bracoE.alcancou && bracoD.alcancou,
     quadrilAlcancavel: esq.alcancou && dir.alcancou,
-    inclinacaoDaBase: inclinacao,
   };
 }
 
-/* Altura da superfície onde o pé pisa: a tampa da base (inclinada com a
-   frente para cima, girando na borda de trás) ou o chão, fora da base. */
-export function alturaDaSuperficie(x: number, z: number, inclinacaoGraus: number): number {
-  if (Math.abs(x) > PLATAFORMA.largura / 2) return 0;
-  return TOPO_BASE + (z + PLATAFORMA.profundidade / 2) * Math.tan(radianos(inclinacaoGraus));
+/* Altura da superfície onde o pé pisa: o topo da base (plana) ou o chão,
+   fora dela. */
+export function alturaDaSuperficie(x: number): number {
+  return Math.abs(x) > PLATAFORMA.largura / 2 ? 0 : TOPO_BASE;
 }
 
-/* O pé gira em torno da ponta: ângulo = elevação do calcanhar menos a
-   inclinação da base (na rampa, o calcanhar fica mais baixo que a ponta). Sem
-   ajuste e com a base plana, dá exatamente o pé plantado de antes. */
-function perna(lado: Lado, centroQuadril: Vec3, ajuste: PoseDoPe | undefined, inclinacao: number) {
+/* O pé gira em torno da ponta pelo ângulo da elevação do calcanhar. Sem
+   ajuste, dá o pé plantado no lugar padrão. */
+function perna(lado: Lado, centroQuadril: Vec3, ajuste: PoseDoPe | undefined) {
   const x = SINAL[lado] * CORPO.meiaLarguraQuadril + (ajuste?.dx ?? 0);
   const zPonta = (ajuste?.dz ?? 0) + CORPO.peFrente;
   const elevacao = ajuste?.elevacao ?? 0;
   const naBase = Math.abs(x) <= PLATAFORMA.largura / 2;
-  const angulo = radianos((ajuste?.calcanhar ?? 0) - (naBase ? inclinacao : 0));
-  const ponta = vec(x, alturaDaSuperficie(x, zPonta, inclinacao) + elevacao, zPonta);
+  const angulo = radianos(ajuste?.calcanhar ?? 0);
+  /* Pé no ar além da borda: a elevação é medida a partir da tampa, não do chão.
+     A base ficou com a largura real do desenho (0,60 m): uma perna aberta para
+     o lado passa da borda sem o pé "cair" 13 cm. Pé na altura do chão fora da
+     base (elevação ~0) continua pisando no chão. */
+  const noArForaDaBase = !naBase && elevacao > 0.005;
+  const superficie = noArForaDaBase ? alturaDaSuperficie(0) : alturaDaSuperficie(x);
+  const ponta = vec(x, superficie + elevacao, zPonta);
   const comprimento = CORPO.peFrente + CORPO.peTras;
   const calcanhar = soma(ponta, vec(0, comprimento * Math.sin(angulo), -comprimento * Math.cos(angulo)));
   const tornozelo = soma(

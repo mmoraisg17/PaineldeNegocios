@@ -18,7 +18,6 @@ export {
 } from './perfil';
 export {
   FREQUENCIA_SEMANAL_PADRAO,
-  nivelMaximoCompativel,
   montarRotina,
   segundosDaDose,
   type AjusteProfissional,
@@ -114,4 +113,4 @@ export {
   salvarEstado,
   type Armazenamento,
 } from './persistencia';
-export { CONTAS_DA_DEMO, IDS_DEMO, SENHA_DA_DEMO, criarEstadoDemo } from './demo';
+export { CONTAS_DA_DEMO, IDS_DEMO, SENHA_DA_DEMO, completarContasDaDemo, criarEstadoDemo } from './demo';

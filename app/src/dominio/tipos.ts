@@ -2,19 +2,16 @@
    outros módulos. Nada aqui conhece React, relógio ou armazenamento, para o
    domínio poder ser testado sem navegador. */
 
-export type Trilha = 'equilibrio60' | 'fisio';
+export type Trilha = 'equilibrio60' | 'fisio' | 'desempenho';
 
 export type Regiao = 'joelho' | 'tornozelo';
 
-/* Itens que um exercício usa. O kit do produto traz todos (barras, inclinação,
-   elástico e assento acoplável), então a pessoa não precisa informar o que tem
-   em casa: a lista serve para a Biblioteca mostrar e filtrar "o que usa". */
-export type Acessorio = 'barras' | 'elastico' | 'inclinacao' | 'cadeira';
+/* Itens que um exercício usa. O kit do produto traz todos (barras, elástico e
+   assento acoplável), então a pessoa não precisa informar o que tem em casa:
+   a lista serve para a Biblioteca mostrar e filtrar "o que usa". */
+export type Acessorio = 'barras' | 'elastico' | 'cadeira';
 
 export type Nivel = 1 | 2 | 3;
-
-/* Níveis do seletor da plataforma (manual, seção 3.3): 0 é plano. */
-export type Inclinacao = 0 | 1 | 2 | 3;
 
 export type Apoio = 'duas-maos' | 'uma-mao' | 'toque' | 'sem-maos';
 
@@ -34,11 +31,10 @@ export const IDS_DOS_EXERCICIOS = [
   'sentar-e-levantar',
   'pes-em-linha',
   'abducao-com-elastico',
-  'transferencia-de-peso',
   'miniagachamento-simetrico',
   'descida-de-degrau',
   'panturrilha-unilateral',
-  'equilibrio-com-inclinacao',
+  'agachamento-bulgaro-explosivo',
 ] as const;
 
 export type IdExercicio = (typeof IDS_DOS_EXERCICIOS)[number];
@@ -46,7 +42,6 @@ export type IdExercicio = (typeof IDS_DOS_EXERCICIOS)[number];
 export type ConfigNivel = {
   dose: Dose;
   apoio: Apoio;
-  inclinacao: Inclinacao;
   descricao: string;
 };
 

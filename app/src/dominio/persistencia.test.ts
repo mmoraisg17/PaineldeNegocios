@@ -45,7 +45,6 @@ function estadoComDados(): EstadoApp {
           nome: 'Dona Lúcia',
           objetivo: 'equilibrio',
           firmeza: 'as-vezes',
-          inclinacaoMaxima: 2,
         },
         niveis: { 'pes-em-linha': 2 },
         sessoes: [{ data: '2026-10-01T10:00:00.000Z', exercicios: [], percepcao: 'ok' }],

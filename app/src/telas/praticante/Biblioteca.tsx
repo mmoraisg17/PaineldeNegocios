@@ -20,16 +20,20 @@ import { Icone } from '../../components/Icone';
    rotina de hoje. "Experimentar agora" abre o exercício fora do treino, então
    não conta para a evolução do nível. */
 
-const TRILHAS: readonly Trilha[] = ['equilibrio60', 'fisio'];
+const TRILHAS: readonly Trilha[] = ['equilibrio60', 'fisio', 'desempenho'];
 const NIVEIS: readonly Nivel[] = [1, 2, 3];
-const ACESSORIOS: readonly Acessorio[] = ['barras', 'elastico', 'inclinacao', 'cadeira'];
+const ACESSORIOS: readonly Acessorio[] = ['barras', 'elastico', 'cadeira'];
 const ROTULO_DO_ACESSORIO: Record<Acessorio, string> = {
   barras: 'Barras',
   elastico: 'Elástico',
-  inclinacao: 'Inclinação',
   cadeira: 'Cadeira',
 };
 const NIVEL_PADRAO: Nivel = 1;
+
+const AVISO_DA_TRILHA: Partial<Record<Trilha, string>> = {
+  fisio: 'Estes exercícios são feitos com a orientação de um profissional.',
+  desempenho: 'Subida rápida, sem saltar: aqueça antes, trave o banquinho e use as barras se perder o equilíbrio.',
+};
 
 const idDaAba = (trilha: Trilha) => `aba-${trilha}`;
 const ID_DO_PAINEL = 'painel-da-biblioteca';
@@ -72,10 +76,8 @@ export function Biblioteca() {
       </div>
 
       <div id={ID_DO_PAINEL} role="tabpanel" aria-labelledby={idDaAba(trilha)} className="flex flex-col gap-3">
-        {trilha === 'fisio' ? (
-          <p className="rounded-cartao bg-alerta-fundo px-4 py-3 text-base text-alerta-texto">
-            Estes exercícios são feitos com a orientação de um profissional.
-          </p>
+        {AVISO_DA_TRILHA[trilha] ? (
+          <p className="rounded-cartao bg-alerta-fundo px-4 py-3 text-base text-alerta-texto">{AVISO_DA_TRILHA[trilha]}</p>
         ) : null}
         <p role="status" className="text-base text-texto-suave">
           {exercicios.length === 1 ? '1 exercício' : `${exercicios.length} exercícios`}
@@ -135,7 +137,7 @@ function AbasDeTrilha({ ativa, aoEscolher }: { ativa: Trilha; aoEscolher: (trilh
   }
 
   return (
-    <div role="tablist" aria-label="Trilhas de exercícios" className="grid grid-cols-2 gap-1 rounded-botao bg-primaria-suave p-1">
+    <div role="tablist" aria-label="Trilhas de exercícios" className="grid grid-cols-3 gap-1 rounded-botao bg-primaria-suave p-1">
       {TRILHAS.map((trilha) => {
         const selecionada = trilha === ativa;
         return (
@@ -152,7 +154,7 @@ function AbasDeTrilha({ ativa, aoEscolher }: { ativa: Trilha; aoEscolher: (trilh
             tabIndex={selecionada ? 0 : -1}
             onClick={() => aoEscolher(trilha)}
             onKeyDown={aoTeclar}
-            className={`min-h-12 rounded-botao px-2 text-lg ${
+            className={`min-h-12 rounded-botao px-1 text-base leading-tight ${
               selecionada ? 'bg-superficie font-bold text-marca shadow-sm' : 'font-semibold text-texto-suave'
             }`}
           >

@@ -1,20 +1,18 @@
 import type { Animacao } from '../animacao';
-import { GRAUS_POR_NIVEL_DE_INCLINACAO } from '../cenario';
 import type { ModoBracos } from '../corpo';
 import { abducao } from './abducao';
+import { agachamentoBulgaroExplosivo } from './agachamentoBulgaroExplosivo';
 import { descidaDeDegrau } from './descidaDeDegrau';
-import { equilibrioComInclinacao } from './equilibrioComInclinacao';
 import { miniagachamento } from './miniagachamento';
 import { panturrilha } from './panturrilha';
 import { pesEmLinha } from './pesEmLinha';
 import { sentarELevantar } from './sentarELevantar';
-import { transferenciaDePeso } from './transferenciaDePeso';
 
-/* O que muda a demonstração de um mesmo exercício: o apoio das mãos, o nível
-   (profundidade, ritmo, um pé ou dois) e a inclinação do seletor (0–3). */
-export type OpcoesDaAnimacao = { bracos: ModoBracos; nivel: 1 | 2 | 3; inclinacao: 0 | 1 | 2 | 3 };
+/* O que muda a demonstração de um mesmo exercício: o apoio das mãos e o nível
+   (profundidade, ritmo, um pé ou dois). */
+export type OpcoesDaAnimacao = { bracos: ModoBracos; nivel: 1 | 2 | 3 };
 
-const PADRAO: OpcoesDaAnimacao = { bracos: 'barras', nivel: 1, inclinacao: 0 };
+const PADRAO: OpcoesDaAnimacao = { bracos: 'barras', nivel: 1 };
 
 /* Registro das animações por id de exercício (os mesmos ids do catálogo em
    src/dominio). Cada exercício entra aqui depois da sua pesquisa sistemática
@@ -27,15 +25,11 @@ const FABRICAS: Record<string, (opcoes: OpcoesDaAnimacao) => Animacao> = {
   'pes-em-linha': (o) => pesEmLinha(o.bracos),
   'descida-de-degrau': (o) => descidaDeDegrau(o.bracos, o.nivel),
   'abducao-com-elastico': (o) => abducao(o.bracos),
-  'equilibrio-com-inclinacao': (o) => equilibrioComInclinacao(o.bracos, o.inclinacao),
-  'transferencia-de-peso': (o) => transferenciaDePeso(o.bracos, o.nivel, o.inclinacao),
+  'agachamento-bulgaro-explosivo': (o) => agachamentoBulgaroExplosivo(o.bracos, o.nivel),
 };
 
 export function animacaoDe(idExercicio: string, opcoes: Partial<OpcoesDaAnimacao> = {}): Animacao | undefined {
-  const o = { ...PADRAO, ...opcoes };
-  const animacao = FABRICAS[idExercicio]?.(o);
-  if (!animacao || o.inclinacao === 0) return animacao;
-  return { ...animacao, inclinacaoDaBase: o.inclinacao * GRAUS_POR_NIVEL_DE_INCLINACAO };
+  return FABRICAS[idExercicio]?.({ ...PADRAO, ...opcoes });
 }
 
 export const exerciciosAnimados = (): string[] => Object.keys(FABRICAS);

@@ -1,12 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { estadoInicial, type EstadoApp } from './estado';
+import { estadoInicial, rotinaDoPraticante, type EstadoApp } from './estado';
 import { sanearContaDaSessao, sanearEstado } from './sanitizacao';
 
 const PERFIL = {
   nome: 'Dona Lúcia',
   objetivo: 'equilibrio',
   firmeza: 'as-vezes',
-  inclinacaoMaxima: 2,
 };
 
 const RESULTADO = {
@@ -208,8 +207,6 @@ describe('sanearEstado: praticantes', () => {
           lucia: PRATICANTE,
           sem: { ...PRATICANTE, id: 'sem', perfil: null },
           ruim: { ...PRATICANTE, id: 'ruim', perfil: { ...PERFIL, objetivo: 'voar' } },
-          alto: { ...PRATICANTE, id: 'alto', perfil: { ...PERFIL, inclinacaoMaxima: 9 } },
-          fracionado: { ...PRATICANTE, id: 'fracionado', perfil: { ...PERFIL, inclinacaoMaxima: 1.5 } },
           firmeza: { ...PRATICANTE, id: 'firmeza', perfil: { ...PERFIL, firmeza: 'tanto faz' } },
           semNome: { ...PRATICANTE, id: 'semNome', perfil: { ...PERFIL, nome: 7 } },
           semId: { ...PRATICANTE, id: undefined },
@@ -250,16 +247,16 @@ describe('sanearEstado: níveis', () => {
       'sentar-e-levantar': 2,
       'descida-de-degrau': 0,
       'abducao-com-elastico': 2.5,
-      'transferencia-de-peso': '3',
       'miniagachamento-simetrico': Number.NaN,
-      'panturrilha-unilateral': null,
-      'equilibrio-com-inclinacao': 1,
+      'panturrilha-unilateral': '3',
+      'agachamento-bulgaro-explosivo': null,
+      'descida-de-degrau-2': 1,
       inexistente: 2,
     };
 
     const estado = sanearEstado(comPraticante({ niveis }));
 
-    expect(lucia(estado)?.niveis).toEqual({ 'sentar-e-levantar': 2, 'equilibrio-com-inclinacao': 1 });
+    expect(lucia(estado)?.niveis).toEqual({ 'sentar-e-levantar': 2 });
   });
 
   test('níveis que não é objeto vira objeto vazio, sem descartar o praticante', () => {
@@ -397,6 +394,65 @@ test('o convite mantém quem o gerou (alunoId) e descarta alunoId inválido', ()
   const estado = sanearEstado({ versao: 2, convites: [{ ...base, alunoId: 'lucia' }, { ...base, codigo: 'XYZ234', alunoId: 42 }] });
   expect(estado.convites[0]?.alunoId).toBe('lucia');
   expect(estado.convites[1]).not.toHaveProperty('alunoId');
+});
+
+/* Estado gravado por uma versão anterior à retirada da inclinação: perfil com
+   `inclinacaoMaxima` e os ids dos dois exercícios que saíram do catálogo
+   espalhados por níveis, treinos e ajuste do profissional. */
+describe('sanearEstado: dados salvos antes da retirada da inclinação', () => {
+  const RESULTADO_ANTIGO = { ...RESULTADO, id: 'transferencia-de-peso' };
+  const praticanteAntigo = {
+    ...PRATICANTE,
+    perfil: { ...PERFIL, inclinacaoMaxima: 2 },
+    niveis: { 'pes-em-linha': 2, 'transferencia-de-peso': 3, 'equilibrio-com-inclinacao': 2 },
+    sessoes: [
+      { ...SESSAO, data: '2026-09-01T10:00:00.000Z', exercicios: [RESULTADO, RESULTADO_ANTIGO] },
+      { ...SESSAO, data: '2026-09-03T10:00:00.000Z', exercicios: [RESULTADO_ANTIGO, { ...RESULTADO, id: 'equilibrio-com-inclinacao' }] },
+    ],
+    ajuste: {
+      ...AJUSTE,
+      exerciciosIncluidos: ['descida-de-degrau', 'equilibrio-com-inclinacao'],
+      exerciciosRemovidos: ['sentar-e-levantar', 'transferencia-de-peso'],
+      niveisFixados: { 'pes-em-linha': 3, 'transferencia-de-peso': 2 },
+      metas: { 'miniagachamento-simetrico': { simetriaEsquerda: 50 }, 'equilibrio-com-inclinacao': { simetriaEsquerda: 60 } },
+    },
+  };
+  const antigo = () => sanearEstado(bruto({ praticantes: { lucia: praticanteAntigo } }));
+
+  test('o perfil continua válido e perde a inclinação máxima', () => {
+    // Arrange / Act
+    const estado = antigo();
+
+    // Assert
+    expect(lucia(estado)?.perfil).toEqual({ nome: 'Dona Lúcia', objetivo: 'equilibrio', firmeza: 'as-vezes' });
+    expect(lucia(estado)?.perfil).not.toHaveProperty('inclinacaoMaxima');
+  });
+
+  test('os níveis dos exercícios removidos são descartados, os outros ficam', () => {
+    expect(lucia(antigo())?.niveis).toEqual({ 'pes-em-linha': 2 });
+  });
+
+  test('os treinos ficam todos; perdem só os exercícios removidos, mesmo que fiquem vazios', () => {
+    // Arrange / Act
+    const sessoes = lucia(antigo())?.sessoes ?? [];
+
+    // Assert: o treino aconteceu e continua contando para a semana e a sequência
+    expect(sessoes.map((sessao) => sessao.exercicios)).toEqual([[RESULTADO], []]);
+    expect(sessoes.map((sessao) => sessao.data)).toEqual(['2026-09-01T10:00:00.000Z', '2026-09-03T10:00:00.000Z']);
+  });
+
+  test('o ajuste do profissional perde os ids removidos e mantém o resto', () => {
+    expect(lucia(antigo())?.ajuste).toEqual(AJUSTE);
+  });
+
+  test('a rotina montada a partir do dado antigo só tem exercícios do catálogo atual', () => {
+    // Arrange / Act
+    const rotina = rotinaDoPraticante(antigo(), 'lucia');
+
+    // Assert: trilha sem o sentar e levantar (removido pelo ajuste), mais a descida incluída
+    expect(rotina?.itens.map((item) => item.exercicioId)).toEqual(['pes-em-linha', 'abducao-com-elastico', 'descida-de-degrau']);
+    expect(rotina?.itens.every((item) => !('inclinacao' in item))).toBe(true);
+  });
 });
 
 describe('sanearEstado: nomes longos', () => {

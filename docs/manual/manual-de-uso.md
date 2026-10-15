@@ -1,6 +1,6 @@
 # Manual de uso: plataforma de equilíbrio + app
 
-*Versão 1.1 · 09/10/2026 · Grupo 7 · Painel de Negócios PJ Consultoria*
+*Versão 1.2 · 15/10/2026 · Grupo 7 · Painel de Negócios PJ Consultoria*
 
 > **Protótipo educacional.** Este produto ajuda a treinar equilíbrio e força em casa. Ele **não faz diagnóstico, não prescreve tratamento e não substitui** a orientação de um médico, fisioterapeuta ou profissional de educação física.
 
@@ -14,7 +14,7 @@
 4. [O app: primeiros passos](#4-o-app-primeiros-passos)
 5. [Treinar: a tela Hoje](#5-treinar-a-tela-hoje)
 6. [Durante o exercício](#6-durante-o-exercício)
-7. [Os 8 exercícios](#7-os-8-exercícios)
+7. [Os 6 exercícios](#7-os-6-exercícios)
 8. [Fim do treino e evolução](#8-fim-do-treino-e-evolução)
 9. [Biblioteca](#9-biblioteca)
 10. [Progresso](#10-progresso)
@@ -35,7 +35,7 @@ O produto tem duas partes que trabalham juntas:
 
 | Parte | O que faz |
 |---|---|
-| **Plataforma** | Base onde você sobe para treinar. Tem **sensores de pressão** que medem como o seu peso se distribui entre os pés, **barras de apoio retráteis** para segurança e **inclinação ajustável** para mudar a dificuldade. |
+| **Plataforma** | Base onde você sobe para treinar. Tem **sensores de pressão** que medem como o seu peso se distribui entre os pés, **barras de apoio retráteis** para segurança. |
 | **App** | Funciona no celular. Monta a sua **rotina de treino**, mostra cada exercício em **animação 3D**, lê os sensores e **avisa na hora** quando algo precisa ser corrigido. Também registra a sua evolução. |
 
 **Duas trilhas de treino:**
@@ -67,7 +67,7 @@ Leia esta seção antes do primeiro uso.
 - **Use as barras sempre que precisar.** Segurar não é "trapacear": o app conta o seu apoio e reduz aos poucos, no seu tempo.
 - **Pare imediatamente** se sentir tontura, falta de ar, dor no peito, dor forte nas articulações ou visão turva. Toque em **Pausar** e sente-se.
 - Na primeira vez, prefira treinar **com alguém por perto**.
-- Não pule, não corra e não suba na plataforma com ela inclinada sem as barras travadas.
+- Não pule, não corra e não suba na plataforma sem as barras travadas.
 
 **Avisos na tela:**
 
@@ -89,10 +89,9 @@ Leia esta seção antes do primeiro uso.
 | 2 | **Sensores de pressão** (dentro da base) | Medem o peso em cada região dos pés: esquerda/direita, frente/trás. |
 | 3 | **Barras de apoio retráteis** (2) | Apoio para as mãos. Sobem e descem e travam em várias alturas. |
 | 4 | **Abas laterais com furos** | Onde as barras se encaixam e são travadas por pinos. |
-| 5 | **Seletor de inclinação** | Inclina a base em níveis fixos (0 a 3) para aumentar a dificuldade. |
-| 6 | **Pés antiderrapantes** (4) | Mantêm a plataforma firme no chão. |
-| 7 | **Botão liga/desliga + luz de status** | Liga a plataforma e mostra o estado (ver 3.4). |
-| 8 | **Acessórios** | Elástico de resistência com encaixe na barra; suporte de celular; assento acoplável (opcional). |
+| 5 | **Pés antiderrapantes** (4) | Mantêm a plataforma firme no chão. |
+| 6 | **Botão liga/desliga + luz de status** | Liga a plataforma e mostra o estado (ver 3.4). |
+| 7 | **Acessórios** | Elástico de resistência com encaixe na barra; suporte de celular; assento acoplável (opcional). |
 
 *Ilustração de referência: `docs/modelagem/base-v1-vistas-2026-10-06.jpeg`.*
 
@@ -111,19 +110,6 @@ Leia esta seção antes do primeiro uso.
 2. A altura ideal fica na **altura do quadril** (punho na linha do quadril, com os braços soltos ao lado do corpo).
 3. Solte a trava e **confira que a barra não se mexe**.
 4. Para guardar, abaixe as barras até o fim (posição recolhida).
-
-**Inclinação:**
-1. **Desça da plataforma** antes de mudar a inclinação.
-2. Gire o seletor ou mude o pino para o nível que o app indicar:
-
-| Nível | Uso |
-|---|---|
-| **0, plano** | Primeiras semanas, avaliações, maioria dos exercícios |
-| **1, leve** | Quando o app sugerir, com as barras |
-| **2, moderado** | Trilha Fisioterapia e níveis avançados |
-| **3, desafio** | Apenas com o app indicando e com as barras ao alcance |
-
-3. O app **confere a inclinação** com o sensor interno. Se estiver diferente do pedido, aparece um aviso.
 
 ### 3.4 Ligar, desligar e luz de status
 
@@ -178,7 +164,7 @@ Depois de criar a conta, o app guia você em 4 passos:
 1. **Seu objetivo:** Equilíbrio · Fortalecimento · Joelho · Tornozelo.
 2. **Sua firmeza hoje:** "Preciso de apoio" · "Às vezes me desequilibro" · "Tenho firmeza".
 
-Com isso, o app escolhe a **trilha** (Equilíbrio 60+ ou Fisioterapia) e os exercícios que combinam com você. A plataforma já vem com todos os itens dos exercícios (barras, inclinação, elástico e assento acoplável): você não precisa informar o que tem em casa.
+Com isso, o app escolhe a **trilha** (Equilíbrio 60+ ou Fisioterapia) e os exercícios que combinam com você. A plataforma já vem com todos os itens dos exercícios (barras, elástico e assento acoplável): você não precisa informar o que tem em casa.
 
 **Passo 2. Conectar a plataforma**
 1. Ligue a plataforma (luz azul piscando).
@@ -227,7 +213,6 @@ A tela do exercício tem quatro áreas:
 
 - É a **vista de cima da plataforma**. O **ponto verde** mostra onde está o centro do seu peso.
 - A **barra Esquerda / Direita** mostra a porcentagem do peso em cada lado.
-- Em alguns exercícios aparece um **alvo** (círculo): leve o ponto até ele.
 - O indicador **"Apoio nas barras"** mostra quanto você está se apoiando com as mãos.
 
 ### 6.3 Avisos e correções
@@ -247,9 +232,9 @@ A tela do exercício tem quatro áreas:
 
 ---
 
-## 7. Os 8 exercícios
+## 7. Os 6 exercícios
 
-Cada exercício tem **3 níveis**. Em geral, subir de nível significa **mais repetições ou tempo**, **menos apoio nas barras** e **mais inclinação**. A animação 3D no app mostra a versão detalhada.
+Cada exercício tem **3 níveis**. Em geral, subir de nível significa **mais repetições ou tempo** e **menos apoio nas barras**. A animação 3D no app mostra a versão detalhada.
 
 ### Trilha Equilíbrio 60+
 
@@ -271,37 +256,25 @@ Cada exercício tem **3 níveis**. Em geral, subir de nível significa **mais re
 - *O app corrige:* a perna de apoio não pode balançar; o peso deve ficar firme nela.
 - *Níveis:* 1, elástico leve, 8 vezes · 2, 12 vezes · 3, elástico mais forte, 12 vezes.
 
-**4. Transferência de peso com alvos**
-- *Para quê:* controle do corpo para alcançar objetos e mudar de direção.
-- *Como:* com os pés afastados na largura do quadril, **leve o peso** devagar para os alvos que aparecem na tela (frente, trás, lados), sem tirar os pés da base.
-- *O app corrige:* se o ponto chegou ao alvo e se o movimento foi controlado.
-- *Níveis:* 1, plano e alvos perto · 2, inclinação 1 e alvos mais longe · 3, inclinação 2.
-
 ### Trilha Fisioterapia (com orientação profissional)
 
-**5. Miniagachamento com descarga simétrica (joelho)**
+**4. Miniagachamento com descarga simétrica (joelho)**
 - *Para quê:* voltar a usar **as duas pernas por igual** depois de lesão ou cirurgia no joelho.
 - *Como:* pés na largura do quadril, segurando as barras. Dobre **um pouco** os joelhos, como se fosse sentar, e volte.
 - *O app corrige:* porcentagem do peso em cada perna (meta padrão de 50/50 ou a que o seu profissional definir) e peso no calcanhar, não na ponta.
 - *Níveis:* 1, pouca descida, 8 vezes · 2, descida média, 12 vezes · 3, descida média com uma mão, 12 vezes.
 
-**6. Descida de degrau (step-down, joelho)**
+**5. Descida de degrau (step-down, joelho)**
 - *Para quê:* controle do joelho para descer escadas.
 - *Como:* fique em pé **sobre a base**, de lado para a borda. Desça **devagar** o pé de fora até tocar o chão com o calcanhar e volte. O joelho de apoio aponta para a frente.
 - *O app corrige:* descida controlada (sem "despencar") e o peso sem fugir para dentro ou para fora.
 - *Níveis:* 1, duas mãos, 6 vezes por perna · 2, uma mão, 10 vezes · 3, uma mão, mais devagar.
 
-**7. Elevação de panturrilha unilateral (tornozelo)**
+**6. Elevação de panturrilha unilateral (tornozelo)**
 - *Para quê:* força e estabilidade do tornozelo.
 - *Como:* em pé numa perna só, segurando as barras, **suba na ponta do pé**, segure 1 segundo e desça devagar.
 - *O app corrige:* subir **reto**, sem o pé rolar para fora (posição de risco para torção).
 - *Níveis:* 1, dois pés, 10 vezes · 2, um pé com duas mãos, 8 vezes · 3, um pé com uma mão, 12 vezes.
-
-**8. Equilíbrio num pé só com inclinação (tornozelo)**
-- *Para quê:* recuperar o "equilíbrio do tornozelo" depois de uma torção.
-- *Como:* fique numa perna só, joelho levemente dobrado, olhando para a frente.
-- *O app corrige:* oscilação do corpo e o momento de usar as barras.
-- *Níveis:* 1, plano, 15 s · 2, inclinação 1, 20 s · 3, inclinação 2, 30 s.
 
 ---
 
@@ -322,7 +295,7 @@ O app combina **o que os sensores mediram** com **o que você sentiu**:
 | Nota entre **60 e 79**, ou você marcou **Difícil** | **Mantém** o nível |
 | Nota **abaixo de 60** em **2 treinos seguidos** | **Volta um nível**, para treinar com mais segurança |
 
-- Subir de nível = mais repetições ou tempo, **menos apoio nas barras** e **mais inclinação**.
+- Subir de nível = mais repetições ou tempo e **menos apoio nas barras**.
 - O app **sempre avisa** antes de mudar o nível, e você pode **recusar**.
 - Se você tem um **acompanhante profissional**, ele pode **fixar o nível** de um exercício. Nesse caso, o app não muda o nível sozinho.
 
@@ -333,7 +306,7 @@ O app combina **o que os sensores mediram** com **o que você sentiu**:
 A **Biblioteca** mostra todos os exercícios, mesmo os que não estão no seu treino de hoje.
 
 - **Abas:** Equilíbrio 60+ · Fisioterapia.
-- **Filtros:** nível (1, 2, 3) e acessório (barras, elástico, inclinação, cadeira).
+- **Filtros:** nível (1, 2, 3) e acessório (barras, elástico, cadeira).
 - Toque num exercício para ver a **ficha**: animação 3D, para que serve, como fazer, o que o app corrige e os níveis.
 - **Experimentar agora** abre o exercício sozinho, fora da rotina. Ele não conta para a evolução do nível.
 
@@ -444,7 +417,6 @@ Se o aluno **remover o seu acesso**, ele some da sua lista e os dados deixam de 
 | **Alto contraste** | Liga/desliga |
 | **Avisos por voz** | Liga/desliga e volume |
 | **Lembretes de treino** | Dias e horário |
-| **Inclinação disponível** | Até qual nível a sua plataforma pode ir |
 
 ### 13.2 Privacidade
 
@@ -472,7 +444,6 @@ Se o aluno **remover o seu acesso**, ele some da sua lista e os dados deixam de 
 | O app não encontra a plataforma | Confira se a plataforma está ligada (luz azul piscando) e se o Bluetooth do celular está ativo. Aproxime o celular e toque em **Conectar** de novo. |
 | O peso parece errado | Desça, **desligue e ligue** a plataforma sem ninguém em cima (ela zera os sensores) e refaça a **calibração**. |
 | O ponto no mapa não se mexe | Confira se você está **dentro da área dos sensores**. Se persistir, reconecte a plataforma. |
-| Aviso "Inclinação diferente da pedida" | Desça e ajuste o seletor para o nível indicado no app. |
 | Luz vermelha | Desligue, espere 10 segundos e ligue de novo. Se continuar, não use e procure o suporte. |
 | A barra está frouxa | **Não use.** Reencaixe a barra e recoloque os pinos até ficar firme. |
 | O texto está pequeno | Perfil → Ajustes → **Tamanho do texto**. |
@@ -508,9 +479,12 @@ O protótipo **simula os sensores** porque a plataforma física ainda está em d
 |---|---|---|---|
 | **Dona Lúcia, 68** | `lucia@demo.test` | Praticante · Equilíbrio 60+ | Rotina, exercício com correções, evolução |
 | **Rafael, 34** | `rafael@demo.test` | Praticante · Fisioterapia (joelho) | Trilha de fisioterapia e metas do profissional |
+| **Lucas, 24** | `lucas@demo.test` | Praticante · Fortalecimento e explosão (atleta de futevôlei) | Conta sem acompanhante, começa no nível 3, quase sem apoio nas barras |
+| **Diego, 30** | `diego@demo.test` | Praticante · Fortalecimento e explosão (atleta profissional de vôlei de praia) | Começa no nível 3 sem faltar a treino; rotina ajustada pela Renata (búlgaro fixo no nível 3, 4 treinos por semana) e recado dela |
 | **Carlos** | `carlos@demo.test` | Acompanhante · Personal da Dona Lúcia | Lista de alunos, relatório, ajustar rotina, recados |
 | **Ana** | `ana@demo.test` | Acompanhante · Fisioterapeuta do Rafael | Metas de simetria, alertas e gráficos de evolução |
 | **Marta** | `marta@demo.test` | Acompanhante · Filha da Dona Lúcia (familiar) | Relatórios somente leitura |
+| **Renata** | `renata@demo.test` | Acompanhante · Preparadora física do Diego | Ajustar rotina, relatório de um atleta, recados |
 
 **Testar o convite por link:** entre como Dona Lúcia, vá em **Perfil → Acompanhantes → Convidar** e copie o link. Saia da conta, abra o link e entre como Ana (ou crie uma conta de acompanhante). Toque em **Aceitar convite**. Depois entre de novo como Dona Lúcia e autorize o pedido.
 
@@ -529,10 +503,9 @@ O protótipo **simula os sensores** porque a plataforma física ainda está em d
 
 | Item | Valor de projeto |
 |---|---|
-| Sensores | 4 a 8 células de carga (base) + sensor de inclinação; opcional: células nas fixações das barras |
+| Sensores | 4 a 8 células de carga (base); opcional: células nas fixações das barras |
 | Eletrônica | Microcontrolador com Bluetooth (ESP32) + conversores HX711 |
 | Alimentação | Bateria recarregável por USB-C |
-| Inclinação | Níveis 0 (plano) a 3, por seletor com pino, sem motor |
 | Altura das barras | Ajustável; referência de 66 a 93 cm acima da base |
 | Peso máximo do usuário | A definir (referência de mercado: 150 a 180 kg) |
 | Altura da base | A definir (usada como degrau no step-down; referência: 10 a 15 cm) |

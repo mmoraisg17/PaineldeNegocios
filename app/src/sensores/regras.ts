@@ -14,8 +14,6 @@ export const LIMIAR = {
   oscilacao: 0.15,
   perdaDeEquilibrio: 0.35,
   variacaoBrusca: 1.2, // fração do peso por segundo
-  foraDoAlvo: 0.3,
-  borda: 0.92,
   firme: 0.06,
   semApoio: 0.08,
 } as const;
@@ -35,13 +33,8 @@ export const DETECTOR_DA_CORRECAO: Readonly<Record<string, Desvio>> = {
   'apoio-balancando': 'oscilacao',
   'oscilacao-extrema': 'perda-de-equilibrio',
   'perda-de-equilibrio': 'perda-de-equilibrio',
-  'hora-de-usar-as-barras': 'perda-de-equilibrio',
   'descida-sem-controle': 'brusco',
   'subida-apressada': 'brusco',
-  'movimento-brusco': 'brusco',
-  'fora-do-alvo': 'fora-do-alvo',
-  'pe-saindo-da-base': 'fora-da-base',
-  'inclinacao-diferente': 'inclinacao-diferente',
   'pronto-para-soltar': 'firme-sem-apoio',
 };
 
@@ -63,12 +56,6 @@ export function detectar(desvio: Desvio, l: Leitura, e: Esperado): boolean {
       return l.oscilacao > LIMIAR.perdaDeEquilibrio;
     case 'brusco':
       return Math.abs(l.variacaoPorSegundo) > LIMIAR.variacaoBrusca;
-    case 'fora-do-alvo':
-      return e.alvo !== undefined && l.distanciaDoAlvo > LIMIAR.foraDoAlvo;
-    case 'fora-da-base':
-      return Math.abs(l.copML) > LIMIAR.borda || Math.abs(l.copAP) > LIMIAR.borda;
-    case 'inclinacao-diferente':
-      return Math.round(l.inclinacao) !== e.inclinacao;
     case 'firme-sem-apoio':
       return l.oscilacao < LIMIAR.firme && l.maos < LIMIAR.semApoio;
   }
@@ -134,8 +121,5 @@ export const ROTULO_DO_DESVIO: Readonly<Record<Desvio, string>> = {
   oscilacao: 'Corpo oscilando',
   'perda-de-equilibrio': 'Perda de equilíbrio',
   brusco: 'Movimento rápido demais',
-  'fora-do-alvo': 'Longe do alvo',
-  'fora-da-base': 'Pé saindo da base',
-  'inclinacao-diferente': 'Inclinação errada',
   'firme-sem-apoio': 'Firme, sem apoio',
 };

@@ -15,6 +15,7 @@ import { useApp, usePraticanteAtual } from '../../estado/ContextoApp';
 import { formatarData } from '../../estado/formatos';
 import { useTituloDaTela } from '../../hooks/useTituloDaTela';
 import {
+  adesaoDoPeriodo,
   contarSemanasCompletas,
   descreverEvolucao,
   resumirSemanas,
@@ -131,9 +132,7 @@ function EvolucaoDoPraticante({ praticante, tituloRef }: { praticante: DadosPrat
 }
 
 function Adesao({ semanas, planejadas }: { semanas: readonly SemanaResumida[]; planejadas: number }) {
-  const feitos = semanas.reduce((total, semana) => total + semana.treinos, 0);
-  const previstos = planejadas * semanas.length;
-  const porcentagem = previstos > 0 ? Math.min(Math.round((feitos / previstos) * PORCENTAGEM), PORCENTAGEM) : 0;
+  const { feitos, previstos, porcentagem } = adesaoDoPeriodo(semanas, planejadas);
   return (
     <>
       <p className="text-lg font-semibold">
@@ -203,7 +202,7 @@ function Graficos({ semanas, rotulos }: { semanas: readonly SemanaResumida[]; ro
 type NivelDoExercicio = { id: string; nome: string; nivel: Nivel };
 
 /* O nível da rotina vale mais que o salvo: ele já respeita o nível fixado
-   pelo profissional e a inclinação máxima da plataforma da pessoa. */
+   pelo profissional. */
 function niveisDosExercicios(praticante: DadosPraticante, itensDaRotina: readonly ItemRotina[]): NivelDoExercicio[] {
   return exerciciosDaTrilha(trilhaDoObjetivo(praticante.perfil.objetivo)).map((exercicio) => ({
     id: exercicio.id,

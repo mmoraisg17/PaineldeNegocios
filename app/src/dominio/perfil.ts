@@ -1,7 +1,9 @@
 import { limitar } from './numeros';
-import type { Inclinacao, Nivel, Trilha } from './tipos';
+import type { Nivel, Trilha } from './tipos';
 
-export type Objetivo = 'equilibrio' | 'fortalecimento' | 'joelho' | 'tornozelo';
+/* 'potencia' é "Fortalecimento e explosão": atleta jovem saudável que treina força
+   e potência de pernas (a conta modelo do Lucas, jogador de futevôlei). */
+export type Objetivo = 'equilibrio' | 'fortalecimento' | 'potencia' | 'joelho' | 'tornozelo';
 
 /* As três respostas de "Sua firmeza hoje" (manual, seção 4.3). */
 export type Firmeza = 'preciso-apoio' | 'as-vezes' | 'firme';
@@ -10,8 +12,6 @@ export type Perfil = {
   nome: string;
   objetivo: Objetivo;
   firmeza: Firmeza;
-  /* Até que nível o seletor da plataforma da pessoa chega (manual, 13.1). */
-  inclinacaoMaxima: Inclinacao;
 };
 
 /* O que a avaliação de 10 segundos mede (manual, seção 4.3, passo 4). */
@@ -43,6 +43,7 @@ export function nivelPelaFirmeza(firmeza: Firmeza): Nivel {
 }
 
 export function trilhaDoObjetivo(objetivo: Objetivo): Trilha {
+  if (objetivo === 'potencia') return 'desempenho';
   return objetivo === 'joelho' || objetivo === 'tornozelo' ? 'fisio' : 'equilibrio60';
 }
 

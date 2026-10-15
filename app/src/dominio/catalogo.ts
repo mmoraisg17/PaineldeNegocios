@@ -3,9 +3,9 @@ import type { Dose, Exercicio, Trilha } from './tipos';
 
 /* Conteúdo transcrito do manual de uso, seção 7. O manual é a fonte: se um
    texto mudar lá, muda aqui (e o teste de catálogo acusa a divergência de
-   dose, apoio e inclinação). Onde o manual não diz a dose ou o apoio de um
-   nível, a escolha segue a regra geral da seção 7: subir de nível = mais
-   repetição ou tempo, menos apoio nas barras e mais inclinação. */
+   dose e apoio). Onde o manual não diz a dose ou o apoio de um nível, a
+   escolha segue a regra geral da seção 7: subir de nível = mais repetição ou
+   tempo e menos apoio nas barras. */
 
 const repeticoes = (quantidade: number, porLado = false): Dose =>
   porLado
@@ -32,9 +32,9 @@ const EXERCICIOS: Exercicio[] = [
     acessorios: ['barras', 'cadeira'],
     oQueOAppCorrige: 'O lado que faz mais força (simetria) e o quanto você empurra as barras.',
     niveis: {
-      1: { dose: repeticoes(8), apoio: 'duas-maos', inclinacao: 0, descricao: 'Com as duas mãos nas barras.' },
-      2: { dose: repeticoes(10), apoio: 'uma-mao', inclinacao: 0, descricao: 'Com uma mão na barra.' },
-      3: { dose: repeticoes(12), apoio: 'sem-maos', inclinacao: 0, descricao: 'Sem as mãos, com os braços cruzados.' },
+      1: { dose: repeticoes(8), apoio: 'duas-maos', descricao: 'Com as duas mãos nas barras.' },
+      2: { dose: repeticoes(10), apoio: 'uma-mao', descricao: 'Com uma mão na barra.' },
+      3: { dose: repeticoes(12), apoio: 'sem-maos', descricao: 'Sem as mãos, com os braços cruzados.' },
     },
     correcoes: [
       { id: 'perna-dominante', mensagem: 'Use as duas pernas para levantar', gravidade: 'atencao' },
@@ -54,9 +54,9 @@ const EXERCICIOS: Exercicio[] = [
     acessorios: ['barras'],
     oQueOAppCorrige: 'A oscilação do corpo e quando já dá para soltar uma mão.',
     niveis: {
-      1: { dose: tempo(10), apoio: 'duas-maos', inclinacao: 0, descricao: 'Duas mãos nas barras, 10 segundos.' },
-      2: { dose: tempo(20), apoio: 'uma-mao', inclinacao: 0, descricao: 'Uma mão na barra, 20 segundos.' },
-      3: { dose: tempo(30), apoio: 'toque', inclinacao: 0, descricao: 'Toque leve com um dedo, 30 segundos.' },
+      1: { dose: tempo(10), apoio: 'duas-maos', descricao: 'Duas mãos nas barras, 10 segundos.' },
+      2: { dose: tempo(20), apoio: 'uma-mao', descricao: 'Uma mão na barra, 20 segundos.' },
+      3: { dose: tempo(30), apoio: 'toque', descricao: 'Toque leve com um dedo, 30 segundos.' },
     },
     correcoes: [
       { id: 'oscilacao-alta', mensagem: 'Olhe para a frente e fique parado', gravidade: 'atencao' },
@@ -78,37 +78,14 @@ const EXERCICIOS: Exercicio[] = [
     acessorios: ['barras', 'elastico'],
     oQueOAppCorrige: 'A perna de apoio não pode balançar: o peso deve ficar firme nela.',
     niveis: {
-      1: { dose: repeticoes(8, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Elástico leve, 8 vezes.' },
-      2: { dose: repeticoes(12, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Elástico leve, 12 vezes.' },
-      3: { dose: repeticoes(12, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Elástico mais forte, 12 vezes.' },
+      1: { dose: repeticoes(8, true), apoio: 'uma-mao', descricao: 'Elástico leve, 8 vezes.' },
+      2: { dose: repeticoes(12, true), apoio: 'uma-mao', descricao: 'Elástico leve, 12 vezes.' },
+      3: { dose: repeticoes(12, true), apoio: 'uma-mao', descricao: 'Elástico mais forte, 12 vezes.' },
     },
     correcoes: [
       { id: 'apoio-balancando', mensagem: 'Firme a perna de apoio', gravidade: 'atencao' },
       { id: 'tronco-inclinado', mensagem: 'Mantenha o peso sobre a perna de apoio', gravidade: 'atencao' },
       { id: 'perda-de-equilibrio', mensagem: 'Pare e segure nas duas barras', gravidade: 'pare' },
-    ],
-  },
-  {
-    id: 'transferencia-de-peso',
-    nome: 'Transferência de peso com alvos',
-    trilha: 'equilibrio60',
-    paraQue: 'Controle do corpo para alcançar objetos e mudar de direção.',
-    comoFazer: [
-      'Fique com os pés afastados na largura do quadril.',
-      'Leve o peso devagar para os alvos que aparecem na tela (frente, trás, lados).',
-      'Não tire os pés da base.',
-    ],
-    acessorios: ['barras', 'inclinacao'],
-    oQueOAppCorrige: 'Se o ponto chegou ao alvo e se o movimento foi controlado.',
-    niveis: {
-      1: { dose: repeticoes(8), apoio: 'duas-maos', inclinacao: 0, descricao: 'Plano, com os alvos perto.' },
-      2: { dose: repeticoes(10), apoio: 'uma-mao', inclinacao: 1, descricao: 'Inclinação 1, com os alvos mais longe.' },
-      3: { dose: repeticoes(12), apoio: 'uma-mao', inclinacao: 2, descricao: 'Inclinação 2.' },
-    },
-    correcoes: [
-      { id: 'fora-do-alvo', mensagem: 'Leve o ponto até o alvo', gravidade: 'atencao' },
-      { id: 'movimento-brusco', mensagem: 'Vá mais devagar, com controle', gravidade: 'atencao' },
-      { id: 'pe-saindo-da-base', mensagem: 'Mantenha os dois pés dentro da base', gravidade: 'pare' },
     ],
   },
   {
@@ -126,9 +103,9 @@ const EXERCICIOS: Exercicio[] = [
     oQueOAppCorrige:
       'A porcentagem do peso em cada perna (meta padrão de 50/50 ou a que o seu profissional definir) e o peso no calcanhar, não na ponta.',
     niveis: {
-      1: { dose: repeticoes(8), apoio: 'duas-maos', inclinacao: 0, descricao: 'Pouca descida, 8 vezes.' },
-      2: { dose: repeticoes(12), apoio: 'duas-maos', inclinacao: 0, descricao: 'Descida média, 12 vezes.' },
-      3: { dose: repeticoes(12), apoio: 'uma-mao', inclinacao: 0, descricao: 'Descida média com uma mão, 12 vezes.' },
+      1: { dose: repeticoes(8), apoio: 'duas-maos', descricao: 'Pouca descida, 8 vezes.' },
+      2: { dose: repeticoes(12), apoio: 'duas-maos', descricao: 'Descida média, 12 vezes.' },
+      3: { dose: repeticoes(12), apoio: 'uma-mao', descricao: 'Descida média com uma mão, 12 vezes.' },
     },
     correcoes: [
       { id: 'peso-so-numa-perna', mensagem: 'Divida o peso entre as duas pernas', gravidade: 'atencao' },
@@ -150,9 +127,9 @@ const EXERCICIOS: Exercicio[] = [
     acessorios: ['barras'],
     oQueOAppCorrige: 'A descida controlada (sem despencar) e o peso sem fugir para dentro ou para fora.',
     niveis: {
-      1: { dose: repeticoes(6, true), apoio: 'duas-maos', inclinacao: 0, descricao: 'Duas mãos, 6 vezes por perna.' },
-      2: { dose: repeticoes(10, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Uma mão, 10 vezes por perna.' },
-      3: { dose: repeticoes(10, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Uma mão, descendo mais devagar.' },
+      1: { dose: repeticoes(6, true), apoio: 'duas-maos', descricao: 'Duas mãos, 6 vezes por perna.' },
+      2: { dose: repeticoes(10, true), apoio: 'uma-mao', descricao: 'Uma mão, 10 vezes por perna.' },
+      3: { dose: repeticoes(10, true), apoio: 'uma-mao', descricao: 'Uma mão, descendo mais devagar.' },
     },
     correcoes: [
       { id: 'descida-sem-controle', mensagem: 'Desça mais devagar', gravidade: 'atencao' },
@@ -174,9 +151,9 @@ const EXERCICIOS: Exercicio[] = [
     acessorios: ['barras'],
     oQueOAppCorrige: 'Subir reto, sem o pé rolar para fora (posição de risco para torção).',
     niveis: {
-      1: { dose: repeticoes(10), apoio: 'duas-maos', inclinacao: 0, descricao: 'Com os dois pés, 10 vezes.' },
-      2: { dose: repeticoes(8, true), apoio: 'duas-maos', inclinacao: 0, descricao: 'Um pé, com as duas mãos, 8 vezes.' },
-      3: { dose: repeticoes(12, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Um pé, com uma mão, 12 vezes.' },
+      1: { dose: repeticoes(10), apoio: 'duas-maos', descricao: 'Com os dois pés, 10 vezes.' },
+      2: { dose: repeticoes(8, true), apoio: 'duas-maos', descricao: 'Um pé, com as duas mãos, 8 vezes.' },
+      3: { dose: repeticoes(12, true), apoio: 'uma-mao', descricao: 'Um pé, com uma mão, 12 vezes.' },
     },
     correcoes: [
       { id: 'pe-rolando-para-fora', mensagem: 'Suba reto, sem rolar o pé para fora', gravidade: 'pare' },
@@ -185,26 +162,30 @@ const EXERCICIOS: Exercicio[] = [
     ],
   },
   {
-    id: 'equilibrio-com-inclinacao',
-    nome: 'Equilíbrio num pé só com inclinação',
-    trilha: 'fisio',
-    regiao: 'tornozelo',
-    paraQue: 'Recuperar o equilíbrio do tornozelo depois de uma torção.',
+    id: 'agachamento-bulgaro-explosivo',
+    nome: 'Búlgaro explosivo',
+    trilha: 'desempenho',
+    paraQue: 'Potência de uma perna só: a arrancada e a mudança de direção na areia, sem saltar nem bater na plataforma.',
     comoFazer: [
-      'Fique numa perna só, com o joelho levemente dobrado.',
-      'Olhe para a frente.',
+      'Monte o banquinho na parte de trás da plataforma e trave. Aqueça 5 minutos antes.',
+      'Apoie a ponta do pé de trás no banquinho. O pé da frente fica inteiro no chão, uma passada à frente.',
+      'Desça devagar, contando até 3, até o joelho da frente ficar em cerca de 90°.',
+      'Suba o mais rápido que conseguir, sem saltar: termine com o pé da frente inteiro no chão.',
+      'Troque de perna quando acabarem as repetições.',
     ],
-    acessorios: ['barras', 'inclinacao'],
-    oQueOAppCorrige: 'A oscilação do corpo e o momento de usar as barras.',
+    acessorios: ['barras', 'cadeira'],
+    oQueOAppCorrige:
+      'O joelho da frente sem fugir para dentro, o peso no pé inteiro (sem ir para a ponta) e a firmeza na subida rápida.',
     niveis: {
-      1: { dose: tempo(15), apoio: 'duas-maos', inclinacao: 0, descricao: 'Plano, 15 segundos.' },
-      2: { dose: tempo(20), apoio: 'uma-mao', inclinacao: 1, descricao: 'Inclinação 1, 20 segundos.' },
-      3: { dose: tempo(30), apoio: 'toque', inclinacao: 2, descricao: 'Inclinação 2, 30 segundos.' },
+      1: { dose: repeticoes(4, true), apoio: 'duas-maos', descricao: 'Duas mãos nas barras, descida rasa, 4 vezes por perna.' },
+      2: { dose: repeticoes(5, true), apoio: 'uma-mao', descricao: 'Uma mão na barra, subida mais rápida, 5 vezes por perna.' },
+      3: { dose: repeticoes(6, true), apoio: 'sem-maos', descricao: 'Sem as mãos, subida o mais rápida possível, 6 vezes por perna.' },
     },
     correcoes: [
-      { id: 'oscilacao-alta', mensagem: 'Olhe para a frente e respire fundo', gravidade: 'atencao' },
-      { id: 'inclinacao-diferente', mensagem: 'Confira a inclinação da plataforma', gravidade: 'atencao' },
-      { id: 'hora-de-usar-as-barras', mensagem: 'Segure nas barras agora', gravidade: 'pare' },
+      { id: 'desvio-lateral', mensagem: 'Joelho alinhado ao pé: não deixe fugir para dentro', gravidade: 'atencao' },
+      { id: 'peso-na-ponta', mensagem: 'Peso no pé inteiro, calcanhar firme', gravidade: 'atencao' },
+      { id: 'oscilacao-alta', mensagem: 'Fique firme e olhe para a frente', gravidade: 'atencao' },
+      { id: 'perda-de-equilibrio', mensagem: 'Pare e segure nas duas barras', gravidade: 'pare' },
     ],
   },
 ];

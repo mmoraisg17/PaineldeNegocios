@@ -14,6 +14,7 @@ import {
   armazenamentoDaSessao,
   armazenamentoDoNavegador,
   carregarEstado,
+  completarContasDaDemo,
   criarEstadoDemo,
   salvarEstado,
 } from '../dominio';
@@ -110,7 +111,7 @@ function estadoSalvoOuDemo(): EstadoApp {
   const salvo = carregarEstado(armazenamentoDoNavegador(), armazenamentoDaSessao());
   const vazio =
     Object.keys(salvo.praticantes).length === 0 && salvo.acompanhantes.length === 0 && salvo.credenciais.length === 0;
-  return vazio ? { ...criarEstadoDemo(new Date()), contaAtual: null } : salvo;
+  return vazio ? { ...criarEstadoDemo(new Date()), contaAtual: null } : completarContasDaDemo(salvo, new Date());
 }
 
 function estadoDeArranque(): EstadoApp {

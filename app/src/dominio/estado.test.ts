@@ -34,7 +34,6 @@ function estadoCom(vinculos: Vinculo[], ajuste: AjusteProfissional | null = AJUS
           nome: 'Lúcia',
           objetivo: 'equilibrio',
           firmeza: 'as-vezes',
-          inclinacaoMaxima: 2,
         },
         niveis: {},
         sessoes: [],

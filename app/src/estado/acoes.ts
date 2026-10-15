@@ -29,7 +29,6 @@ import {
   TAMANHO_MAXIMO_DO_RECADO,
   exerciciosDaTrilha,
   gerarConvite,
-  nivelMaximoCompativel,
   notasRecentesDoExercicio,
   permissoesDoVinculo,
   podeVer,
@@ -165,10 +164,9 @@ export function criarPraticante(
   gerarId: GerarId = idPadrao,
 ): { estado: EstadoApp; id: string } {
   const id = gerarId();
-  // O nível inicial (ver `nivelPelaFirmeza`) vale para todos os exercícios da trilha,
-  // limitado ao que a inclinação da plataforma da pessoa permite.
+  // O nível inicial (ver `nivelPelaFirmeza`) vale para todos os exercícios da trilha.
   const niveis = Object.fromEntries(
-    exerciciosDaTrilha(trilhaDoObjetivo(perfil.objetivo)).map((e) => [e.id, Math.min(nivel, nivelMaximoCompativel(e, perfil.inclinacaoMaxima))]),
+    exerciciosDaTrilha(trilhaDoObjetivo(perfil.objetivo)).map((e) => [e.id, nivel]),
   ) as DadosPraticante['niveis'];
   const praticante: DadosPraticante = { id, perfil: { ...perfil, nome: limparNome(perfil.nome) }, niveis, sessoes: [] };
   return { estado: { ...estado, praticantes: { ...estado.praticantes, [id]: praticante } }, id };
@@ -186,7 +184,7 @@ export type DecisaoDoExercicio = {
 
 /* Fecha um treino: grava a sessão e decide o nível de cada exercício com a
    regra do manual (8.2), respeitando o nível fixado pelo profissional (só se
-   o vínculo dele ainda vale) e a inclinação máxima da plataforma. */
+   o vínculo dele ainda vale). */
 export function registrarSessao(
   estado: EstadoApp,
   praticanteId: string,
@@ -208,7 +206,6 @@ export function registrarSessao(
       notasRecentes: notasRecentesDoExercicio(sessoes, r.id, nivelAtual),
       percepcao,
       fixado: fixados[r.id] !== undefined,
-      nivelMaximo: nivelMaximoCompativel(exercicio, praticante.perfil.inclinacaoMaxima),
     });
     return [{ exercicioId: r.id, nome: exercicio.nome, nivelAnterior: nivelAtual, decisao }];
   });

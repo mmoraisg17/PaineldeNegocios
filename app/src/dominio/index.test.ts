@@ -9,7 +9,6 @@ describe('API pública do domínio', () => {
       'nivelInicial',
       'trilhaDoObjetivo',
       'montarRotina',
-      'nivelMaximoCompativel',
       'permissoesDoVinculo',
       'solicitarVinculo',
       'ajusteVigente',
@@ -55,7 +54,7 @@ describe('API pública do domínio', () => {
     expect(dominio.TAMANHO_MAXIMO_DO_EMAIL).toBe(254);
     expect(dominio.ITERACOES_DA_SENHA).toBe(600_000);
     expect(dominio.SENHA_DA_DEMO).toBe('demo1234');
-    expect(dominio.CONTAS_DA_DEMO).toHaveLength(5);
+    expect(dominio.CONTAS_DA_DEMO).toHaveLength(8);
     expect(dominio.CHAVE_DA_SESSAO).toBe('app-equilibrio:sessao:v2');
     expect(dominio.CHAVES_ANTIGAS).toEqual(['app-equilibrio:v1']);
   });
@@ -64,7 +63,8 @@ describe('API pública do domínio', () => {
     expect('ACESSORIOS_DA_PLATAFORMA' in dominio).toBe(false);
   });
 
-  test('expõe o catálogo e a lista de ids com os mesmos 8 exercícios', () => {
+  test('expõe o catálogo e a lista de ids com os mesmos 7 exercícios', () => {
     expect(dominio.CATALOGO.map((exercicio) => exercicio.id)).toEqual([...dominio.IDS_DOS_EXERCICIOS]);
+    expect(dominio.IDS_DOS_EXERCICIOS).toHaveLength(7);
   });
 });
