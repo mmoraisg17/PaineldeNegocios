@@ -207,6 +207,33 @@ const EXERCICIOS: Exercicio[] = [
       { id: 'hora-de-usar-as-barras', mensagem: 'Segure nas barras agora', gravidade: 'pare' },
     ],
   },
+  {
+    id: 'agachamento-bulgaro-explosivo',
+    nome: 'Búlgaro explosivo',
+    trilha: 'desempenho',
+    paraQue: 'Potência de uma perna só: a arrancada e a mudança de direção na areia, sem saltar nem bater na plataforma.',
+    comoFazer: [
+      'Monte o banquinho na parte de trás da plataforma e trave. Aqueça 5 minutos antes.',
+      'Apoie a ponta do pé de trás no banquinho. O pé da frente fica inteiro no chão, uma passada à frente.',
+      'Desça devagar, contando até 3, até o joelho da frente ficar em cerca de 90°.',
+      'Suba o mais rápido que conseguir, sem saltar: termine com o pé da frente inteiro no chão.',
+      'Troque de perna quando acabarem as repetições.',
+    ],
+    acessorios: ['barras', 'cadeira'],
+    oQueOAppCorrige:
+      'O joelho da frente sem fugir para dentro, o peso no pé inteiro (sem ir para a ponta) e a firmeza na subida rápida.',
+    niveis: {
+      1: { dose: repeticoes(4, true), apoio: 'duas-maos', inclinacao: 0, descricao: 'Duas mãos nas barras, descida rasa, 4 vezes por perna.' },
+      2: { dose: repeticoes(5, true), apoio: 'uma-mao', inclinacao: 0, descricao: 'Uma mão na barra, subida mais rápida, 5 vezes por perna.' },
+      3: { dose: repeticoes(6, true), apoio: 'sem-maos', inclinacao: 0, descricao: 'Sem as mãos, subida o mais rápida possível, 6 vezes por perna.' },
+    },
+    correcoes: [
+      { id: 'desvio-lateral', mensagem: 'Joelho alinhado ao pé: não deixe fugir para dentro', gravidade: 'atencao' },
+      { id: 'peso-na-ponta', mensagem: 'Peso no pé inteiro, calcanhar firme', gravidade: 'atencao' },
+      { id: 'oscilacao-alta', mensagem: 'Fique firme e olhe para a frente', gravidade: 'atencao' },
+      { id: 'perda-de-equilibrio', mensagem: 'Pare e segure nas duas barras', gravidade: 'pare' },
+    ],
+  },
 ];
 
 /* Congelado: o catálogo é compartilhado por todas as telas, e uma tela que o

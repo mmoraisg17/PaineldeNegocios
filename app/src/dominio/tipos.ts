@@ -2,7 +2,7 @@
    outros módulos. Nada aqui conhece React, relógio ou armazenamento, para o
    domínio poder ser testado sem navegador. */
 
-export type Trilha = 'equilibrio60' | 'fisio';
+export type Trilha = 'equilibrio60' | 'fisio' | 'desempenho';
 
 export type Regiao = 'joelho' | 'tornozelo';
 
@@ -39,6 +39,7 @@ export const IDS_DOS_EXERCICIOS = [
   'descida-de-degrau',
   'panturrilha-unilateral',
   'equilibrio-com-inclinacao',
+  'agachamento-bulgaro-explosivo',
 ] as const;
 
 export type IdExercicio = (typeof IDS_DOS_EXERCICIOS)[number];

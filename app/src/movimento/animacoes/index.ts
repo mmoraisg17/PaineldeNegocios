@@ -2,6 +2,7 @@ import type { Animacao } from '../animacao';
 import { GRAUS_POR_NIVEL_DE_INCLINACAO } from '../cenario';
 import type { ModoBracos } from '../corpo';
 import { abducao } from './abducao';
+import { agachamentoBulgaroExplosivo } from './agachamentoBulgaroExplosivo';
 import { descidaDeDegrau } from './descidaDeDegrau';
 import { equilibrioComInclinacao } from './equilibrioComInclinacao';
 import { miniagachamento } from './miniagachamento';
@@ -29,6 +30,7 @@ const FABRICAS: Record<string, (opcoes: OpcoesDaAnimacao) => Animacao> = {
   'abducao-com-elastico': (o) => abducao(o.bracos),
   'equilibrio-com-inclinacao': (o) => equilibrioComInclinacao(o.bracos, o.inclinacao),
   'transferencia-de-peso': (o) => transferenciaDePeso(o.bracos, o.nivel, o.inclinacao),
+  'agachamento-bulgaro-explosivo': (o) => agachamentoBulgaroExplosivo(o.bracos, o.nivel),
 };
 
 export function animacaoDe(idExercicio: string, opcoes: Partial<OpcoesDaAnimacao> = {}): Animacao | undefined {

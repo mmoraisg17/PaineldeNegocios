@@ -15,7 +15,11 @@ export const ROTULO_DO_APOIO: Record<Apoio, string> = {
   'sem-maos': 'Sem as mãos',
 };
 
-export const ROTULO_DA_TRILHA: Record<Trilha, string> = { equilibrio60: 'Equilíbrio 60+', fisio: 'Fisioterapia' };
+export const ROTULO_DA_TRILHA: Record<Trilha, string> = {
+  equilibrio60: 'Equilíbrio 60+',
+  fisio: 'Fisioterapia',
+  desempenho: 'Força e explosão',
+};
 
 export const ROTULO_DO_OBJETIVO: Record<Objetivo, string> = {
   equilibrio: 'Equilíbrio',

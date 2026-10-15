@@ -8,6 +8,8 @@ import { distancia } from '../vetor';
 import { alvoDaTransferencia } from '../../sensores/esperado';
 import { quadrilParaFlexao } from './comum';
 import { animacaoDe, exerciciosAnimados } from './index';
+import { PE_DA_FRENTE_DZ, temposDoBulgaro } from './agachamentoBulgaroExplosivo';
+import { CADEIRA_SENTAR } from './sentarELevantar';
 
 /* Fatos de todas as animações da fase 6, como pede a skill de inspeção de
    movimento: medidos quadro a quadro a 30 qps, antes de qualquer screenshot.
@@ -367,5 +369,91 @@ describe('transferência de peso', () => {
       expect(amostra.pose.tronco, `t=${t.toFixed(2)}`).toBeLessThanOrEqual(7);
       expect(Math.abs(amostra.pose.inclinacaoLateral), `t=${t.toFixed(2)}`).toBeLessThanOrEqual(5);
     }
+  });
+});
+
+/* ---- 9. Agachamento búlgaro explosivo (pesquisa 10) ---- */
+describe('agachamento búlgaro explosivo', () => {
+  const animacaoDoBulgaro = (nivel: 1 | 2 | 3, bracos: 'barras' | 'uma-mao' | 'cruzados' = 'cruzados') =>
+    animacaoDe('agachamento-bulgaro-explosivo', { nivel, bracos })!;
+  const joelhoEm = (animacao: Animacao, t: number, lado: 'esquerdo' | 'direito' = 'esquerdo') =>
+    flexaoDoJoelho(montarEsqueleto(amostrar(animacao, t).pose), lado);
+
+  test('nível 3: joelho da frente a ~90° no fundo e o de trás entre 90° e 120°', () => {
+    const animacao = animacaoDoBulgaro(3);
+    const { tFundo } = temposDoBulgaro(3);
+    expect(joelhoEm(animacao, tFundo)).toBeGreaterThan(85);
+    expect(joelhoEm(animacao, tFundo)).toBeLessThan(95);
+    expect(joelhoEm(animacao, tFundo, 'direito')).toBeGreaterThan(90);
+    expect(joelhoEm(animacao, tFundo, 'direito')).toBeLessThan(120);
+  });
+
+  test('a descida pede 2–3 s e a subida do nível 3 leva menos de 0,7 s (explosiva, sem voo)', () => {
+    const { tFundo, tComeca, tTopo } = temposDoBulgaro(3);
+    expect(tFundo - 1.0).toBeGreaterThanOrEqual(2);
+    expect(tFundo - 1.0).toBeLessThanOrEqual(3);
+    expect(tTopo - tComeca).toBeLessThan(0.7);
+    const subidas = NIVEIS.map((n) => temposDoBulgaro(n).tTopo - temposDoBulgaro(n).tComeca);
+    expect(subidas[0]).toBeGreaterThan(subidas[1]!);
+    expect(subidas[1]).toBeGreaterThan(subidas[2]!);
+  });
+
+  test.each(NIVEIS)('nível %i: a subida é pelo menos 2× mais rápida que a descida', (nivel) => {
+    const { tFundo, tComeca, tTopo } = temposDoBulgaro(nivel);
+    expect((tFundo - 1.0) / (tTopo - tComeca)).toBeGreaterThan(2);
+  });
+
+  test.each(NIVEIS)('nível %i: o pé da frente fica plantado, inteiro no chão e dentro da base', (nivel) => {
+    const qs = quadrosDe(animacaoDoBulgaro(nivel));
+    const inicio = qs[0]!.esqueleto.lados.esquerdo.ponta;
+    for (const { esqueleto, t } of qs) {
+      const pe = esqueleto.lados.esquerdo;
+      expect(pe.apoiado, `t=${t.toFixed(2)}`).toBe(true);
+      expect(distancia(pe.ponta, inicio), `t=${t.toFixed(2)}`).toBeLessThan(MM);
+      expect(Math.abs(pe.ponta.y - pe.calcanhar.y), `pé inteiro t=${t.toFixed(2)}`).toBeLessThan(MM);
+      expect(pe.ponta.z).toBeLessThan(0.5); // a base termina a 0,50 m
+    }
+    expect(PE_DA_FRENTE_DZ + 0.17).toBeLessThan(0.5);
+  });
+
+  test.each(NIVEIS)('nível %i: o pé de trás fica sobre o assento do banquinho, sem sair do lugar', (nivel) => {
+    const animacao = animacaoDoBulgaro(nivel);
+    const qs = quadrosDe(animacao);
+    const inicio = qs[0]!.esqueleto.lados.direito.ponta;
+    const centroDoAssento = (animacao.cadeira!.frenteZ + animacao.cadeira!.fundoZ) / 2;
+    expect(animacao.cadeira).toEqual(CADEIRA_SENTAR);
+    expect(inicio.y).toBeCloseTo(CADEIRA_SENTAR.assentoY, 2);
+    expect(Math.hypot(inicio.x, inicio.z - centroDoAssento)).toBeLessThan(0.225); // dentro do assento de Ø0,45 m
+    for (const { esqueleto, t } of qs) expect(distancia(esqueleto.lados.direito.ponta, inicio), `t=${t.toFixed(2)}`).toBeLessThan(MM);
+  });
+
+  test.each(NIVEIS)('nível %i: nunca há voo; a base mede carga o ciclo inteiro e o pico da subida fica em 1,2–1,6× o peso', (nivel) => {
+    const cargas = quadrosDe(animacaoDoBulgaro(nivel)).map((q) => q.amostra.carga.pes);
+    expect(Math.min(...cargas)).toBeGreaterThan(0.9);
+    expect(Math.max(...cargas)).toBeGreaterThan(1.2);
+    expect(Math.max(...cargas)).toBeLessThan(1.6);
+  });
+
+  test('o pico de carga sobe com o nível (mais velocidade, mais força)', () => {
+    const pico = (n: 1 | 2 | 3) => Math.max(...quadrosDe(animacaoDoBulgaro(n)).map((q) => q.amostra.carga.pes));
+    expect(pico(1)).toBeLessThan(pico(2));
+    expect(pico(2)).toBeLessThan(pico(3));
+  });
+
+  test('o quadril desce até o fundo e volta: mais baixo no fundo do que em pé', () => {
+    const animacao = animacaoDoBulgaro(3);
+    const { tFundo } = temposDoBulgaro(3);
+    const emPe = montarEsqueleto(amostrar(animacao, 0).pose).pelve.y;
+    const fundo = montarEsqueleto(amostrar(animacao, tFundo).pose).pelve.y;
+    expect(emPe - fundo).toBeGreaterThan(0.2);
+  });
+
+  test('nível 1 e 2: as mãos que seguram a barra alcançam a barra o ciclo inteiro', () => {
+    for (const { esqueleto, t } of quadrosDe(animacaoDoBulgaro(1, 'barras'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
+    for (const { esqueleto, t } of quadrosDe(animacaoDoBulgaro(2, 'uma-mao'))) expect(esqueleto.maosNoAlvo, `t=${t.toFixed(2)}`).toBe(true);
+  });
+
+  test('sem inclinação: a base fica plana', () => {
+    expect(animacaoDe('agachamento-bulgaro-explosivo', { nivel: 3 })?.inclinacaoDaBase).toBeUndefined();
   });
 });

@@ -489,7 +489,7 @@ describe('conta modelo do Lucas (atleta de futevôlei, força e explosão)', () 
     expect(demo.recados.some((recado) => recado.paraId === IDS_DEMO.lucas)).toBe(false);
   });
 
-  test('parte do nível 3 (firme, quase sem apoio) e treina 17 das 18 sessões planejadas', () => {
+  test('parte do nível 3 (firme, quase sem apoio) e treina 17 das 18 sessões planejadas, só com o búlgaro', () => {
     expect(lucas?.sessoes).toHaveLength(SEMANAS * PLANEJADAS_POR_SEMANA - 1);
     const primeiroTreino = lucas?.sessoes[0]?.exercicios ?? [];
     expect(primeiroTreino.length).toBeGreaterThan(0);
@@ -508,12 +508,10 @@ describe('conta modelo do Lucas (atleta de futevôlei, força e explosão)', () 
     expect(media(ultimas.map((e) => e.nota))).toBeGreaterThan(media(primeiras.map((e) => e.nota)));
   });
 
-  test('a rotina vem da trilha de fortalecimento de perna, com 4 exercícios', () => {
+  test('a rotina vem da trilha Força e explosão: o búlgaro explosivo', () => {
     const rotina = rotinaDoPraticante(demo, IDS_DEMO.lucas);
-    expect(rotina?.itens.map((item) => item.exercicioId).toSorted()).toEqual(
-      ['descida-de-degrau', 'equilibrio-com-inclinacao', 'miniagachamento-simetrico', 'panturrilha-unilateral'],
-    );
-    expect(trilhaDoObjetivo('potencia')).toBe('fisio');
+    expect(rotina?.itens.map((item) => item.exercicioId)).toEqual(['agachamento-bulgaro-explosivo']);
+    expect(trilhaDoObjetivo('potencia')).toBe('desempenho');
   });
 
   test('a conta é reproduzível: a mesma data gera o mesmo histórico', () => {
