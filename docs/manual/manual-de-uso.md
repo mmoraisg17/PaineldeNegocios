@@ -480,9 +480,11 @@ O protótipo **simula os sensores** porque a plataforma física ainda está em d
 | **Dona Lúcia, 68** | `lucia@demo.test` | Praticante · Equilíbrio 60+ | Rotina, exercício com correções, evolução |
 | **Rafael, 34** | `rafael@demo.test` | Praticante · Fisioterapia (joelho) | Trilha de fisioterapia e metas do profissional |
 | **Lucas, 24** | `lucas@demo.test` | Praticante · Fortalecimento e explosão (atleta de futevôlei) | Conta sem acompanhante, começa no nível 3, quase sem apoio nas barras |
+| **Diego, 30** | `diego@demo.test` | Praticante · Fortalecimento e explosão (atleta profissional de vôlei de praia) | Começa no nível 3 sem faltar a treino; rotina ajustada pela Renata (búlgaro fixo no nível 3, 4 treinos por semana) e recado dela |
 | **Carlos** | `carlos@demo.test` | Acompanhante · Personal da Dona Lúcia | Lista de alunos, relatório, ajustar rotina, recados |
 | **Ana** | `ana@demo.test` | Acompanhante · Fisioterapeuta do Rafael | Metas de simetria, alertas e gráficos de evolução |
 | **Marta** | `marta@demo.test` | Acompanhante · Filha da Dona Lúcia (familiar) | Relatórios somente leitura |
+| **Renata** | `renata@demo.test` | Acompanhante · Preparadora física do Diego | Ajustar rotina, relatório de um atleta, recados |
 
 **Testar o convite por link:** entre como Dona Lúcia, vá em **Perfil → Acompanhantes → Convidar** e copie o link. Saia da conta, abra o link e entre como Ana (ou crie uma conta de acompanhante). Toque em **Aceitar convite**. Depois entre de novo como Dona Lúcia e autorize o pedido.
 
