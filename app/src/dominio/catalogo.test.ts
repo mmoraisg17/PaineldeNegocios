@@ -61,10 +61,18 @@ const ESPERADO: Record<IdExercicio, Record<Nivel, EsperadoDoNivel>> = {
     2: { dose: seg(20), apoio: 'uma-mao', inclinacao: 1 },
     3: { dose: seg(30), apoio: 'toque', inclinacao: 2 },
   },
+  /* Fora do manual: entrou com a trilha Força e explosão (pesquisa 09, plano
+     de potência do Lucas). Salto sempre sem inclinação (a pesquisa desaconselha
+     5° e 10° para saltos). */
+  'salto-com-contramovimento': {
+    1: { dose: rep(5), apoio: 'duas-maos', inclinacao: 0 },
+    2: { dose: rep(5), apoio: 'sem-maos', inclinacao: 0 },
+    3: { dose: rep(6), apoio: 'sem-maos', inclinacao: 0 },
+  },
 };
 
 describe('catálogo: composição', () => {
-  test('tem exatamente os 8 exercícios do manual, na ordem do manual', () => {
+  test('tem os 8 exercícios do manual, na ordem do manual, e depois os da trilha Força e explosão', () => {
     expect(CATALOGO.map((exercicio) => exercicio.id)).toEqual([...IDS_DOS_EXERCICIOS]);
   });
 
@@ -72,9 +80,16 @@ describe('catálogo: composição', () => {
     expect(new Set(CATALOGO.map((exercicio) => exercicio.id)).size).toBe(CATALOGO.length);
   });
 
-  test('cada trilha tem 4 exercícios', () => {
+  test('as trilhas do manual têm 4 exercícios; a de Força e explosão começa com o salto', () => {
     expect(exerciciosDaTrilha('equilibrio60')).toHaveLength(4);
     expect(exerciciosDaTrilha('fisio')).toHaveLength(4);
+    expect(exerciciosDaTrilha('desempenho').map((exercicio) => exercicio.id)).toEqual(['salto-com-contramovimento']);
+  });
+
+  test('os saltos nunca pedem inclinação, em nenhum nível', () => {
+    for (const exercicio of exerciciosDaTrilha('desempenho')) {
+      expect(NIVEIS.every((nivel) => exercicio.niveis[nivel].inclinacao === 0)).toBe(true);
+    }
   });
 
   test('a trilha Equilíbrio 60+ traz sentar, tandem, abdução e transferência', () => {

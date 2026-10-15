@@ -25,6 +25,9 @@ export const LIMIAR = {
 export const DETECTOR_DA_CORRECAO: Readonly<Record<string, Desvio>> = {
   'perna-dominante': 'assimetria',
   'peso-so-numa-perna': 'assimetria',
+  'aterrissagem-assimetrica': 'assimetria',
+  'aterrissagem-na-ponta': 'peso-na-ponta',
+  'estabilizar-aterrissagem': 'oscilacao',
   'desvio-lateral': 'desvio-lateral',
   'pe-rolando-para-fora': 'desvio-lateral',
   'tronco-inclinado': 'desvio-lateral',

@@ -35,6 +35,9 @@ export type Animacao = {
   readonly inclinacaoDaBase?: number;
   /* Regra do fio de prumo (V7): 'centro' (padrão, simétricos) ou 'apoio'. */
   readonly prumo?: ModoDoPrumo;
+  /* O exercício tem fase de voo (salto): sem pé apoiado, a carga medida na base
+     é ~0. As demais animações sempre têm um pé na base. */
+  readonly comVoo?: boolean;
   /* Elástico preso num ponto fixo (base da barra) e no tornozelo de um lado. */
   readonly elastico?: { readonly ancora: readonly [number, number, number]; readonly lado: Lado };
 };

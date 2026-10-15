@@ -207,6 +207,33 @@ const EXERCICIOS: Exercicio[] = [
       { id: 'hora-de-usar-as-barras', mensagem: 'Segure nas barras agora', gravidade: 'pare' },
     ],
   },
+  {
+    id: 'salto-com-contramovimento',
+    nome: 'Salto vertical (CMJ)',
+    trilha: 'desempenho',
+    paraQue: 'Potência nas pernas: a explosão para saltar, bloquear e atacar na areia.',
+    comoFazer: [
+      'Antes de começar, aqueça 5 minutos e tire o banquinho da plataforma. Fique no centro da base, pés na largura do quadril.',
+      'Desça rápido, dobrando joelhos e quadril, com o tronco inclinado à frente.',
+      'Salte para cima o mais forte que conseguir, esticando tudo.',
+      'Aterrisse nas pontas dos pés e amorteça dobrando os joelhos, com os joelhos alinhados aos pés.',
+      'Fique parado por 2 segundos antes do próximo salto.',
+    ],
+    acessorios: ['barras'],
+    oQueOAppCorrige:
+      'A aterrissagem: peso igual nas duas pernas, amortecimento sem cair na ponta dos pés e quanto tempo você leva para ficar parado.',
+    niveis: {
+      1: { dose: repeticoes(5), apoio: 'duas-maos', inclinacao: 0, descricao: 'Duas mãos nas barras, salto curto (só desgrudar os pés), 5 vezes.' },
+      2: { dose: repeticoes(5), apoio: 'sem-maos', inclinacao: 0, descricao: 'Sem as mãos, salto médio, 5 vezes.' },
+      3: { dose: repeticoes(6), apoio: 'sem-maos', inclinacao: 0, descricao: 'Sem as mãos, salto máximo, 6 vezes.' },
+    },
+    correcoes: [
+      { id: 'aterrissagem-assimetrica', mensagem: 'Aterrisse com o peso igual nas duas pernas', gravidade: 'atencao' },
+      { id: 'aterrissagem-na-ponta', mensagem: 'Amorteça: deixe o calcanhar descer ao aterrissar', gravidade: 'atencao' },
+      { id: 'estabilizar-aterrissagem', mensagem: 'Fique parado antes de saltar de novo', gravidade: 'atencao' },
+      { id: 'perda-de-equilibrio', mensagem: 'Pare e segure nas duas barras', gravidade: 'pare' },
+    ],
+  },
 ];
 
 /* Congelado: o catálogo é compartilhado por todas as telas, e uma tela que o
