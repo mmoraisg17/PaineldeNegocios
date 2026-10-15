@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { TOLERANCIA_DA_META_EM_PONTOS, alertasDoAluno, podeVer, permissoes, revogar } from './acompanhamento';
-import { CONTAS_DA_DEMO, SENHA_DA_DEMO, criarEstadoDemo, criarGeradorPseudoaleatorio, IDS_DEMO } from './demo';
+import { CONTAS_DA_DEMO, completarContasDaDemo, SENHA_DA_DEMO, criarEstadoDemo, criarGeradorPseudoaleatorio, IDS_DEMO } from './demo';
 import { ITERACOES_DA_SENHA, buscarCredencial, conferirSenha } from './credenciais';
 import { carregarEstado, salvarEstado, type Armazenamento } from './persistencia';
 import { ajusteVigente, rotinaDoPraticante } from './estado';
@@ -555,5 +555,32 @@ describe('conta modelo do Diego (atleta profissional mais experiente) e da Renat
     };
     expect(ajusteVigente(semRenata, IDS_DEMO.diego)).toBeUndefined();
     expect(rotinaDoPraticante(semRenata, IDS_DEMO.diego)?.ajustadoPor).toBeUndefined();
+  });
+});
+
+describe('completarContasDaDemo', () => {
+  const agora = new Date('2026-10-07T15:30:00.000Z');
+
+  test('acrescenta Lucas, Diego e Renata a uma demonstração antiga', () => {
+    const completo = criarEstadoDemo(agora);
+    const antigo = {
+      ...completo,
+      praticantes: { [IDS_DEMO.lucia]: completo.praticantes[IDS_DEMO.lucia]! },
+      acompanhantes: completo.acompanhantes.filter((p) => p.id === IDS_DEMO.carlos),
+      vinculos: completo.vinculos.filter((v) => v.alunoId === IDS_DEMO.lucia),
+      recados: completo.recados.filter((r) => r.paraId === IDS_DEMO.lucia),
+      credenciais: completo.credenciais.filter((c) => c.pessoaId === IDS_DEMO.lucia || c.pessoaId === IDS_DEMO.carlos),
+    };
+    const novo = completarContasDaDemo(antigo, agora);
+    const emails = novo.credenciais.map((c) => c.email);
+    expect(emails).toEqual(expect.arrayContaining(['lucas@demo.test', 'diego@demo.test', 'renata@demo.test']));
+    expect(novo.praticantes[IDS_DEMO.diego]).toBeDefined();
+    expect(novo.vinculos.some((v) => v.alunoId === IDS_DEMO.diego)).toBe(true);
+    expect(completarContasDaDemo(novo, agora)).toBe(novo);
+  });
+
+  test('não mexe em quem não usa a demonstração', () => {
+    const vazio = { ...criarEstadoDemo(agora), credenciais: [] };
+    expect(completarContasDaDemo(vazio, agora)).toBe(vazio);
   });
 });
