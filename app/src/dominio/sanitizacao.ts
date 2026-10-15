@@ -29,7 +29,14 @@ import { IDS_DOS_EXERCICIOS, type IdExercicio, type Nivel, type Percepcao } from
    Princípio: nunca lançar e nunca devolver algo que quebre uma tela. Cada item
    inválido é descartado sozinho (o resto do estado sobrevive); só o formato de
    topo irreconhecível derruba tudo para o estado inicial. O resultado é uma
-   cópia nova, montada campo a campo, sem nada herdado do JSON original. */
+   cópia nova, montada campo a campo, sem nada herdado do JSON original.
+
+   Dados de antes da retirada da inclinação (perfil com `inclinacaoMaxima`,
+   ids "equilibrio-com-inclinacao" e "transferencia-de-peso") carregam sem
+   subir VERSAO_DO_ESTADO: o formato não mudou de sentido, só perdeu campos e
+   ids, e as duas coisas já são descartadas item a item (campo fora da lista é
+   ignorado; id fora de IDS_DOS_EXERCICIOS sai de níveis, treinos e ajuste).
+   Subir a versão jogaria fora o histórico inteiro de quem já usa o app. */
 
 type Objeto = Record<string, unknown>;
 
@@ -135,6 +142,10 @@ function sanearResultado(valor: unknown): ResultadoExercicio | undefined {
   };
 }
 
+/* Um treino cujos exercícios foram todos descartados (ids removidos do
+   catálogo, por exemplo) é mantido com a lista vazia: o treino aconteceu e
+   conta para a semana e para a sequência. Quem calcula média ignora treino
+   sem exercício (ver mediasRecentes e resumirSemanas). */
 function sanearSessao(valor: unknown): Sessao | undefined {
   if (!ehObjeto(valor) || !ehTexto(valor['data']) || !Array.isArray(valor['exercicios'])) return undefined;
   const percepcao = dentroDe(PERCEPCOES, valor['percepcao']);
